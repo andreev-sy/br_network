@@ -1,0 +1,704 @@
+.content_wrap{
+    margin-top: 90px;
+    background-size: 200%;
+    background-position: 100% 0px;
+}
+
+.content_block{
+    width: calc(100% - 20px);
+}
+
+._pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 27px;
+}
+
+._pagination .swiper-pagination-bullet{
+    width: 8px;
+    height: 8px;
+    border: 1px solid;
+    border-radius: 0px;
+    margin: 0px 6px;
+    background-color: transparent;
+    border-color: #80A7BB;
+    transform: rotate(45deg);
+    opacity: 1;
+}
+
+._pagination .swiper-pagination-bullet-active{
+    background-color: #005078;
+    border-color: #005078;
+}
+
+/*------------------------------------------------------------------------ HEADER -----------------------------------------------------------------------*/
+
+header{
+    height: 89px;
+}
+
+.header_wrap{
+    padding: 0px 10px;
+}
+
+.header_logo_img {
+    width: 49px;
+    height: 37px;
+    background-size: 100%;
+}
+
+.header_logo_text {
+    margin-left: 5px;
+    height: 37px;
+}
+
+.header_logo_text_title {
+    font-size: 34px;
+    margin-top: -7px;
+}
+
+.header_logo_text_desc {
+    font-size: 9px;
+    margin-top: -5px;
+}
+
+.header_menu{
+	display: flex;
+	position: absolute;
+    left: 0px;
+    background: white;
+    width: calc(100% - 30px);
+    justify-content: space-between;
+    padding: 11px 15px;
+    bottom: -54px;  
+    border-bottom: 1px solid #DEDEDE;
+    transform: translateY(10px);
+    opacity: 0;
+    box-shadow: 0px 3px 6px rgba(3, 49, 52, 0.06); 
+    transition: transform 0.3s ease, opacity 0.3s ease; 
+    pointer-events: none;
+}
+
+header._active .header_menu{
+	display: flex;
+	transform: translateY(0px);
+	opacity: 1;
+	pointer-events: initial;
+}
+
+.header_menu_item {
+    font-size: 18px;
+    margin: 0px;
+    padding: 0px;
+}
+
+.header_phone{
+	margin-right: 60px;
+}
+
+.header_burger{
+    display: block;
+}
+
+.header_phone > p {
+    font-size: 28px;
+}
+
+/*------------------------------------------------------------------------ HEADER -----------------------------------------------------------------------*/
+
+
+/*------------------------------------------------------------------------ FOOTER -----------------------------------------------------------------------*/
+
+.footer_block{
+	margin-bottom: 10px;
+}
+
+.footer_block._phone{
+	margin-bottom: 0px;
+}
+
+.footer_block._address br{
+	display: none;
+}
+
+.footer_contacts{
+    flex-direction: column;
+}
+
+.footer_contacts .footer_block:last-child{
+	margin-bottom: 0px;
+	margin-left: 26px;
+}
+
+.footer_block._right p{
+	flex-shrink: 10000;
+}
+
+/*------------------------------------------------------------------------ FOOTER -----------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------ ГЛАВНАЯ -----------------------------------------------------------------------*/
+
+.main_top{
+    width: 100%;
+    margin: 42px auto 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.main_top_desc {
+    margin-left: 0px;
+    margin-top: 20px;
+}
+
+.main_nav_item{
+    height: auto;
+}
+
+.main_nav_item_content{
+    padding: 18px 20px;
+    height: calc(100% - 36px);
+}
+
+p.main_nav_item_title{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.main_nav_item_list a{
+    line-height: 16px;
+    font-size: 14px;
+    margin: 0px 13px 8px 0px;
+}
+
+.main_nav_item_list{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.main_nav_item .main_nav_item_content{
+    background-color: rgba(0, 80, 120, 0.6);
+}
+
+/*------------------------------------------------------------------------ ГЛАВНАЯ -----------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------ ЛИСТИНГ -----------------------------------------------------------------------*/
+
+.items_list{
+    flex-wrap: nowrap;
+}
+
+.items_list_listing .items_list{
+    flex-wrap: wrap;
+}
+
+.items_list_main .item{
+    margin: 0px;
+}
+
+.items_list_listing .item{
+    width: calc((100% / 3) - 10px);
+    margin-right: 15px;
+}
+
+.items_list_listing .item:nth-child(4n){
+    margin-right: 15px;
+}
+
+.items_list_listing .item:nth-child(3n){
+    margin-right: 0px;
+}
+
+.item_img{
+    width: 100%;
+}
+
+.item_img img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+p.item_price._sale span {
+    display: block;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+
+/*------------------------------------------------------------------------ ЛИСТИНГ -----------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------ КОМАНДА -----------------------------------------------------------------------*/
+
+.content_block._personal{
+    width: calc(100% - 120px);
+    padding: 0px 60px;
+}
+
+.personal_wrapper{
+    width: 100%;
+    padding-top: 0px;
+}
+
+.personal_wrapper .swiper-slide._personalHalf{
+    transform: translateY(0px);
+}
+
+.personal_wrapper .swiper-slide._personalCurrent {
+    transform: translateY(0px);
+}
+
+.personal_arrow {
+    width: 39px;
+    height: 31px;
+    top: 55%;
+}
+
+.personal_arrow._next {
+    right: 10px;
+}
+
+.personal_arrow._prev {
+    left: 10px;
+}
+
+.personal_pagination{
+    display: none;
+}
+
+/*------------------------------------------------------------------------ КОМАНДА -----------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------- ОТЗЫВЫ -------------------------------------------------------------------------*/
+
+.reviews_list {
+    width: calc(100% - 136px);
+}
+
+.review_body:before, .review_body:after {
+    display: none;
+}
+
+.review_body{
+    padding: 0px 0px 0px 20px;
+}
+
+.reviews_arrow {
+    width: 39px;
+    height: 100%;
+}
+
+.reviews_arrow._prev {
+    left: 10px;
+}
+
+.reviews_arrow._next {
+    right: 10px;
+}
+
+/*----------------------------------------------------------------------- ОТЗЫВЫ -------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------- ЭКСПЕРТНОСТЬ ---------------------------------------------------------------------*/
+
+.pluses{
+    flex-direction: column;
+}
+
+.pluses_info{
+    width: calc(100% - 240px);
+    padding: 60px 120px;
+    background-image: url(/assets/img/plusesBack.svg);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+}
+
+.pluses_items_wrap{
+    width: calc(100% - 80px);
+    padding: 0px 40px;
+}
+
+/*--------------------------------------------------------------------- ЭКСПЕРТНОСТЬ ---------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------- ПРОДАДИМ НЕДВИЖИМОСТЬ -----------------------------------------------------------------*/
+
+.sell:before {
+    top: calc(50% - 60px);
+}
+
+p.sell_text {
+    flex-shrink: 99999;
+    margin-left: 152px;
+    margin-right: 20px;
+}
+
+/*---------------------------------------------------------------- ПРОДАДИМ НЕДВИЖИМОСТЬ -----------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------- ЦЕННОСТИ ------------------------------------------------------------------------*/
+
+.valuations_header {
+    padding: 30px 0px 25px;
+}
+
+.valuations_menu{
+    display: none;
+}
+
+.valuations_items{
+    width: calc(100% - 30px);
+    padding: 30px 30px 30px 0px;
+    overflow: hidden;
+}
+
+.valuations_item{
+    display: flex;
+    padding: 0px;
+}
+
+/*---------------------------------------------------------------------- ЦЕННОСТИ ------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------- ОБРАТНАЯ СВЯЗЬ ---------------------------------------------------------------------*/
+
+.callback_info{
+    width: calc(43% - 60px);
+    flex-direction: column;
+}
+
+.callback_form{
+    width: calc(57% - 80px);
+    padding: 20px 40px 20px 40px;
+}
+
+.callback_form form {
+    width: 100%;
+}
+
+.callback_input {
+    width: 100%;
+    margin-right: 0px;
+    margin-bottom: 22px;
+    position: relative;
+}
+
+.callback_img {
+    margin-right: 0px;
+    height: 208px;
+}
+
+.callback_img img {
+    width: auto;
+    height: 100%;
+}
+
+.callback_text{
+    width: 100%;
+    padding-right: 0px;
+}
+
+.callback_text h2{
+    font-size: 28px;
+    margin-top: 17px;
+}
+
+.personalData_wrapper {
+    width: 100%;
+}
+
+.personalData_label{
+    position: relative;
+    left: 0px;
+    bottom: auto;
+    margin-top: 20px;
+}
+
+.callback_textarea {
+    width: 100%;
+}
+
+.callback_input input,
+.callback_form textarea{
+    width: calc(100% - 32px);
+}
+
+/*------------------------------------------------------------------- ОБРАТНАЯ СВЯЗЬ ---------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------- ЗАГОЛОВОК ВНУТРЯКА -------------------------------------------------------------------*/
+
+
+
+/*----------------------------------------------------------------- ЗАГОЛОВОК ВНУТРЯКА -------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------- ШАПКА ОБЪЕКТА ----------------------------------------------------------------------*/
+
+.object_head{
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+.object_gallery{
+    width: 100%;
+}
+
+.object_info{
+    width: calc(100%);
+    padding-left: 0px;
+    margin-top: 14px;
+}
+
+.object_buy{
+    width: 532px;
+    margin: 4px auto 28px;
+}
+
+.object_buy_button {
+    width: 240px;
+}
+
+.object_buy_price {
+    width: calc(100% - 300px);
+    padding: 10px 40px 10px 20px;
+}
+
+/*------------------------------------------------------------------- ШАПКА ОБЪЕКТА ----------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------- КАРТА ОБЪЕКТА ----------------------------------------------------------------------*/
+
+.object_map{
+    position: relative;
+    width: calc(100% - 20px);
+    left: 10px;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.object_meta{
+    width: calc(100% - 40px);
+    padding: 0px 20px 0px 20px;
+    justify-content: center;
+}
+
+.object_meta_wrapper{
+    margin-top: 34px;
+    margin-bottom: 38px;
+}
+
+.object_map_wrapper{
+    width: 100%;
+    height: 286px;
+}
+
+/*------------------------------------------------------------------- КАРТА ОБЪЕКТА ----------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------- ФИЛЬТР --------------------------------------------------------------------------*/
+
+.filter{
+    flex-direction: column;
+    padding: 40px 25px 30px;
+}
+
+.filter_block{
+    width: 100%;
+}
+
+.filter_submit{
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.filter_block:first-child {
+    margin-bottom: 35px;
+}
+
+.filter_block:first-child .filter_select_list{
+    right: 0px;
+}
+
+/*---------------------------------------------------------------------- ФИЛЬТР --------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------- КОНТАКТЫ --------------------------------------------------------------------------*/
+
+.contacts{
+    margin-top: 40px;
+}
+
+.contacts_item{
+    display: flex;
+    margin: 12px 0px 0px;
+}
+
+.contacts_title{
+    width: 102px;
+    margin-right: 20px;
+    font-weight: 600;
+}
+
+/*-------------------------------------------------------------------- КОНТАКТЫ --------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------- ТЕКСТ ---------------------------------------------------------------------------*/
+
+.text,
+.text._small{
+    width: 100%;
+}
+
+/*---------------------------------------------------------------------- ТЕКСТ ---------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------- УСЛУГИ ---------------------------------------------------------------------------*/
+
+.services {
+    margin-top: 37px;
+}
+
+._problems .services_block{
+    max-width: 200px;
+}
+
+._problems .services_block:nth-of-type(2){
+    max-width: 200px;
+}
+
+._services .services_block{
+    width: calc(50% - 15px);
+    max-width: none;
+    margin-bottom: 20px;
+}
+
+._services .services_block:nth-of-type(2){
+    width: calc(50% - 15px);
+    max-width: none;
+}
+
+.services_list._problems {
+    margin-bottom: 20px;
+}
+
+/*--------------------------------------------------------------------- УСЛУГИ ---------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------- ФОРМА В УСЛУГАХ ----------------------------------------------------------------------*/
+
+.serviceCallback .callback_input{
+    width: 234px;
+}
+
+.serviceCallback .callback_text {
+    width: calc(100% - 270px);
+}
+
+.serviceCallback .personalData_label {
+    bottom: calc(100% - 10px);
+    left: 19px;
+    margin-top: 0px;
+    position: absolute;
+}
+
+.serviceCallback {
+    width: calc(100% - 60px);
+    padding: 24px 30px 40px;
+}
+
+.serviceCallback form {
+    max-width: 690px;
+    margin: auto;
+    margin-top: 20px;
+}
+
+/*----------------------------------------------------------------- ФОРМА В УСЛУГАХ ----------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------- СИНИЙ БЛОК В УСЛУГАХ -------------------------------------------------------------------*/
+
+.services_blue{
+    padding: 37px 0px 30px;
+}
+
+.services_blue_wrapper {
+    width: calc(100% - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+.services_blue_item {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.services_blue_title br{
+    display: none;
+}
+
+/*--------------------------------------------------------------- СИНИЙ БЛОК В УСЛУГАХ -------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------- ДВОЙНОЙ БЛОК В УСЛУГАХ ------------------------------------------------------------------*/
+
+.services_wb_block {
+    padding: 14px 0px 13px;
+}
+
+.services_wb_item {
+    margin-bottom: 25px;
+}
+
+/*-------------------------------------------------------------- ДВОЙНОЙ БЛОК В УСЛУГАХ ------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------ ДОСКА В УСЛУГАХ ---------------------------------------------------------------------*/
+
+.services_board_line._firstLine {
+    justify-content: space-around;
+    margin: 42px 0px 32px;
+}
+
+.services_board_line._firstLine .services_board_item {
+    margin: 0px 0px;
+    width: calc((100% / 3) - 40px);
+}
+
+.services_board_line {
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.services_board_line .services_board_item {
+    margin: 0px 11px 22px;
+}
+
+/*------------------------------------------------------------------ ДОСКА В УСЛУГАХ ---------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------- БЕЛЫЙ БЛОК В УСЛУГАХ -------------------------------------------------------------------*/
+
+.services_white {
+    padding: 35px 30px 60px;
+}
+
+.services_white_block {
+    width: calc(100% - 80px);
+    left: 0px;
+    flex-wrap: wrap;
+}
+
+.services_white_item {
+    width: calc(100% - 65px);
+}
+
+.services_white_item:last-child {
+    padding: 0px 50px 0px 0px;
+    margin-top: 20px;
+}
+
+/*--------------------------------------------------------------- БЕЛЫЙ БЛОК В УСЛУГАХ -------------------------------------------------------------------*/
+
+/*----------------------------------------------------------- БЕЛЫЙ БОЛЬШОЙ БЛОК В УСЛУГАХ ----------------------------------------------------------------*/
+
+.services_whiteBig_wrapper{
+    width: calc(100% - 60px);
+    padding: 0px 30px;
+}
+
+/*----------------------------------------------------------- БЕЛЫЙ БОЛЬШОЙ БЛОК В УСЛУГАХ ----------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------ ПОСТ ---------------------------------------------------------------------------*/
+
+.post{
+    max-width: 954px;
+    width: 100%;
+    margin: 40px auto 0px;
+}
+
+/*------------------------------------------------------------------------ ПОСТ ---------------------------------------------------------------------------*/
