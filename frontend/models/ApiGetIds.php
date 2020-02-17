@@ -3,7 +3,7 @@ namespace frontend\models;
 
 use Yii;
 use yii\base\Model;
-
+ 
 class ApiGetIds extends Model
 {
 	public function getData() {
