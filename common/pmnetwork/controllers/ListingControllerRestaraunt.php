@@ -14,12 +14,13 @@ use frontend\components\QueryFromSlice;
 use frontend\components\Breadcrumbs;
 use backend\models\Pages;
 use frontend\components\RoomsFilter;
+use frontend\components\RestaurantsFilter;
 use backend\models\Filter;
 use backend\models\Slices;
 
-class ListingController extends Controller
+class ListingControllerRestaraunt extends Controller
 {
-	private $per_page = 24;
+	protected $per_page = 24;
 
 	public $filter_model,
 		   $slices_model;
@@ -84,7 +85,7 @@ class ListingController extends Controller
 
 	public function actionListing($page, $per_page, $params_filter, $seo)
 	{
-		$rooms = new RoomsFilter($params_filter, $per_page, $page);
+		$rooms = new RestaurantsFilter($params_filter, $per_page, $page);
 
 		$filter = FilterWidget::widget([
 			'filter_active' => $params_filter,
