@@ -32,7 +32,19 @@ class ItemsWidget extends Model
 	    	}
 	    }
 	    
-	    $total = Restaurants::find()->count();
+	    switch ($main_table) {
+			case 'restaurants':
+				$total = Restaurants::find()->count();
+				break;
+
+			case 'rooms':
+				$total = Rooms::find()->count();
+				break;
+			
+			default:
+				$total = Restaurants::find()->count();
+				break;
+		}
 
 	    //exit;
 

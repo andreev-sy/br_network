@@ -25,7 +25,19 @@ class ItemsFilter extends BaseObject{
 			$seed = $rand_seed;
 		}
 
-		$query = Restaurants::find()->with('rooms');
+		switch ($main_table) {
+			case 'restaurants':
+				$query = Restaurants::find()->with('rooms');
+				break;
+
+			case 'rooms':
+				$query = Rooms::find()->with('restaurants');
+				break;
+			
+			default:
+				$query = Restaurants::find()->with('rooms');
+				break;
+		}		
 
 		$i = 1;
 		
