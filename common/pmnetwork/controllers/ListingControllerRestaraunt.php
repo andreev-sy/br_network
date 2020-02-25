@@ -85,7 +85,7 @@ class ListingControllerRestaraunt extends Controller
 
 	public function actionListing($page, $per_page, $params_filter, $seo)
 	{
-		$rooms = new RestaurantsFilter($params_filter, $per_page, $page);
+		$items = new RestaurantsFilter($params_filter, $per_page, $page);
 
 		$filter = FilterWidget::widget([
 			'filter_active' => $params_filter,
@@ -93,26 +93,26 @@ class ListingControllerRestaraunt extends Controller
 		]);
 
 		$pagination = PaginationWidget::widget([
-			'total' => $rooms->pages,
+			'total' => $items->pages,
 			'current' => $page,
 		]);
 
 		return $this->render('index.twig', array(
-			'items' => $rooms->items,
+			'items' => $items->items,
 			'filter' => $filter,
 			'pagination' => $pagination,
 			'seo' => $seo,
-			'count' => $rooms->total
+			'count' => $items->total
 		));	
 	}
 
 	public function actionAjaxFilter(){
 		$params = $this->parseGetQuery(json_decode($_GET['filter'], true), $this->filter_model, $this->slices_model);
 
-		$rooms = new RoomsFilter($params['params_filter'], $this->per_page, $params['page']);
+		$items = new RestaurantsFilter($params['params_filter'], $this->per_page, $params['page']);
 
 		$pagination = PaginationWidget::widget([
-			'total' => $rooms->pages,
+			'total' => $items->pages,
 			'current' => $params['page'],
 		]);
 
@@ -121,7 +121,7 @@ class ListingControllerRestaraunt extends Controller
 
 		$title = $this->renderPartial('//components/generic/title.twig', array(
 			'seo' => $params['seo'],
-			'count' => $rooms->total
+			'count' => $items->total
 		));
 
 		$text_top = $this->renderPartial('//components/generic/text.twig', array('text' => $params['seo']['text_top']));
@@ -129,7 +129,7 @@ class ListingControllerRestaraunt extends Controller
 
 		return  json_encode([
 			'listing' => $this->renderPartial('//components/generic/listing.twig', array(
-				'items' => $rooms->items,
+				'items' => $items->items,
 				'img_alt' => $params['seo']['img_alt'],
 			)),
 			'pagination' => $pagination,
