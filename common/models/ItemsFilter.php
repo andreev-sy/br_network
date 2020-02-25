@@ -1,20 +1,19 @@
 <?php
 
-namespace frontend\components;
+namespace common\models;
 
 use yii\base\BaseObject;
 use backend\models\FilterItems;
 use backend\models\Restaurants;
 use Yii;
 
-class RestaurantsFilter extends BaseObject{
+class ItemsFilter extends BaseObject{
 
 	public $items,
 		   $total,
-		   $pages,
-		   $main_table = 'restaurants';
+		   $pages;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table) {
 
 		$session = Yii::$app->session;
 		if($session->get('seed')){
@@ -42,7 +41,7 @@ class RestaurantsFilter extends BaseObject{
 				$filter_item_arr = json_decode($filter_item_obj->api_arr, true);
 				foreach ($filter_item_arr as $filter_data) {
 
-					$filter_query = new FilterQueryConstructor($this->main_table, $filter_data, $i);
+					$filter_query = new FilterQueryConstructor($main_table, $filter_data, $i);
 					if($filter_query->join){
 						$query->joinWith([$filter_data['table'].' as '.$filter_data['table'].'__'.$i]);
 					}
@@ -53,7 +52,7 @@ class RestaurantsFilter extends BaseObject{
 			$query->andWhere($temp_query);				
 		}
 
-		$query->groupBy($this->main_table.'.id');
+		$query->groupBy($main_table.'.id');
 		
 		$total_query = $query;
 		if(!$widget_flag){
