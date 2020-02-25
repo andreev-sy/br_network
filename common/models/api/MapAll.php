@@ -17,6 +17,8 @@ class MapAll extends BaseObject{
 		$this->coords = ArrayHelper::toArray($restaurants, [
 		    'common\models\Restaurants' => [
 		        'id',
+		        'name',
+		        'address',
 		        'latitude',
 		        'longitude'
 		    ],
