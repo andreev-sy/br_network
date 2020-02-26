@@ -14,16 +14,27 @@ class MapAll extends BaseObject{
 	public function __construct() {
 
 		$restaurants = Restaurants::find()->all();
-		$this->coords = ArrayHelper::toArray($restaurants, [
-		    'common\models\Restaurants' => [
-		        'id',
-		        'name',
-		        'address',
-		        'latitude',
-		        'longitude'
-		    ],
-		]);
-		
+		$this->coords = [
+			'type' => 'FeatureCollection',
+			'features' => []
+		];
+
+		foreach ($restaurants as $key => $restaurant) {
+			array_push($this->coords['features'], [
+				'type' => "Feature",
+	            'id' => $restaurant->id,
+	            'geometry' => [
+	              'type' => "Point",
+	              'coordinates' => [$restaurant->latitude, $restaurant->longitude]
+	            ],
+	            'properties' => [
+	              'balloonContent' => $restaurant->address,
+	              'organization' => $restaurant->name,
+	              'address' => $restaurant->address,
+	              'img' => $restaurant->cover_url
+	            ]
+			]);
+		}		
 	}
 
 }
