@@ -22,7 +22,7 @@
         "kartik-v/yii2-widget-select2": "dev-master",
         "dmstr/yii2-adminlte-asset": "^2.1",
         "elasticsearch/elasticsearch": "~6.0",
-        "yiisoft/yii2-elasticsearch": "2.1.*@dev",
+        "yiisoft/yii2-elasticsearch": "~2.0.0",
         "kartik-v/yii2-widget-fileinput": "@dev",
         "yiisoft/yii2-httpclient": "~2.0.0",
         "yiisoft/yii2-imagine": "~2.2.0",

@@ -3,12 +3,8 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
-use common\models\ItemsFilter;
-use common\models\WidgetMain;
-use common\models\Slices;
 use common\components\QueryFromSlice;
 use common\components\ParamsFromQuery;
-use common\models\Restaurants;
 
 class ItemsWidget extends Model
 {
@@ -56,10 +52,23 @@ class ItemsWidget extends Model
 	}
 
 	public function getOther($restaurant_id, $room_id){
-		$items = Rooms::find()
-			->with('restaurants')
-			->where(['restaurant_id' => $restaurant_id])
-			->andWhere(['!=', 'id', $room_id])
+		$items = ItemsElastic::find()
+			//->where(['restaurant_id' => $restaurant_id])
+			->query([
+				"bool" => [
+					"must" => [
+						"term" => [
+							"restaurant_id" => $restaurant_id
+						]
+					],
+					"must_not" => [
+						"term" => [
+							"id" => $room_id
+						]
+					]					
+			    ]
+			])
+			//->limit(3)
 			->all();
 
 		return $items;
