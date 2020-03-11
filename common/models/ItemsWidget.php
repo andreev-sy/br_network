@@ -52,23 +52,10 @@ class ItemsWidget extends Model
 	}
 
 	public function getOther($restaurant_id, $room_id){
-		$items = ItemsElastic::find()
-			//->where(['restaurant_id' => $restaurant_id])
-			->query([
-				"bool" => [
-					"must" => [
-						"term" => [
-							"restaurant_id" => $restaurant_id
-						]
-					],
-					"must_not" => [
-						"term" => [
-							"id" => $room_id
-						]
-					]					
-			    ]
-			])
-			//->limit(3)
+		$items = Rooms::find()
+			->with('restaurants')
+			->where(['restaurant_id' => $restaurant_id])
+			->andWhere(['!=', 'id', $room_id])
 			->all();
 
 		return $items;
