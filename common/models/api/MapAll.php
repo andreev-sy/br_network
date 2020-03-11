@@ -31,7 +31,8 @@ class MapAll extends BaseObject{
 	              'balloonContent' => $restaurant->address,
 	              'organization' => $restaurant->name,
 	              'address' => $restaurant->address,
-	              'img' => $restaurant->cover_url
+	              'img' => $restaurant->cover_url,
+	              'clusterCaption' => $restaurant->name
 	            ]
 			]);
 		}		
