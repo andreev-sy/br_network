@@ -64,7 +64,7 @@ class ItemsFilter extends BaseObject{
 			$query->andWhere($temp_query);				
 		}
 
-		$query->groupBy($main_table.'.id');
+		//$query->groupBy($main_table.'.id');
 		
 		$total_query = $query;
 		if(!$widget_flag){

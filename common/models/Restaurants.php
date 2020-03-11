@@ -54,4 +54,8 @@ class Restaurants extends \yii\db\ActiveRecord
             'cover_url' => 'Cover Url',
         ];
     }
+
+    public function getRooms(){
+        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'id']);
+    }
 }
