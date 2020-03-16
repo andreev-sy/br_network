@@ -1,27 +1,39 @@
 <?php
 
-namespace common\models;
+namespace common\models\elastic;
 
 use yii\base\BaseObject;
 use Yii;
 
-class FilterQueryConstructor extends BaseObject{
+class FilterQueryConstructorElastic extends BaseObject{
 
 	public $join = null,
 		   $query_arr,
 		   $query_type,
-		   $join_iter;
+		   $nested;
 
-	public function __construct($filter_data){
+	public function __construct($filter_data, $main_table){
 
 		$prefix = '';
 
-		if($filter_data['table'] == 'restaurants'){
-			$prefix = 'restaurant_';
+		if($main_table == 'rooms'){
+			if($filter_data['table'] == 'restaurants'){
+				$prefix = 'restaurant_';
+			}
+		}
+		else{
+			if($filter_data['table'] == 'restaurants'){
+				$prefix = 'restaurant_';
+			}
+			else{
+				$prefix = 'rooms.';
+			}
 		}
 
+		
 		$this->query_type = $filter_data['key'];
 		$this->query_arr = [];
+		$this->nested = $filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table;
 
 		//Местоположение
 		if($filter_data['key'] == 'district'){

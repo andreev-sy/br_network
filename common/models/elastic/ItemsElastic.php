@@ -1,5 +1,5 @@
 <?php
-namespace common\models;
+namespace common\models\elastic;
 
 use common\models\Restaurants;
 
@@ -11,7 +11,7 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
     }
 
     public static function index() {
-        return 'pmn_svadbanaprirode';
+        return 'pmn_svadbanaprirode_rooms';
     }
     
     public static function type() {
