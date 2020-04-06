@@ -35,8 +35,21 @@ class FilterQueryConstructorElastic extends BaseObject{
 		$this->query_arr = [];
 		$this->nested = $filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table;
 
+		//Локация
+		if($filter_data['key'] == 'location'){
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['term' => [$prefix.$this->getLocationCode($value) => 1]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					['term' => [$prefix.$this->getLocationCode($value) => 1]]
+				];
+			}
+		}
 		//Местоположение
-		if($filter_data['key'] == 'district'){
+		elseif($filter_data['key'] == 'district'){
 			if(is_array($filter_data['value'])){
 				foreach ($filter_data['value'] as $key => $value) {
 					array_push($this->query_arr, ['term' => [$prefix."district" => $value]]);
@@ -110,5 +123,34 @@ class FilterQueryConstructorElastic extends BaseObject{
 					
 			}
 		}
+	}
+
+	public function getLocationCode($value){
+		$return = '';
+		switch ($value) {
+			case 'Около моря':
+				$return = 'location_sea';
+				break;
+			case 'Около реки':
+				$return = 'location_river';
+				break;
+			case 'Около озера':
+				$return = 'location_lake';
+				break;
+			case 'В горах':
+				$return = 'location_mount';
+				break;
+			case 'В городе':
+				$return = 'location_city';
+				break;
+			case 'В центре города':
+				$return = 'location_center';
+				break;
+			case 'За городом':
+				$return = 'location_outside';
+				break;
+
+		}
+		return $return;
 	}
 }

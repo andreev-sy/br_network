@@ -7,7 +7,51 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
 {
     public function attributes()
     {
-        return ['restaurant_id', 'restaurant_gorko_id', 'restaurant_price', 'restaurant_min_capacity', 'restaurant_max_capacity', 'restaurant_district', 'restaurant_parent_district', 'restaurant_alcohol', 'restaurant_firework', 'restaurant_name', 'restaurant_address', 'restaurant_cover_url', 'restaurant_latitude', 'restaurant_longitude', 'restaurant_own_alcohol', 'restaurant_cuisine', 'restaurant_parking', 'restaurant_extra_services', 'restaurant_payment', 'restaurant_special', 'restaurant_phone', 'id', 'gorko_id', 'restaurant_id', 'price', 'capacity_reception', 'capacity', 'type', 'rent_only', 'banquet_price', 'bright_room', 'separate_entrance', 'type_name', 'name', 'features', 'cover_url'];
+        return [
+            'restaurant_id',
+            'restaurant_gorko_id',
+            'restaurant_price',
+            'restaurant_min_capacity',
+            'restaurant_max_capacity',
+            'restaurant_district',
+            'restaurant_parent_district',
+            'restaurant_alcohol',
+            'restaurant_firework',
+            'restaurant_name',
+            'restaurant_address',
+            'restaurant_cover_url',
+            'restaurant_latitude',
+            'restaurant_longitude',
+            'restaurant_own_alcohol',
+            'restaurant_cuisine',
+            'restaurant_parking',
+            'restaurant_extra_services',
+            'restaurant_payment',
+            'restaurant_special',
+            'restaurant_phone',
+            'restaurant_location_sea',
+            'restaurant_location_river',
+            'restaurant_location_lake',
+            'restaurant_location_mount',
+            'restaurant_location_city',
+            'restaurant_location_center',
+            'restaurant_location_outside',
+            'id',
+            'gorko_id',
+            'restaurant_id',
+            'price',
+            'capacity_reception',
+            'capacity',
+            'type',
+            'rent_only',
+            'banquet_price',
+            'bright_room',
+            'separate_entrance',
+            'type_name',
+            'name',
+            'features',
+            'cover_url'
+        ];
     }
 
     public static function index() {
@@ -47,6 +91,13 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
                     'restaurant_payment'               => ['type' => 'text'],
                     'restaurant_special'               => ['type' => 'text'],
                     'restaurant_phone'                 => ['type' => 'text'],
+                    'restaurant_location_sea'          => ['type' => 'integer'],
+                    'restaurant_location_river'        => ['type' => 'integer'],
+                    'restaurant_location_lake'         => ['type' => 'integer'],
+                    'restaurant_location_mount'        => ['type' => 'integer'],
+                    'restaurant_location_city'         => ['type' => 'integer'],
+                    'restaurant_location_center'       => ['type' => 'integer'],
+                    'restaurant_location_outside'      => ['type' => 'integer'],
                     'id'                    => ['type' => 'integer'],
                     'gorko_id'              => ['type' => 'integer'],
                     'restaurant_id'         => ['type' => 'integer'],
@@ -163,6 +214,43 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
         $record->restaurant_payment = $restaurant->payment;
         $record->restaurant_special = $restaurant->special;
         $record->restaurant_phone = $restaurant->phone;
+
+        $record->restaurant_phone = $restaurant->phone;
+        $record->restaurant_location_sea = 0;
+        $record->restaurant_location_river = 0;
+        $record->restaurant_location_lake = 0;
+        $record->restaurant_location_mount = 0;
+        $record->restaurant_location_city = 0;
+        $record->restaurant_location_center = 0;
+        $record->restaurant_location_outside = 0;
+        $location_arr = json_decode($restaurant->location);
+        if(count($location_arr) > 0 ){
+            foreach ($location_arr as $value) {
+                switch ($value) {
+                    case 'Около реки':
+                        $record->restaurant_location_river = 1;
+                        break;
+                    case 'Около моря':
+                        $record->restaurant_location_sea = 1;
+                        break;
+                    case 'Около озера':
+                        $record->restaurant_location_lake = 1;
+                        break;
+                    case 'В горах':
+                        $record->restaurant_location_mount = 1;
+                        break;
+                    case 'В городе':
+                        $record->restaurant_location_city = 1;
+                        break;
+                    case 'В центре города':
+                        $record->restaurant_location_center = 1;
+                        break;
+                    case 'За городом':
+                        $record->restaurant_location_outside = 1;
+                        break;
+                }
+            }
+        }        
 
         $record->id = $room->id;
         $record->gorko_id = $room->gorko_id;

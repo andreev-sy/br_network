@@ -10,12 +10,12 @@ class GorkoApiTest extends Model
 	public function renewAllData($params) {
 		foreach ($params as $param) {
 
-			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?'.$param;
+			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?city_id=4400&type_id=1&type=30,11,17,14';
 			$api_per_page = '&per_page=';
 			$api_page = '&page=';
 			
 			$ch_venues = curl_init();
-			$ch_venues_url = $api_url.$api_per_page.'1'.$api_page.'1';
+			$ch_venues_url = $api_url.$api_per_page.'20'.$api_page.'1';
 			
 			curl_setopt($ch_venues, CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1"));
 		    curl_setopt($ch_venues, CURLOPT_URL, $ch_venues_url);
@@ -30,12 +30,6 @@ class GorkoApiTest extends Model
 			foreach ($venues['restaurants'] as $key => $restaurant) {
 				$ids[$restaurant['id']] = null;
 			}
-
-			$venues['restaurants'][0]['rooms'] = '';
-			echo '<pre>';
-			print_r($venues['restaurants'][0]);
-			echo '</pre>';
-			exit;
 
 			$page_count = $venues['meta']['pages_count'];
 
@@ -81,5 +75,34 @@ class GorkoApiTest extends Model
 		}
 
 		return;
+	}
+
+	public function showOne($params) {
+		$api_url = 'https://api.gorko.ru/api/v2/directory/venues?city_id=4400&type_id=1&type=30,11,17,14';
+			$api_per_page = '&per_page=';
+			$api_page = '&page=';
+			
+			$ch_venues = curl_init();
+			$ch_venues_url = $api_url.$api_per_page.'1'.$api_page.'1';
+			
+			curl_setopt($ch_venues, CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1"));
+		    curl_setopt($ch_venues, CURLOPT_URL, $ch_venues_url);
+		    curl_setopt($ch_venues, CURLOPT_RETURNTRANSFER,true);
+		    curl_setopt($ch_venues, CURLOPT_ENCODING, '');	    
+
+			$venues = json_decode(curl_exec($ch_venues), true);
+			curl_close($ch_venues);
+
+			$curl = curl_init();
+		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/437869?embed=rooms,contacts&fields=address,params,covers,district');
+		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		    curl_setopt($curl, CURLOPT_ENCODING, '');
+		    $response = json_decode(curl_exec($curl), true)['restaurant'];
+		    curl_close($curl);
+
+		    echo '<pre>';
+		    print_r($response);
+		    echo '<pre>';
+		    exit;
 	}
 }

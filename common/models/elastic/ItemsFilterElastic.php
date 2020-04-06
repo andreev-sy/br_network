@@ -84,21 +84,31 @@ class ItemsFilterElastic extends BaseObject{
 			}			
 		}
 
-		$final_query = [
-			'bool' => [
-				'must' => [
-					'nested' => [
-						"path" => "rooms",
-						"query" => [
-							'bool' => [
-								'must' => []
+		if($main_table == 'rooms'){
+			$final_query = [
+				'bool' => [
+					'must' => [],
+				]
+			];
+		}
+		else{
+			$final_query = [
+				'bool' => [
+					'must' => [
+						'nested' => [
+							"path" => "rooms",
+							"query" => [
+								'bool' => [
+									'must' => []
+								]
 							]
 						]
-					]
-				],
-				
-			]
-		];
+					],
+				]
+			];
+		}
+
+			
 
 		foreach ($simple_query as $type => $arr_filter) {
 			$temp_type_arr = [];
@@ -113,7 +123,12 @@ class ItemsFilterElastic extends BaseObject{
 			foreach ($arr_filter as $key => $value) {
 				array_push($temp_type_arr, $value);
 			}
-			array_push($final_query["bool"]['must']["nested"]['query']['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+			if($main_table == 'rooms'){
+				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+			}
+			else{
+				array_push($final_query["bool"]['must']["nested"]['query']['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+			}
 		}
 
 		//echo '<pre>';

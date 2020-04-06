@@ -14,6 +14,12 @@ frontend/web/index-test.php
 frontend/web/index.php
 frontend/web/dist/*
 frontend/modules/*
+
+backend/modules/*
+backend/web/assets/*
+backend/web/index-test.php
+backend/web/index.php
+backend/web/dist/*
 /media/*
 
 # phpstorm project files

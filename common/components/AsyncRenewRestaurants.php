@@ -40,6 +40,19 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		    $attributes['name'] = $response['name'];
 			$attributes['address'] = $response['address'];
 
+			$locationStr = $response['params']['param_location'];
+			$location = explode(',', $locationStr);
+			foreach ($location as $key => $value) {
+				if($value != ''){
+					$location[$key] = trim($value);
+				}
+				else{
+					unset($location[$key]);
+				}
+			}
+			$location = json_encode($location);
+			$attributes['location'] = $location;
+
 			if($response['covers'][0]){
 				$attributes['cover_url'] = str_replace("=s0", "", $response['covers'][0]['original_url']);
 			}
@@ -80,7 +93,14 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				if($value['key'] == 'phone'){
 					$attributes['phone'] = $value['value'];
 				}
-			}		
+			}
+
+			$attributes['img_count'] = 1;
+			//$attributes['img_count'] = count($response['covers']);
+			//
+			//foreach ($response['rooms'] as $key => $room) {
+			//	$attributes['img_count'] += count($room['media']);
+			//}
 
 			$model->attributes = $attributes;
 		    $model->save();
