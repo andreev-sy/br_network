@@ -139,7 +139,16 @@ class ItemsFilterElastic extends BaseObject{
 		$final_query = [
 			"function_score" => [
 		      "query" => $final_query,
-		      "random_score" => [ "seed" => $seed ]
+		      "functions" => [
+	              [
+	                  "filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+	                  "random_score" => [], 
+	                  "weight" => 100
+	              ],
+	              [
+	              	"random_score" => [ "seed" => $seed ],
+	              ]
+	          ]
 		    ]
 		];
 		
