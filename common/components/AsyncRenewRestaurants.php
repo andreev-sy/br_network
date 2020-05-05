@@ -68,6 +68,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			$attributes['longitude'] = strval($response['longitude']);
 			$attributes['own_alcohol'] = isset($response['params']['param_own_alcohol']) ? $response['params']['param_own_alcohol']['text'] : '';
 			$attributes['district'] = $response['district']['id'];
+			$attributes['commission'] = $response['commission'];
 			$attributes['parent_district'] = $response['district']['parent_id'] ? $response['district']['parent_id'] : 0;
 			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['text'] : '';
 			if(isset($response['params']['param_firework'])){

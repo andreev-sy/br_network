@@ -36,6 +36,7 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
             'restaurant_location_city',
             'restaurant_location_center',
             'restaurant_location_outside',
+            'restaurant_commission',
             'id',
             'gorko_id',
             'restaurant_id',
@@ -50,7 +51,9 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
             'type_name',
             'name',
             'features',
-            'cover_url'
+            'cover_url',
+            'images',
+            'thumbs'
         ];
     }
 
@@ -98,6 +101,7 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
                     'restaurant_location_city'         => ['type' => 'integer'],
                     'restaurant_location_center'       => ['type' => 'integer'],
                     'restaurant_location_outside'      => ['type' => 'integer'],
+                    'restaurant_commission'            => ['type' => 'integer'],
                     'id'                    => ['type' => 'integer'],
                     'gorko_id'              => ['type' => 'integer'],
                     'restaurant_id'         => ['type' => 'integer'],
@@ -113,6 +117,23 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
                     'name'                  => ['type' => 'text'],
                     'features'              => ['type' => 'text'],
                     'cover_url'             => ['type' => 'text'],
+                    'images'                => ['type' => 'nested', 'properties' =>[
+                        'id'                => ['type' => 'integer'],
+                        'sort'              => ['type' => 'integer'],
+                        'realpath'          => ['type' => 'text'],
+                        'subpath'           => ['type' => 'text'],
+                        'waterpath'         => ['type' => 'text'],
+                        'timestamp'         => ['type' => 'text'],
+                    ]],
+                    'thumbs'                => ['type' => 'nested', 'properties' =>[
+                        'id'                => ['type' => 'integer'],
+                        'sort'              => ['type' => 'integer'],
+                        'realpath'          => ['type' => 'text'],
+                        'subpath'           => ['type' => 'text'],
+                        'waterpath'         => ['type' => 'text'],
+                        'timestamp'         => ['type' => 'text'],
+                    ]],
+
                 ]
             ],
         ];
@@ -214,8 +235,7 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
         $record->restaurant_payment = $restaurant->payment;
         $record->restaurant_special = $restaurant->special;
         $record->restaurant_phone = $restaurant->phone;
-
-        $record->restaurant_phone = $restaurant->phone;
+        $record->restaurant_commission = $restaurant->commission;
         $record->restaurant_location_sea = 0;
         $record->restaurant_location_river = 0;
         $record->restaurant_location_lake = 0;
@@ -267,6 +287,24 @@ class ItemsElastic extends \yii\elasticsearch\ActiveRecord
         $record->name = $room->name;
         $record->features = $room->features;
         $record->cover_url = $room->cover_url;
+
+        $images = [];
+        $thumbs = [];
+
+        foreach ($room->images as $key => $image) {
+            $image_arr = [];
+            $image_arr['id'] = $image->id;
+            $image_arr['sort'] = $image->sort;
+            $image_arr['realpath'] = $image->realpath;
+            $image_arr['subpath'] = $image->subpath;
+            $image_arr['waterpath'] = $image->waterpath;
+            $image_arr['timestamp'] = $image->timestamp;
+            array_push($images, $image_arr);
+            array_push($thumbs, $image_arr);
+        }
+
+        $record->images = $images;
+        $record->images = $thumbs;
 
         
         try{

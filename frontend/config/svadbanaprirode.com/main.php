@@ -80,6 +80,10 @@ return [
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
+                ['pattern'=>'/test/index','route'=>'test/index', 'suffix'=>'/'],
+                ['pattern'=>'/test/test','route'=>'test/test', 'suffix'=>'/'],
+                ['pattern'=>'/test/renewelastic','route'=>'test/renewelastic', 'suffix'=>'/'],
+                ['pattern'=>'/test/imgload/','route'=>'test/imgload', 'suffix'=>'/'],
             ],
         ],
         

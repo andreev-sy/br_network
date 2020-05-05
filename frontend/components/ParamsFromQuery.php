@@ -10,7 +10,7 @@ use backend\models\Pages;
 
 class ParamsFromQuery extends BaseObject{
 
-	public $params_filter, $params_api, $listing_url, $seo;
+	public $params_filter, $params_api, $listing_url, $seo, $canonical;
 
 	public function __construct($getQuery, $filter_model, $slices_model) {
 		$return = [
@@ -98,19 +98,27 @@ class ParamsFromQuery extends BaseObject{
 		}
 		if($slice_alias){
 			$this->listing_url = $slice_alias.'/'.$page_param;
+			$this->canonical = $slice_alias.'/'.$page_param;
 		}
 		else{
 			$this->seo = Pages::find()->where(['name' => 'listing'])->one();
 			$this->listing_url = $page_param;
+			$this->canonical = '';
 			foreach ($temp as $key => $value) {
 				$this->listing_url .= $key.'='.$value;
 				$this->listing_url .= '&';
+				if($key != 'page'){
+					$this->canonical .= $key.'='.$value;
+					$this->canonical .= '&';
+				}
 			}
 		}
 
 		$this->listing_url = rtrim($this->listing_url, '&');
 		$this->listing_url = rtrim($this->listing_url, '?');
-
+		$this->canonical = rtrim($this->canonical, '&');
+		$this->canonical = rtrim($this->canonical, '?');
+		
 		$this->params_filter = $return['params_filter'];
 	}
 

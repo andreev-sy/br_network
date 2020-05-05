@@ -60,4 +60,8 @@ class Rooms extends \yii\db\ActiveRecord
     public function getRestaurants(){
         return $this->hasOne(Restaurants::className(), ['id' => 'restaurant_id']);
     }
+
+    public function getImages(){
+        return $this->hasMany(Images::className(), ['item_id' => 'id'])->where(['type' => 'rooms']);
+    }
 }
