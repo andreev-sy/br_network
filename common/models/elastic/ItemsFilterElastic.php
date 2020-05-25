@@ -15,7 +15,7 @@ class ItemsFilterElastic extends BaseObject{
 		   $total,
 		   $pages;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false) {
 
 		$session = Yii::$app->session;
 		if($session->get('seed')){
@@ -27,7 +27,10 @@ class ItemsFilterElastic extends BaseObject{
 			$seed = $rand_seed;
 		}	
 
-		if($main_table == 'rooms'){
+		if($elastic_model){
+			$query = $elastic_model::find();
+		}
+		elseif($main_table == 'rooms'){
 			$query = ItemsElastic::find();
 		}
 		else{
@@ -92,20 +95,30 @@ class ItemsFilterElastic extends BaseObject{
 			];
 		}
 		else{
-			$final_query = [
-				'bool' => [
-					'must' => [
-						'nested' => [
-							"path" => "rooms",
-							"query" => [
-								'bool' => [
-									'must' => []
+			if(count($nested_query)){
+				$final_query = [
+					'bool' => [
+						'must' => [
+							'nested' => [
+								"path" => "rooms",
+								"query" => [
+									'bool' => [
+										'must' => []
+									]
 								]
 							]
-						]
-					],
-				]
-			];
+						],
+					]
+				];
+			}
+			else{
+				$final_query = [
+					'bool' => [
+						'must' => [],
+					]
+				];
+			}
+			
 		}
 
 			

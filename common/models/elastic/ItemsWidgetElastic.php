@@ -10,7 +10,7 @@ use common\components\ParamsFromQuery;
 class ItemsWidgetElastic extends Model
 {
 
-	public function getMain($filter_model, $slices_model, $main_table){
+	public function getMain($filter_model, $slices_model, $main_table, $elastic_model = false){
 
 		$widgets = WidgetMain::find()->with('slice')->all();
 
@@ -19,29 +19,34 @@ class ItemsWidgetElastic extends Model
 	    	$slice_obj = new QueryFromSlice($widget->slice->alias);
 	    	$params = $this->parseGetQuery($slice_obj->params, $filter_model, $slices_model);
 
-	    	$rooms = new ItemsFilterElastic($params['params_filter'], 7, 1, true, $main_table);
+	    	$object = new ItemsFilterElastic($params['params_filter'], 7, 1, true, $main_table, $elastic_model);
 
-	    	if(count($rooms->items) > 0){
-	    		$widget->items = $rooms->items;
+	    	if(count($object->items) > 0){
+	    		$widget->items = $object->items;
 	    	}
 	    	else{
 	    		unset($widgets[$key]);
 	    	}
 	    }
 	    
-	    switch ($main_table) {
-			case 'restaurants':
-				$total = Restaurants::find()->count();
-				break;
+	    if($elastic_model){
+			$total = $elastic_model::find(['id'])->limit(1)->search();
+	    }
+	    else{
+	    	switch ($main_table) {
+				case 'restaurants':
+					$total = Restaurants::find()->count();
+					break;
 
-			case 'rooms':
-				$total = ItemsElastic::find(['id'])->limit(1)->search();
-				break;
-			
-			default:
-				$total = Restaurants::find()->count();
-				break;
-		}
+				case 'rooms':
+					$total = ItemsElastic::find(['id'])->limit(1)->search();
+					break;
+				
+				default:
+					$total = Restaurants::find()->count();
+					break;
+			}
+	    }		    
 
 	    //exit;
 

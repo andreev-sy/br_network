@@ -74,7 +74,8 @@ return [
             'showScriptName' => false,
             'rules' => [
                 '/' => 'site/index',
-                ['pattern'=>'/catalog/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
+                ['pattern'=>'/catalog/<restId:\d+>/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
+                ['pattern'=>'/catalog/<restId:\d+>','route'=>'item/index', 'suffix'=>'/'],
                 ['pattern'=>'/catalog/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
                 ['pattern'=>'/catalog/','route'=>'listing/index', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
