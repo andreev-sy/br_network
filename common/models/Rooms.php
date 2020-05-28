@@ -19,29 +19,23 @@ use Yii;
  */
 class Rooms extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+
+    public $admin_flag = false;
+
     public static function tableName()
     {
         return 'rooms';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
             [['gorko_id', 'name'], 'required'],
-            [['gorko_id', 'restaurant_id', 'price', 'capacity_reception', 'capacity', 'type', 'rent_only', 'banquet_price', 'bright_room', 'separate_entrance'], 'integer'],
-            [['type_name', 'name', 'features', 'cover_url'], 'string'],
+            [['gorko_id', 'restaurant_id', 'price', 'capacity_reception', 'capacity', 'type', 'rent_only', 'banquet_price', 'bright_room', 'separate_entrance', 'active', 'in_elastic'], 'integer'],
+            [['type_name', 'name', 'features', 'cover_url', 'description'], 'string'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function attributeLabels()
     {
         return [
@@ -64,4 +58,5 @@ class Rooms extends \yii\db\ActiveRecord
     public function getImages(){
         return $this->hasMany(Images::className(), ['item_id' => 'id'])->where(['type' => 'rooms']);
     }
+
 }

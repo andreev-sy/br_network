@@ -1,4 +1,8 @@
 codeception-local.php
+codeception.php
 main-local.php
+main.php
 params-local.php
+params.php
 test-local.php
+test.php

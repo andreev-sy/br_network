@@ -57,19 +57,35 @@ class ItemsWidgetElastic extends Model
 		];
 	}
 
-	public function getOther($restaurant_id, $room_id){
-		$items = ItemsElastic::find()->query([
-		    'bool' => [
-		        'must' => [
-		            ['match' => ['restaurant_id' => $restaurant_id]]
-		        ],
-		        'must_not' => [
-		            ['match' => ['id' => $room_id]]
-		        ],
-		    ],
-		])->all();
+	public function getOther($restaurant_id, $room_id, $elastic_model = false){
+		if($elastic_model){
+			$items = $elastic_model::find()->query([
+			    'bool' => [
+			        'must' => [
+			            ['match' => ['restaurant_id' => $restaurant_id]]
+			        ],
+			        'must_not' => [
+			            ['match' => ['id' => $room_id]]
+			        ],
+			    ],
+			])->all();
 
-		return $items;
+			return $items;
+		}
+		else{
+			$items = ItemsElastic::find()->query([
+			    'bool' => [
+			        'must' => [
+			            ['match' => ['restaurant_id' => $restaurant_id]]
+			        ],
+			        'must_not' => [
+			            ['match' => ['id' => $room_id]]
+			        ],
+			    ],
+			])->all();
+
+			return $items;
+		}			
 	}
 
 	private function parseGetQuery($getQuery, $filter_model, $slices_model)
