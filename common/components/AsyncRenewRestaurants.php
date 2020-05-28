@@ -5,11 +5,14 @@ use Yii;
 use yii\base\BaseObject;
 use common\models\Restaurants;
 use common\models\Rooms;
+use common\models\Images;
+use common\components\AsyncRenewImages;
 
 class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterface
 {
-	public $gorko_id,
-		   $dsn;
+	public  $gorko_id,
+		   	$dsn,
+		   	$imageLoad;
 
 	public function execute($queue) {
 
@@ -40,11 +43,11 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		    $attributes['name'] = $response['name'];
 			$attributes['address'] = $response['address'];
 
-			$locationStr = $response['params']['param_location'];
+			$locationStr = $response['params']['param_location']['text'];
 			$location = explode(',', $locationStr);
 			foreach ($location as $key => $value) {
 				if($value != ''){
-					$location[$key] = trim($value);
+					$location[$key] = mb_convert_encoding(trim($value), 'UTF-8');
 				}
 				else{
 					unset($location[$key]);
@@ -68,8 +71,8 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			$attributes['longitude'] = strval($response['longitude']);
 			$attributes['own_alcohol'] = isset($response['params']['param_own_alcohol']) ? $response['params']['param_own_alcohol']['text'] : '';
 			$attributes['district'] = $response['district']['id'];
-			$attributes['commission'] = $response['commission'];
 			$attributes['parent_district'] = $response['district']['parent_id'] ? $response['district']['parent_id'] : 0;
+			$attributes['commission'] = $response['commission'];
 			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['text'] : '';
 			if(isset($response['params']['param_firework'])){
 				$attributes['firework'] = $response['params']['param_firework']['type'] == 'checked' ? 1 : 0;
@@ -96,67 +99,110 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				}
 			}
 
-			$attributes['img_count'] = 1;
-			//$attributes['img_count'] = count($response['covers']);
-			//
-			//foreach ($response['rooms'] as $key => $room) {
-			//	$attributes['img_count'] += count($room['media']);
-			//}
-
 			$model->attributes = $attributes;
 		    $model->save();
 
-			
-			
-			foreach ($response['rooms'] as $key => $room) {
-				$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
-				$restModel = Restaurants::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
-		    
-			    if(!$roomModel){
-			    	$roomModel = new Rooms();
-			    }
+		    $restModel = Restaurants::find()->where(['gorko_id' => $response['id']])->one($connection);
 
-			    $roomAttributes = [];
-		    	$roomAttributes['gorko_id'] = $room['id'];
-		    	$roomAttributes['name'] = $room['name'];
-		    	$roomAttributes['restaurant_id'] = $restModel->id;
-		    	$roomAttributes['price'] = $room['prices'][0]['value'];
-		    	$roomAttributes['capacity'] = $room['params']['param_capacity']['value'];
+		    if($restModel){
 
-		    	if($room['cover_url']){
-					$roomAttributes['cover_url'] = str_replace("w230-h150-n-l95", "w445-h302-n-l95", $room['cover_url']);
+			    foreach ($response['covers'] as $key => $image) {
+					$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
+					$imgAttributes = [];
+			    
+				    if(!$imgModel){
+				    	$imgModel = new Images();
+				    	$imgAttributes['gorko_id'] = $image['id'];
+				    	$imgAttributes['sort'] = $key;
+				    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
+				    	$imgAttributes['type'] = 'restaurant';
+				    	$imgAttributes['item_id'] = $restModel->id;
+				    	$imgModel->attributes = $imgAttributes;
+				    	$imgModel->save();
+				    }			    
 				}
 
-		    	if(isset($room['params']['param_capacity_reception'])){
-		    		$roomAttributes['capacity_reception'] = $room['params']['param_capacity_reception']['value'] ? $room['params']['param_capacity_reception']['value'] : 0;
-		    	}
-		    	
-		    	$roomAttributes['type'] = $room['type'];
-		    	$roomAttributes['type_name'] = $room['type_name'];
+				if($this->imageLoad){
+				    $queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+						'item_id' => $restModel->id,
+						'dsn' => $this->dsn,
+						'type' => 'restaurant',
+					]));
+			    }	
+				
+				foreach ($response['rooms'] as $key => $room) {
+					$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
+			    
+				    if(!$roomModel){
+				    	$roomModel = new Rooms();
+				    }
 
-		    	if(isset($room['params']['param_rent_only'])){
-					$roomAttributes['rent_only'] = $room['params']['param_rent_only']['value'] == 1 ? 1 : 0;
-				}
-				if(isset($room['params']['param_banquet_price'])){
-					$roomAttributes['banquet_price'] = $room['params']['param_banquet_price']['value'] ? $room['params']['param_banquet_price']['value'] : 0;
-				}
-				if(isset($room['params']['param_bright_room'])){
-					$roomAttributes['bright_room'] = $room['params']['param_bright_room']['value'] == 1 ? 1 : 0;
-				}
-				if(isset($room['params']['param_separate_entrance'])){
-					$roomAttributes['separate_entrance'] = $room['params']['param_separate_entrance']['value'] == 1 ? 1 : 0;
-				}
-				if(isset($room['params']['param_features'])){
-					$roomAttributes['features'] = $room['params']['param_features']['value'] ? $room['params']['param_features']['value'] : '';
-				}		    	
+				    $roomAttributes = [];
+			    	$roomAttributes['gorko_id'] = $room['id'];
+			    	$roomAttributes['name'] = $room['name'];
+			    	$roomAttributes['restaurant_id'] = $restModel->id;
+			    	$roomAttributes['price'] = $room['prices'][0]['value'];
+			    	$roomAttributes['capacity'] = $room['params']['param_capacity']['value'];
 
-		    	$roomModel->attributes = $roomAttributes;
-		    	$roomModel->save();
-			}
+			    	if($room['cover_url']){
+						$roomAttributes['cover_url'] = str_replace("w230-h150-n-l95", "w445-h302-n-l95", $room['cover_url']);
+					}
 
-			
+			    	if(isset($room['params']['param_capacity_reception'])){
+			    		$roomAttributes['capacity_reception'] = $room['params']['param_capacity_reception']['value'] ? $room['params']['param_capacity_reception']['value'] : 0;
+			    	}
+			    	
+			    	$roomAttributes['type'] = $room['type'];
+			    	$roomAttributes['type_name'] = $room['type_name'];
 
-		    
+			    	if(isset($room['params']['param_rent_only'])){
+						$roomAttributes['rent_only'] = $room['params']['param_rent_only']['value'] == 1 ? 1 : 0;
+					}
+					if(isset($room['params']['param_banquet_price'])){
+						$roomAttributes['banquet_price'] = $room['params']['param_banquet_price']['value'] ? $room['params']['param_banquet_price']['value'] : 0;
+					}
+					if(isset($room['params']['param_bright_room'])){
+						$roomAttributes['bright_room'] = $room['params']['param_bright_room']['value'] == 1 ? 1 : 0;
+					}
+					if(isset($room['params']['param_separate_entrance'])){
+						$roomAttributes['separate_entrance'] = $room['params']['param_separate_entrance']['value'] == 1 ? 1 : 0;
+					}
+					if(isset($room['params']['param_features'])){
+						$roomAttributes['features'] = $room['params']['param_features']['value'] ? $room['params']['param_features']['value'] : '';
+					}
+
+			    	$roomModel->attributes = $roomAttributes;
+			    	$roomModel->save();
+
+			    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
+
+			    	if($roomModel){
+			    		foreach ($room['media'] as $key => $image) {
+							$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
+							$imgAttributes = [];
+					    
+						    if(!$imgModel){
+						    	$imgModel = new Images();
+						    	$imgAttributes['gorko_id'] = $image['id'];
+						    	$imgAttributes['sort'] = $key;
+						    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
+						    	$imgAttributes['type'] = 'rooms';
+						    	$imgAttributes['item_id'] = $roomModel->id;
+						    	$imgModel->attributes = $imgAttributes;
+					    		$imgModel->save();
+						    }				    
+						}
+
+						if($this->imageLoad){
+						    $queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+								'item_id' => $roomModel->id,
+								'dsn' => $this->dsn,
+								'type' => 'rooms',
+							]));
+					    }	
+			    	}		    	
+				}
+			}	    
 	  	}
 	}
 }

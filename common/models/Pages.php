@@ -36,7 +36,7 @@ class Pages extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'title', 'description', 'keywords', 'h1'], 'required'],
-            [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt'], 'string'],
+            [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt', 'title_pag', 'description_pag', 'keywords_pag', 'h1_pag', 'type'], 'string'],
         ];
     }
 
@@ -47,13 +47,17 @@ class Pages extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'name' => 'Название',
             'title' => 'Title',
+            'title_pag' => 'Title для пагинации',
             'description' => 'Description',
+            'description_pag' => 'Description для пагинации',
             'keywords' => 'Keywords',
+            'keywords_pag' => 'Keywords для пагинации',
             'h1' => 'H1',
-            'text_top' => 'Text Top',
-            'text_bottom' => 'Text Bottom',
+            'h1_pag' => 'H1 для пагинации',
+            'text_top' => 'Верхний текст',
+            'text_bottom' => 'Нижний текст',
         ];
     }
 }

@@ -3,12 +3,35 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
+use common\models\Restaurants;
+use common\models\Rooms;
 use common\components\AsyncRenewRestaurants;
+use common\components\AsyncRenewImages;
 
 class GorkoApiTest extends Model
 {
 	public function renewAllData($params) {
 		foreach ($params as $param) {
+			$current_rest_models = Restaurants::find()
+				->select('gorko_id')
+				->where(['active' => 1])
+				->asArray()
+				->all();
+			$current_rest_ids = [];
+			foreach ($current_rest_models as $key => $value) {
+				array_push($current_rest_ids, $value['gorko_id']);
+			}
+
+			$current_room_models = Rooms::find()
+				->select('gorko_id')
+				->where(['active' => 1])
+				->asArray()
+				->all();
+
+			$current_room_ids = [];
+			foreach ($current_room_models as $key => $value) {
+				array_push($current_room_ids, $value['gorko_id']);
+			}
 
 			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?city_id=4400&type_id=1&type=30,11,17,14';
 			$api_per_page = '&per_page=';
@@ -25,10 +48,18 @@ class GorkoApiTest extends Model
 			$venues = json_decode(curl_exec($ch_venues), true);
 			curl_close($ch_venues);
 
-			$ids = [];
+			$gorko_rest_ids = [];
+			$gorko_room_ids = [];
 
 			foreach ($venues['restaurants'] as $key => $restaurant) {
-				$ids[$restaurant['id']] = null;
+				$gorko_rest_ids[$restaurant['id']] = null;
+				foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
+					$gorko_room_ids[$room['id']] = null;
+				}
+				$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+					'gorko_id' => $restaurant['id'],
+					'dsn' => Yii::$app->db->dsn,
+				]));
 			}
 
 			$page_count = $venues['meta']['pages_count'];
@@ -60,15 +91,50 @@ class GorkoApiTest extends Model
 
 			$iter = 0;
 
+			$imgFlag = true;
+
 			foreach ($channels as $channel) {
-				$venues = json_decode(curl_multi_getcontent($channel), true);	
+				$venues = json_decode(curl_multi_getcontent($channel), true);
 				foreach ($venues['restaurants'] as $key => $restaurant) {
-					$ids[$restaurant['id']] = null;
+					$gorko_rest_ids[$restaurant['id']] = null;
+					foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
+						$gorko_room_ids[$room['id']] = null;
+					}
 					$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 						'gorko_id' => $restaurant['id'],
 						'dsn' => Yii::$app->db->dsn,
 					]));
 				}
+			}
+
+
+
+			foreach ($gorko_rest_ids as $id => $value) {
+				if (($key = array_search($id, $current_rest_ids)) !== false) {
+				    unset($current_rest_ids[$key]);
+				}
+			}
+
+			foreach ($current_rest_ids as $key => $value) {
+				$restaurant = Restaurants::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$restaurant->active = 0;
+				$restaurant->save();
+			}
+
+			foreach ($gorko_room_ids as $id => $value) {
+				if (($key = array_search($id, $current_room_ids)) !== false) {
+				    unset($current_room_ids[$key]);
+				}
+			}			
+
+			foreach ($current_room_ids as $key => $value) {
+				$room = Rooms::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$room->active = 0;
+				$room->save();
 			}
 
 			curl_multi_close($mh);
