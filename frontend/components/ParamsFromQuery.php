@@ -116,6 +116,7 @@ class ParamsFromQuery extends BaseObject{
 		$slice_model = Slices::find()->all();
 		$slice_alias = false;
 		$temp = $filter;
+		unset($temp['page']);
 		foreach ($slice_model as $key => $value) {
 			$temp2 = json_decode($value->params, true);
 			if(count(array_merge(array_diff_assoc($temp,$temp2),array_diff_assoc($temp2,$temp))) == 0){

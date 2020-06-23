@@ -17,6 +17,23 @@ return [
         ],
     ],
     'components' => [
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            //'viewPath' => '@common/mail',
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.yandex.ru',
+                'username' => 'post@smilerooms.ru',
+                'password' => 'H[ZWkBS++8.>1',
+                'port' => '465',
+                'encryption' => 'ssl',
+            ],
+        ],
+        'assetManager' => [
+            'class' => 'yii\web\AssetManager',
+            'forceCopy' => true,          
+        ],
         'view' => [
             'theme' => [
                 'pathMap' => [
@@ -30,8 +47,8 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
-            'username' => 'root',
-            'password' => 'LP_db_',
+            'username' => 'pmnetwork',
+            'password' => 'P2t8wdBQbczLNnVT',
             'charset' => 'utf8',
         ],
         'elasticsearch' => [

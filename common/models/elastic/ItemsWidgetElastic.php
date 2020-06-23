@@ -6,6 +6,7 @@ use yii\base\Model;
 use common\components\QueryFromSlice;
 use common\models\WidgetMain;
 use common\components\ParamsFromQuery;
+use common\models\FilterItems;
 
 class ItemsWidgetElastic extends Model
 {
@@ -88,6 +89,14 @@ class ItemsWidgetElastic extends Model
 		}			
 	}
 
+	public function getSimilar($item, $main_table, $elastic_model = false){
+		$params = $this->getParamsByItem($item);
+
+		$items = new ItemsFilterElastic($params, 5, 1, true, $main_table, $elastic_model, true, $item->id);
+
+		return $items->items;
+	}
+
 	private function parseGetQuery($getQuery, $filter_model, $slices_model)
 	{
 		$return = [];
@@ -108,5 +117,46 @@ class ItemsWidgetElastic extends Model
 		$return['listing_url'] = $temp_params->listing_url;
 		$return['seo'] = $temp_params->seo;
 		return $return;
+	}
+
+	private function getParamsByItem($item){
+		$params = [];
+
+		if($item->restaurant_district == 547 || $item->restaurant_parent_district == 547){
+			$params['district_code'] = [1];
+		}
+		else{
+			$params['district_code'] = [2];
+		}
+
+		$filter_gostey = FilterItems::find()
+			->where(['filter_id' => 4])
+			->all();
+
+		foreach ($filter_gostey as $key => $value) {
+			$filter = json_decode($value->api_arr, true);
+			$filter_str = $filter[0]['value'];
+
+			switch (substr($filter_str, 0, 1)) {
+				case '<':
+					if($item->capacity < str_replace('<', '', $filter_str))
+						$params['gostey'] = [$value->value];
+					break;
+				case '&':
+					$value_arr = explode(',', substr($filter_str, 1));
+					if(in_array($item->capacity, range($value_arr[0], $value_arr[1])))
+						$params['gostey'] = [$value->value];
+					break;
+				case '>':
+					if($item->capacity > str_replace('>', '', $filter_str))
+						$params['gostey'] = [$value->value];
+					break;
+				default:
+					$params['gostey'] = [1];
+					break;
+			}
+		}		
+
+		return $params;
 	}
 }

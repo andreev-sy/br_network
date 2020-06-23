@@ -35,7 +35,7 @@ class Pages extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'title', 'description', 'keywords', 'h1'], 'required'],
+            [['name', 'title', 'description', 'h1'], 'required'],
             [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt', 'title_pag', 'description_pag', 'keywords_pag', 'h1_pag', 'type'], 'string'],
         ];
     }

@@ -15,7 +15,7 @@ class ItemsFilterElastic extends BaseObject{
 		   $total,
 		   $pages;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false) {
 
 		$session = Yii::$app->session;
 		if($session->get('seed')){
@@ -25,7 +25,22 @@ class ItemsFilterElastic extends BaseObject{
 			$rand_seed = random_int(1, 999999);
 			$session->set('seed', $rand_seed);
 			$seed = $rand_seed;
-		}	
+		}
+
+		if($widget_flag){
+			if($session->get('widget_seed')){
+			$seed = $session->get('widget_seed');
+			}
+			else{
+				$rand_seed = random_int(1, 999999);
+				$session->set('widget_seed', $rand_seed);
+				$seed = $rand_seed;
+			}
+		}
+
+		if($random){
+			$seed = random_int(1, 999999);
+		}
 
 		if($elastic_model){
 			$query = $elastic_model::find();
@@ -119,6 +134,10 @@ class ItemsFilterElastic extends BaseObject{
 				];
 			}
 			
+		}
+
+		if($must_not){
+			$final_query['bool']['must_not'] = ['match' => ['id' => $must_not]];
 		}
 
 			

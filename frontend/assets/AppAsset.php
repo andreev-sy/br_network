@@ -20,4 +20,25 @@ class AppAsset extends AssetBundle
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
     ];
+
+    public function init() {
+        $this->css = $this->getVersionedFiles($this->css);
+        $this->js = $this->getVersionedFiles($this->js);
+        parent::init();
+        // resetting BootstrapAsset to not load own css files
+        \Yii::$app->assetManager->bundles['yii\\bootstrap\\BootstrapAsset'] = [
+            'css' => [],
+            'js' => []
+        ];
+    }
+
+    public function getVersionedFiles($files)
+    {
+        $out = [];
+        foreach ($files as $file) {
+            $filePath = \Yii::getAlias('@webroot/' . $file);
+            $out[] = $file . (is_file($filePath) ? '?v=' . filemtime($filePath) : '');
+        }
+        return $out;
+    }
 }

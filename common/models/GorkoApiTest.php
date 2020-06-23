@@ -33,7 +33,7 @@ class GorkoApiTest extends Model
 				array_push($current_room_ids, $value['gorko_id']);
 			}
 
-			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?city_id=4400&type_id=1&type=30,11,17,14';
+			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?'.$param['params'];
 			$api_per_page = '&per_page=';
 			$api_page = '&page=';
 			
@@ -59,6 +59,7 @@ class GorkoApiTest extends Model
 				$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 					'gorko_id' => $restaurant['id'],
 					'dsn' => Yii::$app->db->dsn,
+					'watermark' => $param['watermark']
 				]));
 			}
 
@@ -103,6 +104,7 @@ class GorkoApiTest extends Model
 					$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 						'gorko_id' => $restaurant['id'],
 						'dsn' => Yii::$app->db->dsn,
+						'watermark' => $param['watermark']
 					]));
 				}
 			}
@@ -144,7 +146,8 @@ class GorkoApiTest extends Model
 	}
 
 	public function showOne($params) {
-		$api_url = 'https://api.gorko.ru/api/v2/directory/venues?city_id=4400&type_id=1&type=30,11,17,14';
+		foreach ($params as $param) {
+			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?'.$param['params'];
 			$api_per_page = '&per_page=';
 			$api_page = '&page=';
 			
@@ -170,5 +173,6 @@ class GorkoApiTest extends Model
 		    print_r($response);
 		    echo '<pre>';
 		    exit;
+		}
 	}
 }

@@ -53,12 +53,25 @@ class Seo extends BaseObject{
 	}
 
 	private function seoRepalce($text, $count = 0, $page){
-		$count_ending = [
+		$count_rooms_ending = [
 			'',
 			'а',
 			'ов'
 		];
-		$text = str_replace('**count_rooms**', $count.' зал'.$this->get_num_ending($count, $count_ending), $text);
+		$count_court_ending = [
+			'а',
+			'и',
+			'ок'
+		];
+		$count_tent_ending = [
+			'ер',
+			'ра',
+			'ров'
+		];
+		$text = str_replace('**count**', $count, $text);
+		$text = str_replace('**count_rooms**', $count.' зал'.$this->get_num_ending($count, $count_rooms_ending), $text);
+		$text = str_replace('**count_court**', $count.' площадк'.$this->get_num_ending($count, $count_court_ending), $text);
+		$text = str_replace('**count_tent**', $count.' шат'.$this->get_num_ending($count, $count_tent_ending), $text);
 		$text = str_replace('**page**', $page, $text);
 
 		return $text;

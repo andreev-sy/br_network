@@ -12,7 +12,8 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 {
 	public  $gorko_id,
 		   	$dsn,
-		   	$imageLoad;
+		   	$imageLoad,
+		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png';
 
 	public function execute($queue) {
 
@@ -25,8 +26,8 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 		    $connection = new \yii\db\Connection([
 			    'dsn' => $this->dsn,
-			    'username' => 'root',
-			    'password' => 'LP_db_',
+			    'username' => 'pmnetwork',
+			    'password' => 'P2t8wdBQbczLNnVT',
 			    'charset' => 'utf8',
 			]);
 			$connection->open();
@@ -39,9 +40,12 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		    }
 
 		    $attributes = [];
+		    $attributes['active'] = 1;
+		    $attributes['in_elastic'] = 0;
 		    $attributes['gorko_id'] = $response['id'];
 		    $attributes['name'] = $response['name'];
 			$attributes['address'] = $response['address'];
+
 
 			$locationStr = $response['params']['param_location']['text'];
 			$location = explode(',', $locationStr);
@@ -72,7 +76,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			$attributes['own_alcohol'] = isset($response['params']['param_own_alcohol']) ? $response['params']['param_own_alcohol']['text'] : '';
 			$attributes['district'] = $response['district']['id'];
 			$attributes['parent_district'] = $response['district']['parent_id'] ? $response['district']['parent_id'] : 0;
-			$attributes['commission'] = $response['commission'];
+			$attributes['commission'] = $response['commission'] ? $response['commission'] : 0;
 			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['text'] : '';
 			if(isset($response['params']['param_firework'])){
 				$attributes['firework'] = $response['params']['param_firework']['type'] == 'checked' ? 1 : 0;
@@ -119,16 +123,15 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$imgAttributes['item_id'] = $restModel->id;
 				    	$imgModel->attributes = $imgAttributes;
 				    	$imgModel->save();
+
+				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+							'item_id' => $restModel->id,
+							'dsn' => $this->dsn,
+							'type' => 'restaurant',
+							'watermark' => $this->watermark
+						]));
 				    }			    
 				}
-
-				if($this->imageLoad){
-				    $queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-						'item_id' => $restModel->id,
-						'dsn' => $this->dsn,
-						'type' => 'restaurant',
-					]));
-			    }	
 				
 				foreach ($response['rooms'] as $key => $room) {
 					$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
@@ -138,6 +141,8 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    }
 
 				    $roomAttributes = [];
+				    $roomAttributes['active'] = 1;
+		    		$roomAttributes['in_elastic'] = 0;
 			    	$roomAttributes['gorko_id'] = $room['id'];
 			    	$roomAttributes['name'] = $room['name'];
 			    	$roomAttributes['restaurant_id'] = $restModel->id;
@@ -190,16 +195,15 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						    	$imgAttributes['item_id'] = $roomModel->id;
 						    	$imgModel->attributes = $imgAttributes;
 					    		$imgModel->save();
+
+					    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+									'item_id' => $roomModel->id,
+									'dsn' => $this->dsn,
+									'type' => 'rooms',
+									'watermark' => $this->watermark
+								]));
 						    }				    
 						}
-
-						if($this->imageLoad){
-						    $queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-								'item_id' => $roomModel->id,
-								'dsn' => $this->dsn,
-								'type' => 'rooms',
-							]));
-					    }	
 			    	}		    	
 				}
 			}	    
