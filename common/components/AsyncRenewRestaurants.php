@@ -13,12 +13,13 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 	public  $gorko_id,
 		   	$dsn,
 		   	$imageLoad,
-		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png';
+		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png',
+		   	$imageHash = 'svadbanaprirode';
 
 	public function execute($queue) {
 
 		if( $curl = curl_init() ) {
-		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district');
+		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district&is_edit=1');
 		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		    curl_setopt($curl, CURLOPT_ENCODING, '');
 		    $response = json_decode(curl_exec($curl), true)['restaurant'];
@@ -46,19 +47,35 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		    $attributes['name'] = $response['name'];
 			$attributes['address'] = $response['address'];
 
-
-			$locationStr = $response['params']['param_location']['text'];
-			$location = explode(',', $locationStr);
-			foreach ($location as $key => $value) {
-				if($value != ''){
-					$location[$key] = mb_convert_encoding(trim($value), 'UTF-8');
-				}
-				else{
-					unset($location[$key]);
+			if(isset($response['params']['param_location'])){
+				$attributes['location'] = '';
+				$flag = true;
+				foreach ($response['params']['param_location']['value'] as $location){
+					if($flag){
+						$attributes['location'] .= $location;
+						$flag = false;
+					}
+					else{
+						$attributes['location'] .= ','.$location;
+					}
+					
 				}
 			}
-			$location = json_encode($location);
-			$attributes['location'] = $location;
+
+			if(isset($response['params']['param_type'])){
+				$attributes['type'] = '';
+				$flag = true;
+				foreach ($response['params']['param_type']['value'] as $type){
+					if($flag){
+						$attributes['type'] .= $type;
+						$flag = false;
+					}
+					else{
+						$attributes['type'] .= ','.$type;
+					}
+					
+				}
+			}			
 
 			if($response['covers'][0]){
 				$attributes['cover_url'] = str_replace("=s0", "", $response['covers'][0]['original_url']);
@@ -73,29 +90,30 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 			$attributes['latitude'] = strval($response['latitude']);
 			$attributes['longitude'] = strval($response['longitude']);
-			$attributes['own_alcohol'] = isset($response['params']['param_own_alcohol']) ? $response['params']['param_own_alcohol']['text'] : '';
 			$attributes['district'] = $response['district']['id'];
 			$attributes['parent_district'] = $response['district']['parent_id'] ? $response['district']['parent_id'] : 0;
+			$attributes['city_id'] = $response['city']['id'];
 			$attributes['commission'] = $response['commission'] ? $response['commission'] : 0;
-			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['text'] : '';
+			$attributes['own_alcohol'] = isset($response['params']['param_own_alcohol']) ? $response['params']['param_own_alcohol']['display']['text'] : '';
+			if(isset($response['params']['param_own_alcohol'])){
+				$attributes['alcohol'] = $response['params']['param_own_alcohol']['value'];
+			}
+			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['display']['text'] : '';
 			if(isset($response['params']['param_firework'])){
-				$attributes['firework'] = $response['params']['param_firework']['type'] == 'checked' ? 1 : 0;
+				$attributes['firework'] = $response['params']['param_firework']['value'];
 			}
 			if(isset($response['params']['param_parking'])){
-				$attributes['parking'] = $response['params']['param_parking']['type'] == 'checked' ? $response['params']['param_parking']['text'] : '';
-			}
-			if(isset($response['params']['param_alcohol'])){
-				$attributes['alcohol'] = $response['params']['param_alcohol']['type'] == 'checked' ? 1 : 0;
+				$attributes['parking'] = $response['params']['param_parking']['value'];
 			}
 			if(isset($response['params']['param_extra_services'])){
-				$attributes['extra_services'] = $response['params']['param_extra_services']['text'] ? $response['params']['param_extra_services']['text'] : '';
+				$attributes['extra_services'] = $response['params']['param_extra_services']['display']['text'] ? $response['params']['param_extra_services']['display']['text'] : '';
 			}
 			if(isset($response['params']['param_payment'])){
-				$attributes['payment'] = $response['params']['param_payment']['text'] ? $response['params']['param_payment']['text'] : '';
+				$attributes['payment'] = $response['params']['param_payment']['display']['text'] ? $response['params']['param_payment']['display']['text'] : '';
 			}
 			if(isset($response['params']['param_special'])){
-				$attributes['special'] = $response['params']['param_special']['text'] ? $response['params']['param_special']['text'] : '';
-			}
+				$attributes['special'] = $response['params']['param_special']['display']['text'] ? $response['params']['param_special']['display']['text'] : '';
+			}	
 
 			foreach ($response['contacts'] as $key => $value) {
 				if($value['key'] == 'phone'){
@@ -125,12 +143,22 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$imgModel->save();
 
 				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-							'item_id' => $restModel->id,
+							'item_id' => $imgModel->id,
 							'dsn' => $this->dsn,
 							'type' => 'restaurant',
-							'watermark' => $this->watermark
+							'watermark' => $this->watermark,
+							'imageHash' => $this->imageHash,
 						]));
-				    }			    
+				    }
+				    elseif(!$imgModel->subpath){
+				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+							'item_id' => $imgModel->id,
+							'dsn' => $this->dsn,
+							'type' => 'restaurant',
+							'watermark' => $this->watermark,
+							'imageHash' => $this->imageHash,
+						]));
+				    }
 				}
 				
 				foreach ($response['rooms'] as $key => $room) {
@@ -144,36 +172,40 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    $roomAttributes['active'] = 1;
 		    		$roomAttributes['in_elastic'] = 0;
 			    	$roomAttributes['gorko_id'] = $room['id'];
-			    	$roomAttributes['name'] = $room['name'];
+			    	$roomAttributes['name'] = $room['name'] ? $room['name'] : $room['type_name'];
 			    	$roomAttributes['restaurant_id'] = $restModel->id;
 			    	$roomAttributes['price'] = $room['prices'][0]['value'];
-			    	$roomAttributes['capacity'] = $room['params']['param_capacity']['value'];
+			    	$roomAttributes['capacity'] = $room['params']['param_capacity_0']['value'];
 
 			    	if($room['cover_url']){
 						$roomAttributes['cover_url'] = str_replace("w230-h150-n-l95", "w445-h302-n-l95", $room['cover_url']);
 					}
 
-			    	if(isset($room['params']['param_capacity_reception'])){
-			    		$roomAttributes['capacity_reception'] = $room['params']['param_capacity_reception']['value'] ? $room['params']['param_capacity_reception']['value'] : 0;
+			    	if(isset($room['params']['param_capacity_reception_0'])){
+			    		$roomAttributes['capacity_reception'] = $room['params']['param_capacity_reception_0']['value'] ? $room['params']['param_capacity_reception_0']['value'] : 0;
 			    	}
 			    	
 			    	$roomAttributes['type'] = $room['type'];
 			    	$roomAttributes['type_name'] = $room['type_name'];
 
-			    	if(isset($room['params']['param_rent_only'])){
-						$roomAttributes['rent_only'] = $room['params']['param_rent_only']['value'] == 1 ? 1 : 0;
+			    	if(isset($room['params']['param_rent_only_0'])){
+						$roomAttributes['rent_only'] = $room['params']['param_rent_only_0']['value'] == 1 ? 1 : 0;
 					}
-					if(isset($room['params']['param_banquet_price'])){
-						$roomAttributes['banquet_price'] = $room['params']['param_banquet_price']['value'] ? $room['params']['param_banquet_price']['value'] : 0;
+					if(isset($room['params']['param_bright_room_0'])){
+						$roomAttributes['bright_room'] = $room['params']['param_bright_room_0']['value'] == 1 ? 1 : 0;
 					}
-					if(isset($room['params']['param_bright_room'])){
-						$roomAttributes['bright_room'] = $room['params']['param_bright_room']['value'] == 1 ? 1 : 0;
+					if(isset($room['params']['param_separate_entrance_0'])){
+						$roomAttributes['separate_entrance'] = $room['params']['param_separate_entrance_0']['value'] == 1 ? 1 : 0;
 					}
-					if(isset($room['params']['param_separate_entrance'])){
-						$roomAttributes['separate_entrance'] = $room['params']['param_separate_entrance']['value'] == 1 ? 1 : 0;
+					if(isset($room['params']['param_features_0'])){
+						$roomAttributes['features'] = $room['params']['param_features_0']['value'] ? $room['params']['param_features_0']['value'] : '';
 					}
-					if(isset($room['params']['param_features'])){
-						$roomAttributes['features'] = $room['params']['param_features']['value'] ? $room['params']['param_features']['value'] : '';
+
+					if(isset($room['params']['param_min_price_0']) && $room['params']['param_min_price_0']['value']){
+						$roomAttributes['banquet_price'] = $room['params']['param_min_price_0']['value'];
+					}
+					else{
+						$roomAttributes['banquet_price'] = $room['prices'][0]['value'] * $room['params']['param_capacity_0']['value'];
 					}
 
 			    	$roomModel->attributes = $roomAttributes;
@@ -197,12 +229,22 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 					    		$imgModel->save();
 
 					    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-									'item_id' => $roomModel->id,
+									'item_id' => $imgModel->id,
 									'dsn' => $this->dsn,
 									'type' => 'rooms',
-									'watermark' => $this->watermark
+									'watermark' => $this->watermark,
+									'imageHash' => $this->imageHash,
 								]));
-						    }				    
+						    }
+						    elseif(!$imgModel->subpath){
+						    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+									'item_id' => $imgModel->id,
+									'dsn' => $this->dsn,
+									'type' => 'rooms',
+									'watermark' => $this->watermark,
+									'imageHash' => $this->imageHash,
+								]));
+						    }			    
 						}
 			    	}		    	
 				}

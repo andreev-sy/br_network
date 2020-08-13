@@ -3,9 +3,10 @@
 namespace common\models\elastic;
 
 use yii\base\BaseObject;
-use backend\models\FilterItems;
-use backend\models\RestaurantsElastic;
+use common\models\FilterItems;
 use Yii;
+use common\models\Filter;
+use yii\helpers\ArrayHelper;
 
 use Elasticsearch\ClientBuilder;
 
@@ -15,7 +16,9 @@ class ItemsFilterElastic extends BaseObject{
 		   $total,
 		   $pages;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false) {
+
+		$filter_main_model = ArrayHelper::map(Filter::find()->all(), 'alias', 'type');
 
 		$session = Yii::$app->session;
 		if($session->get('seed')){
@@ -71,35 +74,68 @@ class ItemsFilterElastic extends BaseObject{
 		foreach ($filter_arr as $key => $value_temp) {
 
 			foreach ($value_temp as $value) {
-				$filter_item_obj = FilterItems::find()
-					->joinWith(['filter'])
-					->where(['filter.alias' => $key])
-					->andWhere(['value' => $value])
-					->one();
-				$filter_item_arr = json_decode($filter_item_obj->api_arr, true);
+				if($filter_main_model[$key] != 'input'){
+					$filter_item_obj = FilterItems::find()
+						->joinWith(['filter'])
+						->where(['filter.alias' => $key])
+						->andWhere(['value' => $value])
+						->one();
+					$filter_item_arr = json_decode($filter_item_obj->api_arr, true);
 
-				foreach ($filter_item_arr as $filter_data) {
+					foreach ($filter_item_arr as $filter_data) {
 
-					$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
+						$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
 
-					if($filter_query->nested){
-						if(!isset($nested_query[$filter_query->query_type])){
-							$nested_query[$filter_query->query_type] = [];
+						if($filter_query->nested){
+							if(!isset($nested_query[$filter_query->query_type])){
+								$nested_query[$filter_query->query_type] = [];
+							}
 						}
-					}
-					else{
-						if(!isset($simple_query[$filter_query->query_type])){
-							$simple_query[$filter_query->query_type] = [];
+						else{
+							if(!isset($simple_query[$filter_query->query_type])){
+								$simple_query[$filter_query->query_type] = [];
+							}
 						}
-					}
 
-					foreach ($filter_query->query_arr as $filter_value) {
-						$filter_query->nested ? 
-							array_push($nested_query[$filter_query->query_type], $filter_value): 
-							array_push($simple_query[$filter_query->query_type], $filter_value);
-					}
-				}		
-			}			
+						foreach ($filter_query->query_arr as $filter_value) {
+							$filter_query->nested ? 
+								array_push($nested_query[$filter_query->query_type], $filter_value): 
+								array_push($simple_query[$filter_query->query_type], $filter_value);
+						}
+					}	
+				}
+				else{
+					$filter_item_obj = FilterItems::find()
+						->joinWith(['filter'])
+						->where(['filter.alias' => $key])
+						->one();
+					$filter_item_arr = json_decode($filter_item_obj->api_arr, true);
+
+					$filter_item_arr[0]['value'] = $filter_item_arr[0]['value'].$value;
+
+					foreach ($filter_item_arr as $filter_data) {
+
+						$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
+
+						if($filter_query->nested){
+							if(!isset($nested_query[$filter_query->query_type])){
+								$nested_query[$filter_query->query_type] = [];
+							}
+						}
+						else{
+							if(!isset($simple_query[$filter_query->query_type])){
+								$simple_query[$filter_query->query_type] = [];
+							}
+						}
+
+						foreach ($filter_query->query_arr as $filter_value) {
+							$filter_query->nested ? 
+								array_push($nested_query[$filter_query->query_type], $filter_value): 
+								array_push($simple_query[$filter_query->query_type], $filter_value);
+						}
+					}	
+				}	
+			}
 		}
 
 		if($main_table == 'rooms'){
@@ -114,11 +150,13 @@ class ItemsFilterElastic extends BaseObject{
 				$final_query = [
 					'bool' => [
 						'must' => [
-							'nested' => [
-								"path" => "rooms",
-								"query" => [
-									'bool' => [
-										'must' => []
+							0 => [
+								'nested' => [
+									"path" => "rooms",
+									"query" => [
+										'bool' => [
+											'must' => []
+										]
 									]
 								]
 							]
@@ -140,7 +178,19 @@ class ItemsFilterElastic extends BaseObject{
 			$final_query['bool']['must_not'] = ['match' => ['id' => $must_not]];
 		}
 
-			
+		if(isset(Yii::$app->params['subdomen_id'])){
+			$subdomen_id = Yii::$app->params['subdomen_id'];
+		}
+		elseif($api_subdomen){
+			$subdomen_id = $api_subdomen;
+		}
+		else{
+			$subdomen_id = 0;
+		}
+
+		if($subdomen_id){
+			array_push($final_query['bool']['must'], ['match' => ['restaurant_city_id' => $subdomen_id]]);
+		}			
 
 		foreach ($simple_query as $type => $arr_filter) {
 			$temp_type_arr = [];
@@ -159,14 +209,16 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
 			}
 			else{
-				array_push($final_query["bool"]['must']["nested"]['query']['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query["bool"]['must'][0]["nested"]['query']['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
 			}
 		}
 
-		//echo '<pre>';
-		//print_r($final_query);
-		//echo '</pre>';
-		//exit;
+		//if($subdomen_id){
+		//	echo '<pre>';
+		//	print_r($final_query);
+		//	echo '</pre>';
+		//	exit;
+		//}
 
 		$final_query = [
 			"function_score" => [

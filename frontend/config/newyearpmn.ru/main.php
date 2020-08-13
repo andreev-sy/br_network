@@ -92,7 +92,7 @@ return [
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
-                ['pattern'=>'/api/map_all','route'=>'api/mapall', 'suffix'=>'/'],
+                ['pattern'=>'/api/map_all/','route'=>'api/mapall', 'suffix'=>'/'],
             ],
         ],
         

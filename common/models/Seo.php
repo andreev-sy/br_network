@@ -10,7 +10,7 @@ class Seo extends BaseObject{
 
 	public $seo;
 
-	public function __construct($type, $page = 1, $count = 0, $item = false){
+	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room'){
 		$seo_obj = Pages::find()
 			->where([
 				'type' => $type,
@@ -37,7 +37,12 @@ class Seo extends BaseObject{
 		if($type == 'item'){
 			foreach ($this->seo as $key => $text) {
 				if(!(strpos($text, '**') === false)){
-					$this->seo[$key] = $this->seoRepalceItem($text, $item);
+					if($item_type == 'room'){
+						$this->seo[$key] = $this->seoRepalceItem($text, $item);
+					}
+					else{
+						$this->seo[$key] = $this->seoRepalceRest($text, $item);
+					}
 				}
 			}
 		}
@@ -81,6 +86,22 @@ class Seo extends BaseObject{
 		$text = str_replace('**room_name**', $item->name, $text);
 		$text = str_replace('**capacity**', $item->capacity, $text);
 		$text = str_replace('**price**', $item->price, $text);
+		$text = str_replace('**rest_name**', $item->restaurant_name, $text);
+		if(!(strpos($text, '**area**') === false)){
+			if($item->restaurant_district == 547 || $item->restaurant_parent_district == 547){
+				$text = str_replace('**area**', 'в Подмосковье', $text);
+			}
+			else{
+				$text = str_replace('**area**', 'в Москве', $text);
+			}
+		}
+
+		return $text;
+	}
+
+	private function seoRepalceRest($text, $item){
+		$text = str_replace('**room_name**', $item->restaurant_name, $text);
+		$text = str_replace('**capacity**', $item->restaurant_max_capacity, $text);
 		$text = str_replace('**rest_name**', $item->restaurant_name, $text);
 		if(!(strpos($text, '**area**') === false)){
 			if($item->restaurant_district == 547 || $item->restaurant_parent_district == 547){

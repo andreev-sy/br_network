@@ -59,7 +59,8 @@ class GorkoApiTest extends Model
 				$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 					'gorko_id' => $restaurant['id'],
 					'dsn' => Yii::$app->db->dsn,
-					'watermark' => $param['watermark']
+					'watermark' => $param['watermark'],
+					'imageHash' => $param['imageHash']
 				]));
 			}
 
@@ -104,7 +105,8 @@ class GorkoApiTest extends Model
 					$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 						'gorko_id' => $restaurant['id'],
 						'dsn' => Yii::$app->db->dsn,
-						'watermark' => $param['watermark']
+						'watermark' => $param['watermark'],
+						'imageHash' => $param['imageHash']
 					]));
 				}
 			}
@@ -147,12 +149,10 @@ class GorkoApiTest extends Model
 
 	public function showOne($params) {
 		foreach ($params as $param) {
-			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?'.$param['params'];
-			$api_per_page = '&per_page=';
-			$api_page = '&page=';
+			$api_url = 'https://api.gorko.ru/api/v2/restaurants/432253?embed=rooms,contacts&fields=address,params,covers,district&is_edit=1';
 			
 			$ch_venues = curl_init();
-			$ch_venues_url = $api_url.$api_per_page.'1'.$api_page.'1';
+			$ch_venues_url = $api_url;
 			
 			curl_setopt($ch_venues, CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1"));
 		    curl_setopt($ch_venues, CURLOPT_URL, $ch_venues_url);
@@ -163,10 +163,10 @@ class GorkoApiTest extends Model
 			curl_close($ch_venues);
 
 			$curl = curl_init();
-		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/437869?embed=rooms,contacts&fields=address,params,covers,district');
+		    curl_setopt($curl, CURLOPT_URL, $ch_venues_url);
 		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		    curl_setopt($curl, CURLOPT_ENCODING, '');
-		    $response = json_decode(curl_exec($curl), true)['restaurant'];
+		    $response = json_decode(curl_exec($curl), true);
 		    curl_close($curl);
 
 		    echo '<pre>';

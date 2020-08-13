@@ -12,7 +12,8 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 	public  $item_id,
 		   	$type,
 		   	$dsn,
-		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png';
+		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png',
+		   	$imageHash = 'svadbanaprirode';
 
 	public function execute($queue) {
 		$connection = new \yii\db\Connection([
@@ -24,9 +25,9 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 		$connection->open();
 		Yii::$app->set('db', $connection);
 
-		$imgModel = Images::find()->where(['item_id' => $this->item_id, 'type' => $this->type])->all($connection);
+		$imgModel = Images::find()->where(['id' => $this->item_id, 'type' => $this->type])->one($connection);
 
-		foreach ($imgModel as $img) {
+		//foreach ($imgModel as $img) {
 			$curl = curl_init();
 			$file = $this->watermark;
 			$mime = mime_content_type($file);
@@ -34,10 +35,10 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 			$name = $info['basename'];
 			$output = curl_file_create($file, $mime, $name);
 			$params = [
-				'mediaId' => $img->gorko_id,
+				'mediaId' => $imgModel->gorko_id,
 				'token'=> '4aD9u94jvXsxpDYzjQz0NFMCpvrFQJ1k',
 				'watermark' => $output,
-				'hash_key' => 'svadbanaprirode'
+				'hash_key' => $this->imageHash
 			];
 			curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/tools/mediaToSatellite');
 		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
@@ -50,11 +51,11 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 		    print_r(json_decode($response));
 		    curl_close($curl);
 
-		    $img->subpath = $response_obj->url;
-		    $img->waterpath = $response_obj->url_watermark;
-		    $img->timestamp = time();
+		    $imgModel->subpath = $response_obj->url;
+		    $imgModel->waterpath = $response_obj->url_watermark;
+		    $imgModel->timestamp = time();
 
-		    $img->save();		    
-		}
+		    $imgModel->save();		    
+		//}
 	}
 }
