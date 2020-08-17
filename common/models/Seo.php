@@ -74,6 +74,8 @@ class Seo extends BaseObject{
 			'ров'
 		];
 		$text = str_replace('**count**', $count, $text);
+		$text = str_replace('**year**', date("Y")+1, $text);
+		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '' , $text);
 		$text = str_replace('**count_rooms**', $count.' зал'.$this->get_num_ending($count, $count_rooms_ending), $text);
 		$text = str_replace('**count_court**', $count.' площадк'.$this->get_num_ending($count, $count_court_ending), $text);
 		$text = str_replace('**count_tent**', $count.' шат'.$this->get_num_ending($count, $count_tent_ending), $text);

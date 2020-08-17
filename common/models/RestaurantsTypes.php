@@ -15,14 +15,14 @@ use Yii;
  * @property string $params
  * @property string $img_alt
  */
-class Subdomen extends \yii\db\ActiveRecord
+class RestaurantsTypes extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'subdomen';
+        return 'restaurants_types';
     }
 
     /**
@@ -31,9 +31,9 @@ class Subdomen extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'alias', 'city_id'], 'required'],
-            [['alias', 'name', 'name_dec'], 'string'],
-            [['id', 'city_id', 'active'], 'integer'],
+            [['id', 'value', 'text'], 'required'],
+            [['text'], 'string'],
+            [['id', 'value'], 'integer']
         ];
     }
 

@@ -70,6 +70,14 @@ class ItemsFilterElastic extends BaseObject{
 		$nested_query = [
 
 		];
+
+		$type_query = [
+
+		];
+
+		$location_query = [
+
+		];
 		
 		foreach ($filter_arr as $key => $value_temp) {
 
@@ -91,6 +99,16 @@ class ItemsFilterElastic extends BaseObject{
 								$nested_query[$filter_query->query_type] = [];
 							}
 						}
+						elseif($filter_query->type){
+							if(!isset($type_query[$filter_query->query_type])){
+								$type_query[$filter_query->query_type] = [];
+							}
+						}
+						elseif($filter_query->location){
+							if(!isset($location_query[$filter_query->query_type])){
+								$location_query[$filter_query->query_type] = [];
+							}
+						}
 						else{
 							if(!isset($simple_query[$filter_query->query_type])){
 								$simple_query[$filter_query->query_type] = [];
@@ -98,9 +116,18 @@ class ItemsFilterElastic extends BaseObject{
 						}
 
 						foreach ($filter_query->query_arr as $filter_value) {
-							$filter_query->nested ? 
-								array_push($nested_query[$filter_query->query_type], $filter_value): 
+							if($filter_query->nested){
+								array_push($nested_query[$filter_query->query_type], $filter_value);
+							}
+							elseif($filter_query->type){
+								array_push($type_query[$filter_query->query_type], $filter_value);
+							}
+							elseif($filter_query->location){
+								array_push($location_query[$filter_query->query_type], $filter_value);
+							}
+							else{
 								array_push($simple_query[$filter_query->query_type], $filter_value);
+							}
 						}
 					}	
 				}
@@ -138,41 +165,11 @@ class ItemsFilterElastic extends BaseObject{
 			}
 		}
 
-		if($main_table == 'rooms'){
-			$final_query = [
-				'bool' => [
-					'must' => [],
-				]
-			];
-		}
-		else{
-			if(count($nested_query)){
-				$final_query = [
-					'bool' => [
-						'must' => [
-							0 => [
-								'nested' => [
-									"path" => "rooms",
-									"query" => [
-										'bool' => [
-											'must' => []
-										]
-									]
-								]
-							]
-						],
-					]
-				];
-			}
-			else{
-				$final_query = [
-					'bool' => [
-						'must' => [],
-					]
-				];
-			}
-			
-		}
+		$final_query = [
+			'bool' => [
+				'must' => [],
+			]
+		];
 
 		if($must_not){
 			$final_query['bool']['must_not'] = ['match' => ['id' => $must_not]];
@@ -209,16 +206,42 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
 			}
 			else{
-				array_push($final_query["bool"]['must'][0]["nested"]['query']['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "rooms","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 		}
 
-		//if($subdomen_id){
-		//	echo '<pre>';
-		//	print_r($final_query);
-		//	echo '</pre>';
-		//	exit;
-		//}
+		foreach ($type_query as $type => $arr_filter) {
+			$temp_type_arr = [];
+			foreach ($arr_filter as $key => $value) {
+				array_push($temp_type_arr, $value);
+			}
+			if($main_table == 'rooms'){
+				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+			}
+			else{
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_types","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+		}
+
+		foreach ($location_query as $type => $arr_filter) {
+			$temp_type_arr = [];
+			foreach ($arr_filter as $key => $value) {
+				array_push($temp_type_arr, $value);
+			}
+			if($main_table == 'rooms'){
+				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+			}
+			else{
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_location","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+		}
+
+		if($subdomen_id){
+			//echo '<pre>';
+			//print_r($type_query);
+			//echo '</pre>';
+			//exit;
+		}
 
 		$final_query = [
 			"function_score" => [

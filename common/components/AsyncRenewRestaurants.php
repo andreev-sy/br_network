@@ -34,6 +34,10 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			$connection->open();
 			Yii::$app->set('db', $connection);
 
+			if(!$response['commission']){
+				return 1;
+			}
+
 		    $model = Restaurants::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
 		    
 		    if(!$model){
@@ -142,22 +146,22 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$imgModel->attributes = $imgAttributes;
 				    	$imgModel->save();
 
-				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-							'item_id' => $imgModel->id,
-							'dsn' => $this->dsn,
-							'type' => 'restaurant',
-							'watermark' => $this->watermark,
-							'imageHash' => $this->imageHash,
-						]));
+				    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+						//	'item_id' => $imgModel->id,
+						//	'dsn' => $this->dsn,
+						//	'type' => 'restaurant',
+						//	'watermark' => $this->watermark,
+						//	'imageHash' => $this->imageHash,
+						//]));
 				    }
 				    elseif(!$imgModel->subpath){
-				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-							'item_id' => $imgModel->id,
-							'dsn' => $this->dsn,
-							'type' => 'restaurant',
-							'watermark' => $this->watermark,
-							'imageHash' => $this->imageHash,
-						]));
+				    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+						//	'item_id' => $imgModel->id,
+						//	'dsn' => $this->dsn,
+						//	'type' => 'restaurant',
+						//	'watermark' => $this->watermark,
+						//	'imageHash' => $this->imageHash,
+						//]));
 				    }
 				}
 				
@@ -228,22 +232,22 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						    	$imgModel->attributes = $imgAttributes;
 					    		$imgModel->save();
 
-					    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-									'item_id' => $imgModel->id,
-									'dsn' => $this->dsn,
-									'type' => 'rooms',
-									'watermark' => $this->watermark,
-									'imageHash' => $this->imageHash,
-								]));
+					    		//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+								//	'item_id' => $imgModel->id,
+								//	'dsn' => $this->dsn,
+								//	'type' => 'rooms',
+								//	'watermark' => $this->watermark,
+								//	'imageHash' => $this->imageHash,
+								//]));
 						    }
 						    elseif(!$imgModel->subpath){
-						    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-									'item_id' => $imgModel->id,
-									'dsn' => $this->dsn,
-									'type' => 'rooms',
-									'watermark' => $this->watermark,
-									'imageHash' => $this->imageHash,
-								]));
+						    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+								//	'item_id' => $imgModel->id,
+								//	'dsn' => $this->dsn,
+								//	'type' => 'rooms',
+								//	'watermark' => $this->watermark,
+								//	'imageHash' => $this->imageHash,
+								//]));
 						    }			    
 						}
 			    	}		    	
