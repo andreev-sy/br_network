@@ -21,6 +21,11 @@ class MapAll extends BaseObject{
 		];
 
 		foreach ($restaurants->items as $key => $restaurant) {
+			foreach ($restaurant->restaurant_images as $key => $image) {
+				$map_preview = $image['subpath'];
+				break;
+			}
+
 			array_push($this->coords['features'], [
 				'type' => "Feature",
 	            'id' => $restaurant->id,
@@ -32,8 +37,9 @@ class MapAll extends BaseObject{
 	              'balloonContent' => $restaurant->restaurant_address,
 	              'organization' => $restaurant->restaurant_name,
 	              'address' => $restaurant->restaurant_address,
-	              //'img' => $restaurant->restaurant_images[0]->subpath,
-	              'clusterCaption' => $restaurant->restaurant_name
+	              'img' => $map_preview,
+	              'clusterCaption' => $restaurant->restaurant_name,
+	              'link' => '/ploshhadki/'.$restaurant->id.'/',
 	            ]
 			]);
 		}		

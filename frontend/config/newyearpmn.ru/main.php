@@ -49,7 +49,7 @@ return [
             'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
             'username' => 'pmnetwork',
             'password' => 'P2t8wdBQbczLNnVT',
-            'charset' => 'utf8',
+            'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',
@@ -86,9 +86,9 @@ return [
             'showScriptName' => false,
             'rules' => [
                 '/' => 'site/index',
-                ['pattern'=>'/catalog/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
-                ['pattern'=>'/catalog/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
-                ['pattern'=>'/catalog/','route'=>'listing/index', 'suffix'=>'/'],
+                ['pattern'=>'/ploshhadki/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
+                ['pattern'=>'/ploshhadki/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
+                ['pattern'=>'/ploshhadki/','route'=>'listing/index', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
