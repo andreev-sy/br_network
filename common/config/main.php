@@ -19,6 +19,7 @@ return [
                     'options' => [
                         'auto_reload' => true,
                         'debug' => true,
+                        //'cache' => false,
                     ],
                     'globals' => [
                         'html' => ['class' => '\yii\helpers\Html'],
@@ -40,8 +41,8 @@ return [
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
                 'host' => 'smtp.yandex.ru',
-                'username' => 'post@smilerooms.ru',
-                'password' => '2017Smile',
+                'username' => 'svadbanaprirode@yandex.ru',
+                'password' => 'vitywhbzxzodifdf',
                 'port' => '465',
                 'encryption' => 'ssl',
             ],

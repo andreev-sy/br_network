@@ -32,7 +32,7 @@ class WidgetMain extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['slice_id', 'title', 'subtitle', 'text', 'link_text'], 'required'],
+            [['slice_id', 'title', 'link_text'], 'required'],
             [['slice_id'], 'integer'],
             [['title', 'subtitle', 'text', 'link_text', 'img_alt'], 'string'],
         ];

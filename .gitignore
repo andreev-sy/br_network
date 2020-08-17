@@ -73,3 +73,6 @@ robots.txt
 
 # visual studio code project files
 .vscode
+
+elasticsearch-6.8.9.deb
+elasticsearch-6.8.9.deb.sha512

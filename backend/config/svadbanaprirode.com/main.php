@@ -40,9 +40,9 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_svadbanaprirode',
-            'username' => 'root',
-            'password' => 'LP_db_',
-            'charset' => 'utf8',
+            'username' => 'pmnetwork',
+            'password' => 'P2t8wdBQbczLNnVT',
+            'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',

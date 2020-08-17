@@ -60,15 +60,21 @@ class GorkoApi extends Model
 
 			$iter = 0;
 
+			$imgFlag = true;
+
 			foreach ($channels as $channel) {
-				$venues = json_decode(curl_multi_getcontent($channel), true);	
+				$venues = json_decode(curl_multi_getcontent($channel), true);
 				foreach ($venues['restaurants'] as $key => $restaurant) {
 					$ids[$restaurant['id']] = null;
 					$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 						'gorko_id' => $restaurant['id'],
 						'dsn' => Yii::$app->db->dsn,
+						'imageLoad' => $imgFlag,
 					]));
+					$imgFlag = false;
+					break;
 				}
+				break;
 			}
 
 			curl_multi_close($mh);

@@ -68,4 +68,8 @@ class Declension {
         }
         return $ending;
     }
+
+    public static function csrfToken(){
+    	return Yii::$app->request->getCsrfToken();
+    }
 }

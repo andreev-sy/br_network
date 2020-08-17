@@ -18,6 +18,19 @@ return [
         ],
     ],
     'components' => [
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            //'viewPath' => '@common/mail',
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.yandex.ru',
+                'username' => 'post@smilerooms.ru',
+                'password' => 'H[ZWkBS++8.>1',
+                'port' => '465',
+                'encryption' => 'ssl',
+            ],
+        ],
         'assetManager' => [
             'class' => 'yii\web\AssetManager',
             'forceCopy' => true,          
@@ -35,9 +48,9 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_svadbanaprirode',
-            'username' => 'root',
-            'password' => 'LP_db_',
-            'charset' => 'utf8',
+            'username' => 'pmnetwork',
+            'password' => 'P2t8wdBQbczLNnVT',
+            'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',
@@ -79,11 +92,15 @@ return [
                 ['pattern'=>'/catalog/','route'=>'listing/index', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
-                ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/form','route'=>'form/send', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/form/','route'=>'form/send', 'suffix'=>'/'],
                 ['pattern'=>'/test/index','route'=>'test/index', 'suffix'=>'/'],
                 ['pattern'=>'/test/test','route'=>'test/test', 'suffix'=>'/'],
                 ['pattern'=>'/test/renewelastic','route'=>'test/renewelastic', 'suffix'=>'/'],
                 ['pattern'=>'/test/imgload/','route'=>'test/imgload', 'suffix'=>'/'],
+                ['pattern'=>'/sitemap/','route'=>'sitemap/index', 'suffix'=>'/'],
+                ['pattern'=>'/privacy/','route'=>'static/privacy', 'suffix'=>'/'],
+                ['pattern'=>'/robots/','route'=>'static/robots', 'suffix'=>'/'],
             ],
         ],
         
