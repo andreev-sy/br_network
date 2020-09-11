@@ -5,6 +5,7 @@ namespace common\models;
 use yii\base\BaseObject;
 use Yii;
 use common\models\Pages;
+use common\models\SubdomenPages;
 
 class Seo extends BaseObject{
 
@@ -17,21 +18,20 @@ class Seo extends BaseObject{
 			])
 			->one();
 
-		if($page == 1){
-			$this->seo['title'] 		= $seo_obj->title;
-			$this->seo['description'] 	= $seo_obj->description;
-			$this->seo['keywords'] 		= $seo_obj->keywords;
-			$this->seo['h1'] 			= $seo_obj->h1;
-			$this->seo['text_top']		= $seo_obj->text_top;
-			$this->seo['text_bottom']	= $seo_obj->text_bottom;
+		if(isset(Yii::$app->params['subdomen_baseid'])){
+			$seo_subdomen_obj = SubdomenPages::find()
+				->where([
+					'page_id' 		=> $seo_obj->id,
+					'subdomen_id'   => Yii::$app->params['subdomen_baseid'],
+				])
+				->one();
+		}	
+
+		if(isset($seo_subdomen_obj) && $seo_subdomen_obj){
+			$this->setSeo($seo_subdomen_obj, $page);
 		}
 		else{
-			$this->seo['title'] 		= $seo_obj->title_pag;
-			$this->seo['description'] 	= $seo_obj->description_pag;
-			$this->seo['keywords'] 		= $seo_obj->keywords_pag;
-			$this->seo['h1'] 			= $seo_obj->h1_pag;
-			$this->seo['text_top']		= '';
-			$this->seo['text_bottom']	= '';
+			$this->setSeo($seo_obj, $page);
 		}
 
 		if($type == 'item'){
@@ -57,6 +57,27 @@ class Seo extends BaseObject{
 		$this->seo['img_alt'] 		= $seo_obj->img_alt;
 	}
 
+	private function setSeo($seoObj, $page){
+		if($page == 1){
+			$this->seo['title'] 		= $seoObj->title;
+			$this->seo['description'] 	= $seoObj->description;
+			$this->seo['keywords'] 		= $seoObj->keywords;
+			$this->seo['h1'] 			= $seoObj->h1;
+			$this->seo['h1_pag'] 		= $seoObj->h1_pag;
+			$this->seo['text_top']		= $seoObj->text_top;
+			$this->seo['text_bottom']	= $seoObj->text_bottom;
+		}
+		else{
+			$this->seo['title'] 		= $seoObj->title_pag;
+			$this->seo['description'] 	= $seoObj->description_pag;
+			$this->seo['keywords'] 		= $seoObj->keywords_pag;
+			$this->seo['h1'] 			= $seoObj->h1_pag;
+			$this->seo['h1_pag'] 		= $seoObj->h1_pag;
+			$this->seo['text_top']		= '';
+			$this->seo['text_bottom']	= '';
+		}
+	}
+
 	private function seoRepalce($text, $count = 0, $page){
 		$count_rooms_ending = [
 			'',
@@ -75,7 +96,9 @@ class Seo extends BaseObject{
 		];
 		$text = str_replace('**count**', $count, $text);
 		$text = str_replace('**year**', date("Y")+1, $text);
+		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '' , $text);
 		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '' , $text);
+		$text = str_replace('**city_rod**', isset(Yii::$app->params['subdomen_rod']) ? Yii::$app->params['subdomen_rod'] : '' , $text);
 		$text = str_replace('**count_rooms**', $count.' зал'.$this->get_num_ending($count, $count_rooms_ending), $text);
 		$text = str_replace('**count_court**', $count.' площадк'.$this->get_num_ending($count, $count_court_ending), $text);
 		$text = str_replace('**count_tent**', $count.' шат'.$this->get_num_ending($count, $count_tent_ending), $text);
@@ -85,6 +108,10 @@ class Seo extends BaseObject{
 	}
 
 	private function seoRepalceItem($text, $item){
+		$text = str_replace('**year**', date("Y")+1, $text);
+		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '' , $text);
+		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '' , $text);
+		$text = str_replace('**city_rod**', isset(Yii::$app->params['subdomen_rod']) ? Yii::$app->params['subdomen_rod'] : '' , $text);
 		$text = str_replace('**room_name**', $item->name, $text);
 		$text = str_replace('**capacity**', $item->capacity, $text);
 		$text = str_replace('**price**', $item->price, $text);
@@ -102,9 +129,16 @@ class Seo extends BaseObject{
 	}
 
 	private function seoRepalceRest($text, $item){
+		$text = str_replace('**year**', date("Y")+1, $text);
+		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '' , $text);
+		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '' , $text);
+		$text = str_replace('**city_rod**', isset(Yii::$app->params['subdomen_rod']) ? Yii::$app->params['subdomen_rod'] : '' , $text);
 		$text = str_replace('**room_name**', $item->restaurant_name, $text);
 		$text = str_replace('**capacity**', $item->restaurant_max_capacity, $text);
+		$text = str_replace('**min_capacity**', $item->restaurant_min_capacity, $text);
+		$text = str_replace('**max_capacity**', $item->restaurant_max_capacity, $text);
 		$text = str_replace('**rest_name**', $item->restaurant_name, $text);
+		$text = str_replace('**price**', $item->restaurant_price, $text);
 		if(!(strpos($text, '**area**') === false)){
 			if($item->restaurant_district == 547 || $item->restaurant_parent_district == 547){
 				$text = str_replace('**area**', 'в Подмосковье', $text);

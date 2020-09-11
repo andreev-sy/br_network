@@ -33,8 +33,8 @@ class Restaurants extends \yii\db\ActiveRecord
     {
         return [
             [['gorko_id', 'name', 'address', 'city_id'], 'required'],
-            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic'], 'integer'],
-            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'parking', 'extra_services', 'payment', 'special', 'phone', 'location', 'type'], 'string'],
+            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking'], 'integer'],
+            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type'], 'string'],
         ];
     }
 

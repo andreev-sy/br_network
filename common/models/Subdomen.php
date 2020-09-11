@@ -32,7 +32,7 @@ class Subdomen extends \yii\db\ActiveRecord
     {
         return [
             [['id', 'alias', 'city_id'], 'required'],
-            [['alias', 'name', 'name_dec'], 'string'],
+            [['alias', 'name', 'name_dec', 'name_rod'], 'string'],
             [['id', 'city_id', 'active'], 'integer'],
         ];
     }
