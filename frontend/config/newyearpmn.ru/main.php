@@ -86,13 +86,16 @@ return [
             'showScriptName' => false,
             'rules' => [
                 '/' => 'site/index',
+                ['pattern'=>'robots','route'=>'site/robots', 'suffix'=>'.txt'],
                 ['pattern'=>'/ploshhadki/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
                 ['pattern'=>'/ploshhadki/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
                 ['pattern'=>'/ploshhadki/','route'=>'listing/index', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
-                ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/form','route'=>'form/send', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/form/','route'=>'form/send', 'suffix'=>'/'],
                 ['pattern'=>'/api/map_all/','route'=>'api/mapall', 'suffix'=>'/'],
+                ['pattern'=>'/privacy/','route'=>'static/privacy', 'suffix'=>'/'],
             ],
         ],
         
