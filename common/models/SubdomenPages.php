@@ -6,7 +6,7 @@ use common\models\siteobject\BaseSiteObject;
 use Yii;
 
 /**
- * This is the model class for table "pages".
+ * This is the model class for table "subdomen_pages".
  *
  * @property int $id
  * @property string $name
@@ -18,7 +18,7 @@ use Yii;
  * @property string $text_bottom
  * @property string $img_alt
  */
-class Pages extends BaseSiteObject
+class SubdomenPages extends BaseSiteObject
 {
 
     public $breadcrumbs;
@@ -27,7 +27,7 @@ class Pages extends BaseSiteObject
      */
     public static function tableName()
     {
-        return 'pages';
+        return 'subdomen_pages';
     }
 
     /**
@@ -36,8 +36,9 @@ class Pages extends BaseSiteObject
     public function rules()
     {
         return [
-            [['name', 'type'], 'required'],
-            [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt', 'title_pag', 'description_pag', 'keywords_pag', 'h1_pag', 'type'], 'string'],
+            // [['title', 'description', 'h1'], 'required'],
+            [['page_id', 'subdomen_id'], 'integer'],
+            [['title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt', 'title_pag', 'description_pag', 'keywords_pag', 'h1_pag'], 'string'],
         ];
     }
 
@@ -48,7 +49,6 @@ class Pages extends BaseSiteObject
     {
         return [
             'id' => 'ID',
-            'name' => 'Название',
             'title' => 'Title',
             'title_pag' => 'Title для пагинации',
             'description' => 'Description',
@@ -60,5 +60,13 @@ class Pages extends BaseSiteObject
             'text_top' => 'Верхний текст',
             'text_bottom' => 'Нижний текст',
         ];
+    }
+
+    public function getSubdomen(){
+        return $this->hasOne(Subdomen::className(), ['id' => 'subdomen_id']);
+    }
+
+    public function getPage(){
+        return $this->hasOne(Pages::className(), ['id' => 'page_id']);
     }
 }

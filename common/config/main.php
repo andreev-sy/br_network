@@ -1,8 +1,20 @@
 <?php
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+    ],
+    'language' => 'ru-RU',
+    'controllerMap' => [
+        'blog-post-blocks' => 'backend\controllers\api\BlogPostBlockController',
+        'blog-blocks' => 'backend\controllers\api\BlogBlockController',
+        'blog-block' => 'backend\controllers\BlogBlockController',
+        'blog-post' => 'backend\controllers\BlogPostController',
+        'blog-post-block' => 'backend\controllers\BlogPostBlockController',
+        'blog-tag' => 'backend\controllers\BlogTagController',
+        'media' => 'backend\controllers\MediaController',
+        'site-object-seo' => 'backend\controllers\SiteObjectSeoController',
     ],
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
@@ -29,7 +41,7 @@ return [
                         'YamapFactory' => 'frontend\components\YamapFactory',
                     ],
                     'uses' => ['yii\bootstrap'],
-                    'extensions' =>['Twig_Extension_StringLoader', new \Twig_Extension_StringLoader(),new \Twig_Extension_Debug,]
+                    'extensions' => ['Twig_Extension_StringLoader', new \Twig_Extension_StringLoader(), new \Twig_Extension_Debug,]
                 ],
                 // ...
             ],
@@ -50,5 +62,19 @@ return [
                 'charset' => 'UTF-8',
             ],
         ],
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class'          => 'yii\i18n\PhpMessageSource',
+                    'basePath'       => '@backend/translations',
+                    'sourceLanguage' => 'en-US',
+                    'fileMap'        => [
+                        'cruds' => 'cruds.php',
+                        'models' => 'models.php',
+                    ],
+                ],
+            ],
+        ],
     ],
+    'params' => \common\utility\SiteParamsHelper::getGlobalSiteParams()
 ];
