@@ -34,7 +34,8 @@
         "trntv/yii2-aceeditor": "^2.1",
         "2amigos/yii2-tinymce-widget": "^1.1",
         "kartik-v/yii2-widget-datetimepicker": "^1.4",
-        "kartik-v/yii2-widget-datepicker": "^1.4"
+        "kartik-v/yii2-widget-datepicker": "^1.4",
+        "phpoffice/phpspreadsheet": "^1.14"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

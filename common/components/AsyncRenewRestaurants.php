@@ -94,7 +94,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 			$attributes['latitude'] = strval($response['latitude']);
 			$attributes['longitude'] = strval($response['longitude']);
-			$attributes['district'] = $response['district']['id'];
+			$attributes['district'] = $response['district']['id'] ? $response['district']['id'] : 0;
 			$attributes['parent_district'] = $response['district']['parent_id'] ? $response['district']['parent_id'] : 0;
 			$attributes['city_id'] = $response['city']['id'];
 			$attributes['commission'] = $response['commission'] ? $response['commission'] : 0;
@@ -126,7 +126,12 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			}
 
 			$model->attributes = $attributes;
-		    $model->save();
+		    $rest_save = $model->save();
+
+		    //$log = file_get_contents('/var/www/pmnetwork/pmnetwork/log/manual.log');
+		    //$log .= json_encode($attributes);
+		    //$log .= json_encode($model->getErrors());
+		    //file_put_contents('/var/www/pmnetwork/pmnetwork/log/manual.log', $log);
 
 		    $restModel = Restaurants::find()->where(['gorko_id' => $response['id']])->one($connection);
 
@@ -146,22 +151,22 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$imgModel->attributes = $imgAttributes;
 				    	$imgModel->save();
 
-				    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-						//	'item_id' => $imgModel->id,
-						//	'dsn' => $this->dsn,
-						//	'type' => 'restaurant',
-						//	'watermark' => $this->watermark,
-						//	'imageHash' => $this->imageHash,
-						//]));
+				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+							'item_id' => $imgModel->id,
+							'dsn' => $this->dsn,
+							'type' => 'restaurant',
+							'watermark' => $this->watermark,
+							'imageHash' => $this->imageHash,
+						]));
 				    }
 				    elseif(!$imgModel->subpath){
-				    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-						//	'item_id' => $imgModel->id,
-						//	'dsn' => $this->dsn,
-						//	'type' => 'restaurant',
-						//	'watermark' => $this->watermark,
-						//	'imageHash' => $this->imageHash,
-						//]));
+				    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+							'item_id' => $imgModel->id,
+							'dsn' => $this->dsn,
+							'type' => 'restaurant',
+							'watermark' => $this->watermark,
+							'imageHash' => $this->imageHash,
+						]));
 				    }
 				}
 				
@@ -232,27 +237,29 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						    	$imgModel->attributes = $imgAttributes;
 					    		$imgModel->save();
 
-					    		//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-								//	'item_id' => $imgModel->id,
-								//	'dsn' => $this->dsn,
-								//	'type' => 'rooms',
-								//	'watermark' => $this->watermark,
-								//	'imageHash' => $this->imageHash,
-								//]));
+					    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+									'item_id' => $imgModel->id,
+									'dsn' => $this->dsn,
+									'type' => 'rooms',
+									'watermark' => $this->watermark,
+									'imageHash' => $this->imageHash,
+								]));
 						    }
 						    elseif(!$imgModel->subpath){
-						    	//$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-								//	'item_id' => $imgModel->id,
-								//	'dsn' => $this->dsn,
-								//	'type' => 'rooms',
-								//	'watermark' => $this->watermark,
-								//	'imageHash' => $this->imageHash,
-								//]));
+						    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
+									'item_id' => $imgModel->id,
+									'dsn' => $this->dsn,
+									'type' => 'rooms',
+									'watermark' => $this->watermark,
+									'imageHash' => $this->imageHash,
+								]));
 						    }			    
 						}
 			    	}		    	
 				}
 			}	    
 	  	}
+
+	  	return $restModel;
 	}
 }
