@@ -81,6 +81,8 @@ return [
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
+                ['pattern'=>'/blog/','route'=>'blog/index', 'suffix'=>'/'],
+                ['pattern'=>'/blog/<id:\d+>','route'=>'blog/item', 'suffix'=>'/'],
             ],
         ],
         
