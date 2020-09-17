@@ -25,6 +25,9 @@ class Seo extends BaseObject
 				'type' => $type,
 			])
 			->one();
+		if(empty($this->seo_obj)) {
+			throw new \yii\web\NotFoundHttpException();
+		}	
 		if (isset(Yii::$app->params['subdomen_baseid'])) {
 			$this->seo_subdomen_obj = SubdomenPages::find()
 				->where([
@@ -201,7 +204,7 @@ class Seo extends BaseObject
 	public function withMedia($mediaTargetTypes)
 	{
 		foreach ($mediaTargetTypes as $mediaTargetType) {
-			if ($subdomenMedia = $this->seo_subdomen_obj->getFilesData($mediaTargetType)) {
+			if ($this->seo_subdomen_obj && $subdomenMedia = $this->seo_subdomen_obj->getFilesData($mediaTargetType)) {
 				$this->seo['media'][$mediaTargetType] = $subdomenMedia;
 			} else {
 				//если нет у поддомена берем общую

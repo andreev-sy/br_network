@@ -4,7 +4,6 @@
 
 namespace common\models\blog;
 
-use app\modules\pmnbd\models\MediaEnum;
 use common\models\siteobject\BaseMediaEnum;
 use Mustache_Engine;
 use Yii;

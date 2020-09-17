@@ -93,7 +93,6 @@ $actionColumnTemplateString = '<div class="action-buttons">' . $actionColumnTemp
 				'firstPageLabel' => Yii::t('cruds', 'First'),
 				'lastPageLabel' => Yii::t('cruds', 'Last'),
 			],
-			'filterModel' => $searchModel,
 			'tableOptions' => ['class' => 'table table-striped table-bordered table-hover'],
 			'headerRowOptions' => ['class' => 'x'],
 			'columns' => [

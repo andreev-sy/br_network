@@ -200,13 +200,16 @@ class BlogPost extends BaseSiteObject
             $this->published_at = date('Y-m-d H:i:s');
         }
 
-        BlogPostTag::deleteAll(['blog_post_id' => $this->id]);
-        if ($tags = $_POST['blogPostTags']) {
-            $columns = ['blog_post_id', 'blog_tag_id', 'sort'];
-            $rows = array_map(function ($idx) use ($tags) {
-                return [$this->id, $tags[$idx], $idx + 1];
-            }, array_keys($tags));
-            Yii::$app->db->createCommand()->batchInsert(BlogPostTag::tableName(), $columns, $rows)->execute();
+        if (\Yii::$app->request->isPost) {
+            BlogPostTag::deleteAll(['blog_post_id' => $this->id]);
+            if (isset($_POST['blogPostTags'])) {
+                $tags = $_POST['blogPostTags'];
+                $columns = ['blog_post_id', 'blog_tag_id', 'sort'];
+                $rows = array_map(function ($idx) use ($tags) {
+                    return [$this->id, $tags[$idx], $idx + 1];
+                }, array_keys($tags));
+                Yii::$app->db->createCommand()->batchInsert(BlogPostTag::tableName(), $columns, $rows)->execute();
+            }
         }
 
         return true;
