@@ -94,6 +94,7 @@ return [
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/send', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form/','route'=>'form/send', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/sendroom/','route'=>'form/room', 'suffix'=>'/'],
                 ['pattern'=>'/test/index','route'=>'test/index', 'suffix'=>'/'],
                 ['pattern'=>'/test/test','route'=>'test/test', 'suffix'=>'/'],
                 ['pattern'=>'/test/renewelastic','route'=>'test/renewelastic', 'suffix'=>'/'],

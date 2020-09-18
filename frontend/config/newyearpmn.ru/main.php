@@ -96,6 +96,7 @@ return [
                 ['pattern'=>'/ajax/form/','route'=>'form/send', 'suffix'=>'/'],
                 ['pattern'=>'/api/map_all/','route'=>'api/mapall', 'suffix'=>'/'],
                 ['pattern'=>'/privacy/','route'=>'static/privacy', 'suffix'=>'/'],
+                ['pattern'=>'/ajax/sendroom/','route'=>'form/room', 'suffix'=>'/'],
             ],
         ],
         

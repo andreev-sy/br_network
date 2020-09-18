@@ -12,12 +12,13 @@ class MapAll extends BaseObject{
 
 	public $coords;
 
-	public function __construct($elastic_model, $subdomain_id) {
+	public function __construct($elastic_model, $subdomain_id, $filter = []) {
 
-		$restaurants = new ItemsFilterElastic([], 1000, 1, false, 'restaurants', $elastic_model, false, false, $subdomain_id);
+		$restaurants = new ItemsFilterElastic($filter, 9000, 1, false, 'restaurants', $elastic_model, false, false, $subdomain_id);
 		$this->coords = [
 			'type' => 'FeatureCollection',
-			'features' => []
+			'features' => [],
+			'filter' => $filter
 		];
 
 		foreach ($restaurants->items as $key => $restaurant) {
