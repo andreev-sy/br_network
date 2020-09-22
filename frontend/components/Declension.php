@@ -69,6 +69,30 @@ class Declension {
         return $ending;
     }
 
+	public static function get($count, $part, $withCount = false)
+	{
+		$parts = [
+			'шат' => ['ер','ра','ров'],
+			'зал' => ['','а','ов'],
+			'площад' => ['ка','ки','ок'],
+			'отел' => ['ь','я','ей'],
+			'лофт' => ['','а','ов'],
+			'баз' => ['а','ы',''],
+			'саун' => ['а','ы',''],
+			'бан' => ['я','и','ь'],
+			'бар' => ['','а','ов'],
+			'веранд' => ['а','ы',''],
+			'террас' => ['а','ы',''],
+			'коттедж' => ['','а','ей'],
+			'ресторан' => ['','а','ов'],
+			'мест' => ['о', 'а', '']
+		];
+		if(empty($parts[$part])) {
+			return ($withCount ? $count . ' ' : '') . 'мест' . self::get_num_ending($count, $parts['мест']);
+		}
+		return ($withCount ? $count . ' ' : '') . $part . self::get_num_ending($count, $parts[$part]);
+	}
+
     public static function csrfToken(){
     	return Yii::$app->request->getCsrfToken();
     }

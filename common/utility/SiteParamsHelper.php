@@ -25,6 +25,9 @@ class SiteParamsHelper
 
     public static function getGlobalSiteParams()
     {
+        if(empty($_SERVER['HTTP_HOST'])) {
+            return [];
+        }
         $hostParts = explode('.', $_SERVER['HTTP_HOST']);
         $hostParts = array_reverse($hostParts);
         $siteAddress = $hostParts[1] . '.' . $hostParts[0];

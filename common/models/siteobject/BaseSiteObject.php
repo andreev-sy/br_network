@@ -27,7 +27,7 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
     public function __construct()
     {
         //в каждом модуле своя реализация MediaEnum
-        $this->mediaEnumClass = \Yii::$app->params['mediaEnumClass'] ?: BaseSiteObject::class;
+        $this->mediaEnumClass = \Yii::$app->params['mediaEnumClass'] ?: BaseMediaEnum::class;
     }
 
     /**
@@ -92,12 +92,13 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
 
     public function beforeDelete()
     {
-        
+        if (!parent::beforeDelete()) {
+            return false;
+        }
         if ($this->siteObject) {
             return $this->siteObject->delete();
         }
-
-        return parent::beforeDelete();
+        return true;
     }
 
     private function createMediaTargets()
