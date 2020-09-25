@@ -11,6 +11,7 @@ use Yii;
  *
  * @property integer $id
  * @property integer $site_object_id
+ * @property integer $active
  * @property string $heading
  * @property string $title
  * @property string $description
@@ -44,7 +45,7 @@ class SiteObjectSeo extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['site_object_id'], 'integer'],
+            [['site_object_id', 'active'], 'integer'],
             [['title', 'description', 'text1', 'text2', 'text3', 'pagination_title', 'pagination_description'], 'string'],
             [['heading', 'keywords', 'pagination_heading', 'pagination_keywords'], 'string', 'max' => 255],
             [['site_object_id'], 'exist', 'skipOnError' => true, 'targetClass' => \common\models\siteobject\SiteObject::className(), 'targetAttribute' => ['site_object_id' => 'id']]
@@ -59,6 +60,7 @@ class SiteObjectSeo extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('models', 'ID'),
             'site_object_id' => Yii::t('models', 'Site Object ID'),
+            'active' => 'Активен',
             'heading' => Yii::t('models', 'Heading'),
             'title' => Yii::t('models', 'Title'),
             'description' => Yii::t('models', 'Description'),

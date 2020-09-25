@@ -6,6 +6,7 @@ use yii\bootstrap\Html;
 use yii\helpers\Url;
 
 $seoObject = $model->seoObject;
+$textOnly = isset($textOnly) && $textOnly ? true : false;
 if(!$seoObject) {
     echo '<div class="callout callout-warning mt-20">Сначала нужно сохранить объект!</div>'; return;
 }
@@ -37,6 +38,7 @@ if(!$seoObject) {
 
     <div class="">
         <p>
+            <?php if(!$textOnly) : ?>
             <!-- attribute heading -->
             <?php echo $form->field($seoObject, 'heading')->textInput(['maxlength' => true]) ?>
 
@@ -48,13 +50,16 @@ if(!$seoObject) {
 
             <!-- attribute keywords -->
             <?php echo $form->field($seoObject, 'keywords')->textInput(['maxlength' => true]) ?>
-
+            <?php endif; ?>    
             <!-- attribute text1 -->
             <?php echo $form->field($seoObject, 'text1')->widget(HtmlEditor::class) ?>
 
             <!-- attribute text2 -->
             <?php echo $form->field($seoObject, 'text2')->widget(HtmlEditor::class) ?>
 
+            <?php echo $form->field($seoObject, 'text3')->widget(HtmlEditor::class) ?>
+
+            <?php if(!$textOnly) : ?>
             <?php echo $form->field($seoObject, 'pagination_heading')->textInput(['maxlength' => true]) ?>
 
             <?php echo $form->field($seoObject, 'pagination_title')->textInput() ?>
@@ -62,6 +67,10 @@ if(!$seoObject) {
             <?php echo $form->field($seoObject, 'pagination_description')->textarea(['rows' => 6]) ?>
 
             <?php echo $form->field($seoObject, 'pagination_keywords')->textInput(['maxlength' => true]) ?>
+
+            <?= isset($seoObject->active) ? $form->field($seoObject, 'active')->checkbox() : '' ?>
+            <?php endif; ?>    
+
 
             <?= yii\helpers\Html::hiddenInput('back',Url::current()) ?>
         </p>
