@@ -10,6 +10,7 @@ use common\models\blog\BlogPostBlock;
 use common\models\blog\BlogPostBlockSearch;
 use common\utility\SortableTrait;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 
@@ -29,7 +30,20 @@ class BlogPostBlockController extends \yii\rest\ActiveController
 		$actions['index']['dataFilter'] = [
             'class' => 'yii\data\ActiveDataFilter',
             'searchModel' => BlogPostBlockSearch::class
-        ];
+		];
+		$actions['index']['prepareDataProvider'] = function ($action, $filter) {
+			$model = new $this->modelClass;
+			$query = $model::find();
+			if (!empty($filter)) {
+				$query->andWhere($filter);
+			}
+			$dataProvider = new ActiveDataProvider([
+				'query' => $query,
+				'pagination' => false,
+
+			]);
+			return $dataProvider;
+		};
 		return $actions;
 	}
 
