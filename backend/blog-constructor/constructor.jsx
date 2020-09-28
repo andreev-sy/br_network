@@ -81,7 +81,7 @@ const PlainTextInput = ({ initialValue, onBlur, onInput, onInputReady }) => {
                 }}
                 inline={true}
                 onEditorChange={onInput}
-                onInit={() => onInputReady(true)}
+                onInit={() => setLoaded(true)}
             />
         </div>
     );
@@ -1130,7 +1130,7 @@ const App = ({ pageId, frontendDomen }) => {
     );
 };
 
-$('document').ready(() => {
+$(() => {
     const domContainer = document.getElementById('react-constructor');
     const pageId = $('[data-page-id]') && $('[data-page-id]').data('page-id');
     const frontendDomen =
