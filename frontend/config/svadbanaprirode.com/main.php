@@ -3,7 +3,8 @@ $params = array_merge(
     require __DIR__ . '/../../../common/config/params.php',
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
-    require __DIR__ . '/../params-local.php'
+    require __DIR__ . '/../params-local.php',
+    \common\utility\SiteParamsHelper::getParamsForModule('svadbanaprirode')
 );
 Yii::setAlias('@module_web', '@frontend/modules/svadbanaprirode/web');
 
@@ -102,6 +103,7 @@ return [
                 ['pattern'=>'/sitemap/','route'=>'sitemap/index', 'suffix'=>'/'],
                 ['pattern'=>'/privacy/','route'=>'static/privacy', 'suffix'=>'/'],
                 ['pattern'=>'/robots/','route'=>'static/robots', 'suffix'=>'/'],
+                ['pattern'=>'/api/map_all','route'=>'api/mapall', 'suffix'=>'/'],
             ],
         ],
         

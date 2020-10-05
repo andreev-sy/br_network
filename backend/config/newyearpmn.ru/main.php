@@ -3,7 +3,8 @@ $params = array_merge(
     require __DIR__ . '/../../../common/config/params.php',
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
-    require __DIR__ . '/../params-local.php'
+    require __DIR__ . '/../params-local.php',
+    \common\utility\SiteParamsHelper::getParamsForModule('newyearpmn')
 );
 Yii::setAlias('@module_web', '@backend/modules/newyearpmn/web');
 
@@ -68,6 +69,20 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                ['pattern' => '/update', 'route' => 'update/update'],
+                'media/<id:\d+>/resort/<sort:\d+>' => 'media/resort',
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'blog-blocks',
+                    'except' => ['delete', 'create', 'update'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'blog-post-blocks',
+                    'extraPatterns' => [
+                        'POST sort' => 'sort',
+                    ]
+                ],
                 ['pattern'=>'/update','route'=>'update/update'],
             ],
         ],

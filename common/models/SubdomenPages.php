@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\models\siteobject\BaseSiteObject;
 use Yii;
 
 /**
@@ -17,7 +18,7 @@ use Yii;
  * @property string $text_bottom
  * @property string $img_alt
  */
-class SubdomenPages extends \yii\db\ActiveRecord
+class SubdomenPages extends BaseSiteObject
 {
 
     public $breadcrumbs;
@@ -35,7 +36,7 @@ class SubdomenPages extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'description', 'h1'], 'required'],
+            // [['title', 'description', 'h1'], 'required'],
             [['page_id', 'subdomen_id'], 'integer'],
             [['title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'img_alt', 'title_pag', 'description_pag', 'keywords_pag', 'h1_pag'], 'string'],
         ];
