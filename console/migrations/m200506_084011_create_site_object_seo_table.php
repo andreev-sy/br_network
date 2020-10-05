@@ -18,6 +18,7 @@ class m200506_084011_create_site_object_seo_table extends Migration
         $this->createTable('{{%site_object_seo}}', [
             'id' => $this->primaryKey(),
             'site_object_id' => $this->integer(),
+            'active' => $this->tinyInteger()->defaultValue(0),
             'heading' => $this->string(),
             'title' => $this->text(),
             'description' => $this->text(),

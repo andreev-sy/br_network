@@ -27,7 +27,7 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
     public function __construct()
     {
         //в каждом модуле своя реализация MediaEnum
-        $this->mediaEnumClass = \Yii::$app->params['mediaEnumClass'] ?: BaseMediaEnum::class;
+        $this->mediaEnumClass = \Yii::$app->params['mediaEnumClass'] ?? BaseMediaEnum::class;
     }
 
     /**
@@ -55,7 +55,7 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
     }
 
     public static function createSiteObjects() {
-        foreach (self::find()->all() as $obj) {
+        foreach (self::findWithRelations()->all() as $obj) {
             $obj->createSiteObject();
         }
     }
@@ -92,12 +92,13 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
 
     public function beforeDelete()
     {
-        
+        if (!parent::beforeDelete()) {
+            return false;
+        }
         if ($this->siteObject) {
             return $this->siteObject->delete();
         }
-
-        return parent::beforeDelete();
+        return true;
     }
 
     private function createMediaTargets()
@@ -166,5 +167,18 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
             ->with('mediaTargets')
             ->with('mediaTargets.siteObjectMedia')
             ->with('mediaTargets.siteObjectMedia.media');
+    }
+
+    public static function findWithSeo()
+    {
+        return static::find()->with('seoObject');
+    }
+
+    public static function findWithRelations() {
+        return static::find()
+            ->with('mediaTargets')
+            ->with('mediaTargets.siteObjectMedia')
+            ->with('mediaTargets.siteObjectMedia.media')
+            ->with('seoObject');
     }
 }
