@@ -2,15 +2,16 @@
 
 use backend\widgets\MediaUpload;
 use common\helpers\enum\MediaEnum;
+use common\models\siteobject\BaseMediaEnum;
 use common\models\siteobject\Media;
 use common\models\siteobject\SiteObjectMediaTarget;
 
-
+$mediaEnumclass = \Yii::$app->params['mediaEnumClass'] ?? BaseMediaEnum::class;
 /** @var SiteObjectMediaTarget */
 if (!$model->isNewRecord) {
     foreach ($model->mediaTargets as $mediaTarget) {
         echo MediaUpload::widget([
-            'label' => \Yii::$app->params['mediaEnumClass']::getLabel($mediaTarget->type),
+            'label' => $mediaEnumclass::getLabel($mediaTarget->type),
             'multiple' => true,
             'hidden' => false,
             'model' => $mediaTarget,

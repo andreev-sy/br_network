@@ -1,5 +1,9 @@
 <?php
 
+use common\models\siteobject\BaseMediaEnum;
+
+$mediaEnumclass = \Yii::$app->params['mediaEnumClass'] ?? BaseMediaEnum::class;
+
 /** @var  \common\models\siteobject\SiteObjectMediaTarget */
 foreach ($model->mediaTargets as $mediaTarget) :
     $medias = $mediaTarget->getMediaArray();
@@ -7,7 +11,7 @@ foreach ($model->mediaTargets as $mediaTarget) :
     <br>
     <div class="form-group" id="<?= $model->id ?>">
         <div class="bg-light-blue disabled color-palette box-header with-border mb-20">
-            <span class="label" style="font-size:14px"><?= \Yii::$app->params['mediaEnumClass']::getLabel($mediaTarget->type) ?></span>
+            <span class="label" style="font-size:14px"><?= $mediaEnumclass::getLabel($mediaTarget->type) ?></span>
         </div>
         <div class="row">
                 <?php foreach ($medias as $media) : ?>
