@@ -161,6 +161,10 @@ class BlogBlock extends \yii\db\ActiveRecord
                 $data = ArrayHelper::merge($data, $dataFromFileInputs);
             }
         }
+        
+        if($this->type == BlockTypeEnum::Custom) {
+            return \Yii::$app->controller->renderPartial($this->template, $data);
+        }
 
         $mustache = new Mustache_Engine([
             'escape' => function ($text) {
@@ -170,5 +174,4 @@ class BlogBlock extends \yii\db\ActiveRecord
 
         return $mustache->render($this->template, $data);
     }
-
 }

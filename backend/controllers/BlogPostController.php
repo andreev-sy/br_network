@@ -12,7 +12,7 @@ use yii\helpers\Url;
 /**
  * BlogPostController implements the CRUD actions for BlogPost model.
  */
-class BlogPostController extends Controller
+class BlogPostController extends BaseBackendController
 {
 
 	/**

@@ -12,7 +12,7 @@ use yii\helpers\Url;
 /**
  * SiteObjectSeoController implements the CRUD actions for SiteObjectSeo model.
  */
-class SiteObjectSeoController extends Controller
+class SiteObjectSeoController extends BaseBackendController
 {
 
     /**

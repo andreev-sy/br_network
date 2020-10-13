@@ -3,6 +3,7 @@
 namespace common\models\siteobject;
 
 use common\models\blog\BlogPost;
+use common\models\blog\BlogPostBlock;
 use common\models\blog\BlogTag;
 use common\utility\BaseEnum;
 use yii\helpers\Json;

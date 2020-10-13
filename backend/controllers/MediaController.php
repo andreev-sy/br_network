@@ -12,7 +12,7 @@ use yii\web\HttpException;
 /**
  * This is the class for controller "MediaController".
  */
-class MediaController extends Controller
+class MediaController extends BaseBackendController
 {
     public $enableCsrfValidation = false;
     public function actionUpload()

@@ -20,9 +20,10 @@ class HtmlEditor extends Widget
             [
                 'model' => $this->model,
                 'attribute' => $this->attribute,
-                'options' => ['rows' => 2],
+                'options' => ['rows' => 10],
                 'language' => 'ru',
                 'clientOptions' => [
+                    'autoresize_bottom_margin' => 10,
                     'plugins' => [
                         "advlist autolink lists link charmap preview anchor emoticons nonbreaking",
                         "searchreplace visualblocks code fullscreen",
