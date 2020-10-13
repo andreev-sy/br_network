@@ -102,7 +102,7 @@ $actionColumnTemplateString = '<div class="action-buttons">' . $actionColumnTemp
 				[
 					'label' => 'Фото',
 					'format' => 'image',
-					'value' => function ($model) {
+					'value' => function ($model) use ($mediaEnumclass) {
 						try {
 							return $model->getFileData($mediaEnumclass::IMAGE, ['height' => 80, 'width' => 100])->src;
 						} catch (Exception $e) {
