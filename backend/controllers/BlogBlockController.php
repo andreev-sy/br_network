@@ -12,9 +12,9 @@ use yii\data\ActiveDataProvider;
 /**
  * BlogBlockController implements the CRUD actions for BlogBlock model.
  */
-class BlogBlockController extends Controller
+class BlogBlockController extends BaseBackendController
 {
-
+	
 	/**
 	 *
 	 * @var boolean whether to enable CSRF validation for the actions in this controller.

@@ -12,7 +12,7 @@ use yii\helpers\Url;
 /**
  * BlogTagController implements the CRUD actions for BlogTag model.
  */
-class BlogTagController extends Controller
+class BlogTagController extends BaseBackendController
 {
 
 	/**

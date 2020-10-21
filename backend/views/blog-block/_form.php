@@ -37,9 +37,17 @@ use \yii\bootstrap\Tabs;
 		<?php $this->beginBlock('main'); ?>
 
 		<p>
+			<!-- attribute type -->
+			<?php echo $form->field($model, 'type')->dropDownList(
+				BlockTypeEnum::LABEL_MAP,
+				[
+					'prompt' => Yii::t('cruds', 'Select'),
+				]
+			); ?>
 
 			<!-- attribute name -->
 			<?php echo $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+
 
 			<!-- attribute alias -->
 			<?php echo $form->field($model, 'alias')->textInput(['maxlength' => true]) ?>
@@ -63,15 +71,6 @@ use \yii\bootstrap\Tabs;
 					'containerOptions' => ['style' => 'width: 100%; min-height: 200px; font-size: 14px']
 				]
 			); ?>
-
-			<!-- attribute type -->
-			<?php echo $form->field($model, 'type')->dropDownList(
-				BlockTypeEnum::LABEL_MAP,
-				[
-					'prompt' => Yii::t('cruds', 'Select'),
-				]
-			); ?>
-
 		</p>
 		<?php $this->endBlock(); ?>
 

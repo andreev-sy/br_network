@@ -147,7 +147,7 @@ class BlogBlock extends \yii\db\ActiveRecord
             if (in_array($inputType, [BaseMediaEnum::IMAGE])) {
                 $dataFromFileInputs =  array_reduce($inputsMeta, function ($acc, $inputMeta) use ($inputType, $blogPostBlock) {
                     $mediaTargetType = $inputType . '_' . $inputMeta['slug'];
-                    $acc[$mediaTargetType] = array_map(
+                    $srcs = array_map(
                         function ($fileData) {
                             return [
                                 'src' => $fileData->src,
@@ -156,10 +156,30 @@ class BlogBlock extends \yii\db\ActiveRecord
                         },
                         $blogPostBlock->getFilesData($mediaTargetType)
                     );
+                    if(!empty($inputMeta['src'])) {
+                        foreach ($inputMeta['src'] as $postfix => $config) {
+                            $resultThumbConfig = array_reduce(array_keys($config), function ($acc, $shortcut) use ($config) {
+                                $map = ['w' => 'width', 'h' => 'height', 'q' => 'quality'];
+                                if($prop = $map[$shortcut] ?? null) {
+                                    $acc[$prop] = intval($config[$shortcut]);
+                                }
+                                return $acc;
+                            }, []);
+                            $filesData = $blogPostBlock->getFilesData($mediaTargetType, $resultThumbConfig);
+                            foreach ($filesData as $idx => $fileData) {
+                                $srcs[$idx]["src_$postfix"] = $fileData->src;
+                            }
+                        }
+                    }
+                    $acc[$mediaTargetType] = $srcs;
                     return $acc;
                 }, []);
                 $data = ArrayHelper::merge($data, $dataFromFileInputs);
             }
+        }
+        
+        if($this->type == BlockTypeEnum::Custom) {
+            return \Yii::$app->controller->renderPartial($this->template, $data);
         }
 
         $mustache = new Mustache_Engine([
@@ -171,4 +191,11 @@ class BlogBlock extends \yii\db\ActiveRecord
         return $mustache->render($this->template, $data);
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        //при добавлении картиночных инпутов в блок, обновляем уже созданные инстансы
+        foreach ($this->getBlogPostBlocks()->all() as $blogPostBlock) {
+            $blogPostBlock->createSiteObject();
+        }
+    }
 }
