@@ -1,5 +1,6 @@
 <?php
 
+use common\models\siteobject\BaseMediaEnum;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
@@ -11,6 +12,8 @@ use yii\grid\GridView;
  */
 $this->title = Yii::t('models', 'Blog Posts');
 $this->params['breadcrumbs'][] = $this->title;
+$mediaEnumclass = \Yii::$app->params['mediaEnumClass'] ?? BaseMediaEnum::class;
+
 
 if (isset($actionColumnTemplates)) {
 	$actionColumnTemplate = implode(' ', $actionColumnTemplates);
@@ -101,7 +104,7 @@ $actionColumnTemplateString = '<div class="action-buttons">' . $actionColumnTemp
 					'format' => 'image',
 					'value' => function ($model) {
 						try {
-							return $model->getFileData(\Yii::$app->params['mediaEnumClass']::IMAGE, ['height' => 80, 'width' => 100])->src;
+							return $model->getFileData($mediaEnumclass::IMAGE, ['height' => 80, 'width' => 100])->src;
 						} catch (Exception $e) {
 							//return $e;
 						}

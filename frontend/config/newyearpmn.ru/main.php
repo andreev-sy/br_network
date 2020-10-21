@@ -98,6 +98,8 @@ return [
                 ['pattern'=>'/api/map_all/','route'=>'api/mapall', 'suffix'=>'/'],
                 ['pattern'=>'/privacy/','route'=>'static/privacy', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/sendroom/','route'=>'form/room', 'suffix'=>'/'],
+                ['pattern'=>'/blog/<alias>/', 'route' => 'blog/post', 'suffix'=>'/'],
+                ['pattern'=>'/blog/preview-post/<id>/', 'route' => 'blog/preview', 'suffix'=>'/'],
             ],
         ],
         
