@@ -21,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $published
  * @property integer $featured
  * @property integer $sort
+ * @property string $html
  * @property integer $created_by
  * @property string $created_at
  * @property integer $updated_by
@@ -73,7 +74,7 @@ class BlogPost extends BaseSiteObject
     {
         return [
             [['name', 'alias'], 'required'],
-            [['intro'], 'string'],
+            [['intro', 'html'], 'string'],
             [['published', 'featured', 'sort'], 'integer'],
             [['name', 'alias', 'short_intro'], 'string', 'max' => 255],
             [['published_at'], 'date', 'format' => 'php:Y-m-d H:i:s'],
@@ -144,9 +145,18 @@ class BlogPost extends BaseSiteObject
         return $this->hasMany(\common\models\blog\BlogTag::className(), ['id' => 'blog_tag_id'])->viaTable('blog_post_tag', ['blog_post_id' => 'id']);
     }
 
-    public function getHtml()
+    public function getHtml($extraData = [])
     {
-        return  $this->getBodyHtml();
+        if (empty($extraData) && $this->hasProperty('html') && !empty($this->html)) {
+            return $this->html;
+        }
+        return $this->getBodyHtml($extraData);
+    }
+
+    public function saveHtml()
+    {
+        $this->html = $this->getBodyHtml();
+        return $this->save();
     }
 
     public function getTableOfContentsArray()
@@ -178,10 +188,10 @@ class BlogPost extends BaseSiteObject
         return $result;
     }
 
-    public function getBodyHtml()
+    public function getBodyHtml($extraData = [])
     {
-        return array_reduce($this->blogPostBlocks, function ($acc, $blogPostBlock) {
-            return $acc . $blogPostBlock->getHtml();
+        return array_reduce($this->blogPostBlocks, function ($acc, $blogPostBlock) use ($extraData) {
+            return $acc . $blogPostBlock->getHtml($extraData);
         }, '');
     }
 
