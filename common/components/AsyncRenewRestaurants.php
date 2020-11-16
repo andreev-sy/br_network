@@ -14,7 +14,8 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		   	$dsn,
 		   	$imageLoad,
 		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png',
-		   	$imageHash = 'svadbanaprirode';
+		   	$imageHash = 'svadbanaprirode',
+		   	$only_comm;
 
 	public function execute($queue) {
 
@@ -34,7 +35,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			$connection->open();
 			Yii::$app->set('db', $connection);
 
-			if(!$response['commission']){
+			if(!$response['commission'] && $this->only_comm){
 				return 1;
 			}
 
