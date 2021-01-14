@@ -9,19 +9,35 @@ $params = array_merge(
 return [
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__).'/..',
-    'bootstrap' => ['log', 'gorko_ny'],
-    'controllerNamespace' => 'app\modules\gorko_ny_konst\controllers',
+    'bootstrap' => ['log', 'banketnye_zaly_moskva'],
+    'controllerNamespace' => 'app\modules\banketnye_zaly_moskva\controllers',
     'modules' => [
-        'gorko_ny' => [
-            'class' => 'app\modules\gorko_ny_konst\Module',
+        'banketnye_zaly_moskva' => [
+            'class' => 'app\modules\banketnye_zaly_moskva\Module',
         ],
     ],
     'components' => [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@app/modules/gorko_ny_konst/views',
+                    '@app/views' => '@app/modules/banketnye_zaly_moskva/views',
                 ],
+            ],
+        ],
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            //'viewPath' => '@common/mail',
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.yandex.ru',
+                'username' => 'impl-stom@yandex.ru',
+                'password' => 'gireveqbrlrwpofm',
+                'port' => '465',
+                'encryption' => 'ssl',
+            ],
+            'messageConfig' => [
+                'charset' => 'UTF-8',
             ],
         ],
         'request' => [
@@ -29,10 +45,18 @@ return [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
+            'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
             'username' => 'root',
             'password' => 'LP_db_',
             'charset' => 'utf8',
+        ],
+        'elasticsearch' => [
+            'class' => 'yii\elasticsearch\Connection',
+            'autodetectCluster' => false,
+            'nodes' => [
+                ['http_address' => '127.0.0.1:9200'],
+                // configure more hosts if you have a cluster
+            ],
         ],
         'user' => [
             'identityClass' => 'common\models\User',
@@ -68,7 +92,6 @@ return [
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
                 ['pattern'=>'/api/map_all','route'=>'api/mapall', 'suffix'=>'/'],
-                //['pattern'=>'/blog/','route'=>'blog/index', 'suffix'=>'/'],
             ],
         ],
         
