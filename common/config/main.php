@@ -1,13 +1,33 @@
 <?php
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'language' => 'ru-RU',
+    'controllerMap' => [
+        'blog-post-blocks' => 'backend\controllers\api\BlogPostBlockController',
+        'blog-blocks' => 'backend\controllers\api\BlogBlockController',
+        'blog-block' => 'backend\controllers\BlogBlockController',
+        'blog-post' => 'backend\controllers\BlogPostController',
+        'blog-post-block' => 'backend\controllers\BlogPostBlockController',
+        'blog-tag' => 'backend\controllers\BlogTagController',
+        'media' => 'backend\controllers\MediaController',
+        'site-object-seo' => 'backend\controllers\SiteObjectSeoController',
+    ],
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
+        ],
+        'elasticsearch' => [
+            'class' => 'yii\elasticsearch\Connection',
+            'autodetectCluster' => false,
+            'nodes' => [
+                ['http_address' => '127.0.0.1:9200'],
+                // configure more hosts if you have a cluster
+            ],
         ],
         'view' => [
             'class' => 'yii\web\View',
@@ -19,6 +39,7 @@ return [
                     'options' => [
                         'auto_reload' => true,
                         'debug' => true,
+                        //'cache' => false,
                     ],
                     'globals' => [
                         'html' => ['class' => '\yii\helpers\Html'],
@@ -28,7 +49,7 @@ return [
                         'YamapFactory' => 'frontend\components\YamapFactory',
                     ],
                     'uses' => ['yii\bootstrap'],
-                    'extensions' =>['Twig_Extension_StringLoader', new \Twig_Extension_StringLoader(),new \Twig_Extension_Debug,]
+                    'extensions' => ['Twig_Extension_StringLoader', new \Twig_Extension_StringLoader(), new \Twig_Extension_Debug,]
                 ],
                 // ...
             ],
@@ -40,8 +61,8 @@ return [
             'transport' => [
                 'class' => 'Swift_SmtpTransport',
                 'host' => 'smtp.yandex.ru',
-                'username' => 'post@smilerooms.ru',
-                'password' => '2017Smile',
+                'username' => 'svadbanaprirode@yandex.ru',
+                'password' => 'vitywhbzxzodifdf',
                 'port' => '465',
                 'encryption' => 'ssl',
             ],
@@ -49,5 +70,19 @@ return [
                 'charset' => 'UTF-8',
             ],
         ],
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class'          => 'yii\i18n\PhpMessageSource',
+                    'basePath'       => '@backend/translations',
+                    'sourceLanguage' => 'en-US',
+                    'fileMap'        => [
+                        'cruds' => 'cruds.php',
+                        'models' => 'models.php',
+                    ],
+                ],
+            ],
+        ],
     ],
+    'params' => \common\utility\SiteParamsHelper::getGlobalSiteParams()
 ];

@@ -32,9 +32,9 @@ class Restaurants extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['gorko_id', 'name', 'address'], 'required'],
-            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'alcohol', 'firework'], 'integer'],
-            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'parking', 'extra_services', 'payment', 'special', 'phone'], 'string'],
+            [['gorko_id', 'name', 'address', 'city_id'], 'required'],
+            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking', 'metro_station_id'], 'integer'],
+            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type', 'restaurants_spec'], 'string'],
         ];
     }
 
@@ -56,6 +56,14 @@ class Restaurants extends \yii\db\ActiveRecord
     }
 
     public function getRooms(){
-        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'id']);
+        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'id'])->orderBy(['capacity' => SORT_ASC]);
+    }
+
+    public function getImages(){
+        return $this->hasMany(Images::className(), ['item_id' => 'id'])->where(['type' => 'restaurant']);
+    }
+
+    public function getSubdomen(){
+        return $this->hasOne(Subdomen::className(), ['city_id' => 'city_id']);
     }
 }

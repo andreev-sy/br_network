@@ -6,11 +6,10 @@ use Yii;
 use yii\base\BaseObject;
 use backend\models\Filter;
 use backend\models\Slices;
-use backend\models\Pages;
 
 class ParamsFromQuery extends BaseObject{
 
-	public $params_filter, $params_api, $listing_url, $seo;
+	public $params_filter, $params_api, $listing_url, $canonical, $slice_alias;
 
 	public function __construct($getQuery, $filter_model, $slices_model) {
 		$return = [
@@ -85,32 +84,31 @@ class ParamsFromQuery extends BaseObject{
 			$temp2 = json_decode($value->params, true);
 			if(count(array_merge(array_diff_assoc($temp,$temp2),array_diff_assoc($temp2,$temp))) == 0){
 				$slice_alias = $value->alias;
-				$this->seo = [
-					'h1' => $value->h1,
-		            'title' => $value->title,
-		            'description' => $value->description,
-		            'keywords' => $value->keywords,
-		            'text_top' => $value->text_top,
-		            'text_bottom' => $value->text_bottom,
-		            'img_alt' => $value->img_alt,
-				];
 			}
 		}
 		if($slice_alias){
 			$this->listing_url = $slice_alias.'/'.$page_param;
+			$this->canonical = $slice_alias.'/'.$page_param;
 		}
 		else{
-			$this->seo = Pages::find()->where(['name' => 'listing'])->one();
 			$this->listing_url = $page_param;
+			$this->canonical = '';
 			foreach ($temp as $key => $value) {
 				$this->listing_url .= $key.'='.$value;
 				$this->listing_url .= '&';
+				if($key != 'page'){
+					$this->canonical .= $key.'='.$value;
+					$this->canonical .= '&';
+				}
 			}
 		}
 
 		$this->listing_url = rtrim($this->listing_url, '&');
 		$this->listing_url = rtrim($this->listing_url, '?');
-
+		$this->canonical = rtrim($this->canonical, '&');
+		$this->canonical = rtrim($this->canonical, '?');
+		$this->slice_alias = $slice_alias;
+		
 		$this->params_filter = $return['params_filter'];
 	}
 
@@ -118,6 +116,7 @@ class ParamsFromQuery extends BaseObject{
 		$slice_model = Slices::find()->all();
 		$slice_alias = false;
 		$temp = $filter;
+		unset($temp['page']);
 		foreach ($slice_model as $key => $value) {
 			$temp2 = json_decode($value->params, true);
 			if(count(array_merge(array_diff_assoc($temp,$temp2),array_diff_assoc($temp2,$temp))) == 0){

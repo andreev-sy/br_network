@@ -10,7 +10,9 @@ class FilterQueryConstructorElastic extends BaseObject{
 	public $join = null,
 		   $query_arr,
 		   $query_type,
-		   $nested;
+		   $nested,
+		   $type,
+		   $location;
 
 	public function __construct($filter_data, $main_table){
 
@@ -33,10 +35,48 @@ class FilterQueryConstructorElastic extends BaseObject{
 		
 		$this->query_type = $filter_data['key'];
 		$this->query_arr = [];
-		$this->nested = $filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table;
+		$this->nested = ($filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table);
+		$this->type = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'types.id');
+		$this->location = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'location.id');
 
+		//print_r($filter_data['key']);
+
+		//Локация зала
+		if($filter_data['key'] == 'location'){
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['term' => [$prefix.$this->getLocationCode($value) => 1]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					['term' => [$prefix.$this->getLocationCode($value) => 1]]
+				];
+			}
+		}
+		//Тип
+		if($filter_data['key'] == 'types.id'){
+			$this->query_arr = [
+				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			];
+		}
+		//Локация ресторана
+		if($filter_data['key'] == 'location.id'){
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['match' => [$prefix.$filter_data['key'] => $value]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					["match" => [
+						$prefix.$filter_data['key'] => $filter_data['value']
+					]]
+				];
+			}
+		}
 		//Местоположение
-		if($filter_data['key'] == 'district'){
+		elseif($filter_data['key'] == 'district'){
 			if(is_array($filter_data['value'])){
 				foreach ($filter_data['value'] as $key => $value) {
 					array_push($this->query_arr, ['term' => [$prefix."district" => $value]]);
@@ -110,5 +150,34 @@ class FilterQueryConstructorElastic extends BaseObject{
 					
 			}
 		}
+	}
+
+	public function getLocationCode($value){
+		$return = '';
+		switch ($value) {
+			case 'Около моря':
+				$return = 'location_sea';
+				break;
+			case 'Около реки':
+				$return = 'location_river';
+				break;
+			case 'Около озера':
+				$return = 'location_lake';
+				break;
+			case 'В горах':
+				$return = 'location_mount';
+				break;
+			case 'В городе':
+				$return = 'location_city';
+				break;
+			case 'В центре города':
+				$return = 'location_center';
+				break;
+			case 'За городом':
+				$return = 'location_outside';
+				break;
+
+		}
+		return $return;
 	}
 }
