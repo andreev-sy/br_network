@@ -2,7 +2,9 @@
 
 namespace common\models;
 
+use common\models\siteobject\BaseSiteObject;
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "restaurants".
@@ -16,7 +18,7 @@ use Yii;
  * @property int $price
  * @property string $cover_url
  */
-class Restaurants extends \yii\db\ActiveRecord
+class Restaurants extends BaseSiteObject
 {
     /**
      * {@inheritdoc}
@@ -33,8 +35,8 @@ class Restaurants extends \yii\db\ActiveRecord
     {
         return [
             [['gorko_id', 'name', 'address', 'city_id'], 'required'],
-            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking'], 'integer'],
-            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type'], 'string'],
+            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking', 'metro_station_id'], 'integer'],
+            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type', 'restaurants_spec'], 'string'],
         ];
     }
 
@@ -66,4 +68,5 @@ class Restaurants extends \yii\db\ActiveRecord
     public function getSubdomen(){
         return $this->hasOne(Subdomen::className(), ['city_id' => 'city_id']);
     }
+
 }
