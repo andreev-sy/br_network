@@ -33,7 +33,7 @@ class BlogPostBlockController extends \yii\rest\ActiveController
 		];
 		$actions['index']['prepareDataProvider'] = function ($action, $filter) {
 			$model = new $this->modelClass;
-			$query = $model::find();
+			$query = $model::find()->orderBy(['sort' => SORT_ASC]);
 			if (!empty($filter)) {
 				$query->andWhere($filter);
 			}

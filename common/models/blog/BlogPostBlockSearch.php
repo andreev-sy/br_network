@@ -50,10 +50,11 @@ class BlogPostBlockSearch extends BlogPostBlock
 	 * @return ActiveDataProvider
 	 */
 	public function search($params) {
-		$query = BlogPostBlock::find();
+		$query = BlogPostBlock::find()->orderBy(['sort' => SORT_ASC]);
 
 		$dataProvider = new ActiveDataProvider([
 				'query' => $query,
+				'pagination' => false,
 			]);
 
 		$this->load($params);

@@ -96,4 +96,36 @@ class Declension {
     public static function csrfToken(){
     	return Yii::$app->request->getCsrfToken();
     }
+
+    /**
+     * Функция возвращает ссылку на изображение, подменяя no_image на картинку ДР
+     * @param  $img_src String Ссылка на изображение
+     * @return String
+     */
+    public static function get_image_src($img_src)
+    {
+        return strrpos($img_src, 'no_photo.png') === false ? $img_src : '/img/no_photo_cover.png';
+    }
+
+	public static function dateWithRusMonth($unixstamp)
+    {
+        $d = date("j", $unixstamp);
+        $m = date("m", $unixstamp);
+        $y = date("Y", $unixstamp);
+        $months = [
+            '01' => 'января',
+            '02' => 'февраля',
+            '03' => 'марта',
+            '04' => 'апреля',
+            '05' => 'мая',
+            '06' => 'июня',
+            '07' => 'июля',
+            '08' => 'августа',
+            '09' => 'сентября',
+            '10' => 'октября',
+            '11' => 'ноября',
+            '12' => 'декабря'
+        ];
+        return $d . ' ' . (isset($months[$m]) ? $months[$m] : '') . ' ' . $y;
+    }
 }
