@@ -86,19 +86,19 @@ class PagesController extends BaseBackendController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $subdomen_pages = SubdomenPages::find()
-            ->where([
-                'page_id' => $model->id,
-            ])
-            ->all();
-        $subdomen_keys = [];
-        foreach ($subdomen_pages as $subdomen_page) {
-            $subdomen_keys[] = $subdomen_page->subdomen_id;
-        }
-        $subdomens = Subdomen::find()
-            ->orderBy(['name' => SORT_ASC])
-            ->where(['not', ['id'=>$subdomen_keys]])
-            ->all();
+        //$subdomen_pages = SubdomenPages::find()
+        //    ->where([
+        //        'page_id' => $model->id,
+        //    ])
+        //    ->all();
+        //$subdomen_keys = [];
+        //foreach ($subdomen_pages as $subdomen_page) {
+        //    $subdomen_keys[] = $subdomen_page->subdomen_id;
+        //}
+        //$subdomens = Subdomen::find()
+        //    ->orderBy(['name' => SORT_ASC])
+        //    ->where(['not', ['id'=>$subdomen_keys]])
+        //    ->all();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -106,8 +106,8 @@ class PagesController extends BaseBackendController
 
         return $this->render('update', [
             'model' => $model,
-            'subdomen_pages' => $subdomen_pages,
-            'subdomens' => $subdomens,
+            //'subdomen_pages' => $subdomen_pages,
+            //'subdomens' => $subdomens,
         ]);
     }
 

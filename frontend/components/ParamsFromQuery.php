@@ -9,24 +9,29 @@ use backend\models\Slices;
 
 class ParamsFromQuery extends BaseObject{
 
-	public $params_filter, $params_api, $listing_url, $canonical, $slice_alias;
+	public $params_filter, $params_api, $listing_url, $canonical, $slice_alias, $query_hits = 0;
 
 	public function __construct($getQuery, $filter_model, $slices_model) {
 		$return = [
 			'params_api' => [],
-			'params_filter' => []
+			'params_filter' => [],
 		];
 		$temp = [];
 		foreach ($filter_model as $filter_row) {
 			if(array_key_exists($filter_row->alias, $getQuery)){
 				$queryArr = explode(',', $getQuery[$filter_row->alias]);
 				$return['params_filter'][$filter_row->alias] = $queryArr;
+				// $log = serialize($queryArr);
+				// file_put_contents('/var/www/pmnetwork/log/elasticMetroLog.txt', $log . PHP_EOL, FILE_APPEND);  
 
 				foreach ($filter_row->items as $filter_item) {
 					if(in_array($filter_item->value, $queryArr)){
+
 						$base_arr = json_decode($filter_item->api_arr, true);
 						$api_arr = [];
-
+						if(isset($filter_item->hits)) {
+							$this->query_hits += intval($filter_item->hits);
+						}
 						foreach ($base_arr as $value) {
 							//echo '<pre>';
 							//print_r($value);
@@ -112,8 +117,8 @@ class ParamsFromQuery extends BaseObject{
 		$this->params_filter = $return['params_filter'];
 	}
 
-	public static function isSlice($filter){
-		$slice_model = Slices::find()->all();
+	public static function isSlice($filter, $slices_model = null){
+		$slice_model = $slices_model ?? Slices::find()->all();
 		$slice_alias = false;
 		$temp = $filter;
 		unset($temp['page']);
@@ -126,4 +131,16 @@ class ParamsFromQuery extends BaseObject{
 		return $slice_alias;
 	}
 
+	public static function getSlice($filter, $slices_model = null) {
+		$slice_model = $slices_model ?? Slices::find()->all();
+		$temp = $filter;
+		unset($temp['page']);
+		foreach ($slice_model as $key => $slice_model) {
+			$temp2 = json_decode($slice_model->params, true);
+			if(count(array_merge(array_diff_assoc($temp,$temp2),array_diff_assoc($temp2,$temp))) == 0){
+				return $slice_model;
+			}
+		}
+		return null;
+	}
 }

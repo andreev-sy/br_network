@@ -10,8 +10,9 @@ import CyrillicToTranslit from 'cyrillic-to-translit-js';
 import { Line } from 'rc-progress';
 import Checkbox from 'rc-checkbox';
 import Sticky from 'react-stickynode';
+import settings from './settings';
 
-import {
+const {
     BLOCK_SHARED_SETTINGS,
     DRAFT_REL_FIELD,
     BLOCK_REL_FIELD,
@@ -25,7 +26,10 @@ import {
     DRAFT_ID,
     PREVIEW_LINK,
     SAVE_LINK,
-} from './settings';
+    LIST_STYLES = [],
+} = settings;
+
+console.log(API_DRAFT_BLOCKS, settings);
 
 const PLAIN_TEXT_INPUT = 'text';
 const IMAGE_INPUT = 'image'; //TODO expand
@@ -59,6 +63,7 @@ const PlainTextInput = ({ initialValue, onBlur, onInput, onInputReady }) => {
                     toolbar:
                         'undo redo | bold italic forecolor backcolor | link emoticons charmap nonbreaking',
                     nowrap: true,
+                    invalid_elements: 'p',
                     forced_root_block: '',
                     force_br_newlines: true,
                     force_p_newlines: false,
@@ -110,8 +115,30 @@ const RichTextInput = ({
                     plugins: [
                         'advlist autolink lists link charmap preview anchor emoticons nonbreaking',
                         'searchreplace visualblocks code fullscreen autoresize',
-                        'insertdatetime media table paste image',
+                        'codesample insertdatetime media table paste image',
                     ],
+                    extended_valid_elements:
+                        'b link meta style script head body html',
+                    formats: {
+                        bold: [
+                            { inline: 'strong', remove: 'all' },
+                            { inline: 'span', styles: { fontWeight: 'bold' } },
+                            { inline: 'b', remove: 'all' },
+                        ],
+                    },
+                    style_formats: [
+                        {
+                            title: 'Полужирный <b>',
+                            format: 'bold',
+                            inline: 'b',
+                        },
+                        {
+                            title: 'Ul галочки',
+                            selector: 'ul',
+                            classes: 'ul_checkmark',
+                        },
+                    ],
+                    style_formats_merge: true,
                     convert_urls: false,
                     image_caption: true,
                     default_link_target: '_blank',
@@ -119,8 +146,20 @@ const RichTextInput = ({
                         'undo redo | bold italic forecolor backcolor|' +
                         ' aligncenter alignright alignjustify |' +
                         'bullist numlist outdent indent | image link |' +
-                        'emoticons charmap nonbreaking',
+                        'emoticons codesample charmap nonbreaking',
                     nowrap: true,
+                    codesample_languages: [
+                        { text: 'HTML/XML', value: 'markup' },
+                        { text: 'JavaScript', value: 'javascript' },
+                        { text: 'CSS', value: 'css' },
+                        { text: 'PHP', value: 'php' },
+                        { text: 'Ruby', value: 'ruby' },
+                        { text: 'Python', value: 'python' },
+                        { text: 'Java', value: 'java' },
+                        { text: 'C', value: 'c' },
+                        { text: 'C#', value: 'csharp' },
+                        { text: 'C++', value: 'cpp' },
+                    ],
                     className: 'form-control',
                     images_upload_handler: function (
                         blobInfo,
@@ -225,6 +264,9 @@ const FileInput = ({ mediaTargetId, onInputReady }) => {
                 console.error(response);
             },
         });
+        return () => {
+            console.log('cleanup', $(inputref.current).fileinput('destroy'));
+        };
     }, [mediaTargetId]);
 
     useEffect(() => {
@@ -252,8 +294,16 @@ const SortableItem = SortableElement(
         onDeleteBlock,
         onExpandedStateChange,
         onBlockLoaded,
+        availableBlocks,
+        updateBlock,
+        generalListStyle,
+        setNewBlockInsertion,
+        newBlockInsertion,
     }) => {
-        let inputsMeta = {},
+        if (draftBlock.error) {
+            return <li>{draftBlock.error.message}</li>;
+        }
+        let inputsMeta = draftBlock.inputs,
             initialInputsContent = _.assign(
                 {},
                 {
@@ -263,6 +313,8 @@ const SortableItem = SortableElement(
                         heading: '',
                         alias: '',
                         headingVar: '',
+                        listStyle: 'decimal',
+                        customHref: false,
                         level: 1,
                     },
                 }
@@ -287,70 +339,61 @@ const SortableItem = SortableElement(
         BLOCK_SHARED_SETTINGS.forEach((setting) => {
             addToBlockSettings(setting);
         });
-        try {
-            inputsMeta = JSON.parse(draftBlock[BLOCK_REL_NAME].inputs) || {};
-            for (const inputType of Object.keys(inputsMeta)) {
-                if (inputType == 'settings') {
-                    inputsMeta[inputType].forEach((setting) => {
-                        addToBlockSettings(setting);
+        for (const inputType of Object.keys(inputsMeta)) {
+            if (inputType == 'settings') {
+                inputsMeta[inputType].forEach((setting) => {
+                    addToBlockSettings(setting);
+                });
+            } else {
+                for (const {
+                    heading = null,
+                    slug,
+                    titlePreview = false,
+                } of inputsMeta[inputType]) {
+                    const inputVarName = `${inputType}_${slug}`;
+                    inputsReadyInitState = _.assign({}, inputsReadyInitState, {
+                        [inputVarName]: false,
                     });
-                } else {
-                    for (const {
-                        heading = null,
-                        slug,
-                        titlePreview = false,
-                    } of inputsMeta[inputType]) {
-                        const inputVarName = `${inputType}_${slug}`;
-                        inputsReadyInitState = _.assign(
+                    if (heading) {
+                        initialInputsContent = _.assign(
                             {},
-                            inputsReadyInitState,
+                            initialInputsContent,
                             {
-                                [inputVarName]: false,
+                                paragraph: {
+                                    ...initialInputsContent.paragraph,
+                                    isset: true,
+                                    asHeading: true,
+                                    level: heading,
+                                    headingVar: inputVarName,
+                                },
                             }
                         );
-                        if (heading) {
-                            initialInputsContent = _.assign(
-                                {},
-                                initialInputsContent,
-                                {
-                                    paragraph: {
-                                        ...initialInputsContent.paragraph,
-                                        isset: true,
-                                        asHeading: true,
-                                        level: heading,
-                                        headingVar: inputVarName,
-                                    },
-                                }
-                            );
-                        }
-                        if (titlePreview) {
-                            initialInputsContent = _.assign(
-                                {},
-                                initialInputsContent,
-                                {
-                                    titlePreviewInput: inputVarName,
-                                }
-                            );
-                        }
+                    }
+                    if (titlePreview) {
+                        initialInputsContent = _.assign(
+                            {},
+                            initialInputsContent,
+                            {
+                                titlePreviewInput: inputVarName,
+                            }
+                        );
                     }
                 }
             }
-            if (draftBlock.content) {
-                const parsed = JSON.parse(draftBlock.content) || {};
-                initialInputsContent = _.assign(
-                    {},
-                    initialInputsContent,
-                    parsed
-                );
-            }
-        } catch (error) {
-            return <li>{error.message}</li>;
+        }
+        if (!_.isEmpty(draftBlock.content)) {
+            initialInputsContent = _.merge(
+                {},
+                initialInputsContent,
+                draftBlock.content,
+            );
         }
 
         const [inputsContent, setInputContent] = useState(initialInputsContent);
         const [inputsReadyState, setInputsReadyState] = useState(
             inputsReadyInitState
         );
+        const [isFullyLoaded, setIsFullyLoaded] = useState(false);
 
         const [isDirty, setIsDirty] = useState(false);
         const [mode, setMode] = useState('editor');
@@ -382,7 +425,7 @@ const SortableItem = SortableElement(
             newinputsContent.paragraph.heading = stripped;
             newinputsContent.paragraph.alias = CyrillicToTranslit()
                 .transform(stripped, '-')
-                .replace(/[^a-zA-Z-]/g, '')
+                .replace(/[^0-9a-zA-Z-]/g, '')
                 .toLowerCase();
         };
 
@@ -425,10 +468,34 @@ const SortableItem = SortableElement(
             const value = e.target.value;
             const alias = CyrillicToTranslit()
                 .transform(value, '-')
-                .replace(/[^a-zA-Z-]/g, '')
+                .replace(/[^0-9a-zA-Z-]/g, '')
                 .toLowerCase();
             const newinputsContent = _.cloneDeep(inputsContent);
             newinputsContent.paragraph.heading = value;
+            newinputsContent.paragraph.alias = alias;
+            setInputContent(newinputsContent);
+        };
+
+        const onCustomHrefCheckbox = (e) => {
+            const checked = e.target.checked;
+            const newinputsContent = _.cloneDeep(inputsContent);
+            newinputsContent.paragraph.customHref = checked;
+            if (!checked) {
+                newinputsContent.paragraph.alias = CyrillicToTranslit()
+                    .transform(newinputsContent.paragraph.heading, '-')
+                    .replace(/[^0-9a-zA-Z-]/g, '')
+                    .toLowerCase();
+            }
+            setInputContent(newinputsContent);
+        };
+
+        const onCustomHrefChange = (e) => {
+            const value = e.target.value;
+            const alias = CyrillicToTranslit()
+                .transform(value, '-')
+                .replace(/[^0-9a-zA-Z-]/g, '')
+                .toLowerCase();
+            const newinputsContent = _.cloneDeep(inputsContent);
             newinputsContent.paragraph.alias = alias;
             setInputContent(newinputsContent);
         };
@@ -438,6 +505,19 @@ const SortableItem = SortableElement(
                 _.assign(_.cloneDeep(inputsContent), {
                     [settingVarName]: value,
                 })
+            );
+        };
+
+        const onBlockTypeChange = (e) => {
+            ajax(
+                'put',
+                API_DRAFT_BLOCKS +
+                    draftBlock.id +
+                    `/?expand=${BLOCK_REL_NAME},mediaTargets`,
+                (res) => {
+                    updateBlock(res);
+                },
+                { [BLOCK_REL_FIELD]: e.value }
             );
         };
 
@@ -451,7 +531,8 @@ const SortableItem = SortableElement(
                 { content: JSON.stringify(inputsContent) },
                 (res) => {
                     setIsDirty(false);
-                }
+                },
+                true
             );
         };
 
@@ -463,19 +544,36 @@ const SortableItem = SortableElement(
             );
         };
 
+        const onSubListStyleChange = (e) => {
+            const newinputsContent = _.cloneDeep(inputsContent);
+            newinputsContent.paragraph.listStyle = e.value;
+            setInputContent(newinputsContent);
+        };
+
+        const isBlockFullyLoaded = () => {
+            return !_.values(inputsReadyState).includes(false);
+        };
+
         useEffect(() => {
             if (!isDirty) {
                 onSave();
             }
-        }, [isDirty, inputsContent]);
+        }, [inputsContent]);
 
         useEffect(() => {
             const isLoaded = !_.values(inputsReadyState).includes(false);
             if (isLoaded) {
                 setIsDirty(false);
             }
+            setIsFullyLoaded(isLoaded);
             onBlockLoaded(isLoaded);
         }, [inputsReadyState]);
+
+        useEffect(() => {
+            if (generalListStyle !== null) {
+                onSubListStyleChange(generalListStyle);
+            }
+        }, [generalListStyle]);
 
         const inputComponents = Object.keys(inputsMeta).reduce(
             (acc, inputType) => {
@@ -596,6 +694,10 @@ const SortableItem = SortableElement(
             }
         };
 
+        const blockTypeVariants = availableBlocks.map((blockType) => {
+            return { value: blockType.id, label: blockType.name };
+        });
+
         return (
             <li className='editor__block' key={draftBlock.id}>
                 <div
@@ -686,24 +788,56 @@ const SortableItem = SortableElement(
                             </button>
                         </div>
                     </div>
-                    <div
-                        className={`box-body ${
-                            mode == 'editor' ? '' : 'hidden'
-                        }`}
-                    >
-                        {inputComponents.map(({ title, inputElement }, idx) => (
-                            <div className='form-group' key={idx}>
-                                <label>{title}</label>
-                                {inputElement}
+                    {(draftBlock.expanded.body || isFullyLoaded) && (
+                        <>
+                            <div
+                                className={`box-body ${
+                                    mode == 'editor' && isFullyLoaded
+                                        ? ''
+                                        : 'hidden'
+                                }`}
+                            >
+                                {inputComponents.map(
+                                    ({ title, inputElement }, idx) => (
+                                        <div className='form-group' key={idx}>
+                                            <label>{title}</label>
+                                            {inputElement}
+                                        </div>
+                                    )
+                                )}
                             </div>
-                        ))}
-                    </div>
+                            <div
+                                className={`box-body ${
+                                    mode == 'editor' && !isFullyLoaded
+                                        ? ''
+                                        : 'hidden'
+                                }`}
+                            >
+                                <div className='form-group'>
+                                    <div className='loading-circle'></div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                     <div
                         className={`box-body ${
                             mode == 'settings' ? '' : 'hidden'
                         }`}
                     >
                         <div className='box-body'>
+                            <div className='form-group_row'>
+                                <div className=''>Тип блока</div>
+                                <Select
+                                    defaultValue={blockTypeVariants.find(
+                                        (variant) =>
+                                            variant.value ==
+                                            draftBlock[BLOCK_REL_NAME].id
+                                    )}
+                                    options={blockTypeVariants}
+                                    onChange={onBlockTypeChange}
+                                    isSearchable={false}
+                                />
+                            </div>
                             {blockSettings.map(
                                 ({ title, type, variants, settingVarName }) =>
                                     type == 'select' && (
@@ -732,7 +866,16 @@ const SortableItem = SortableElement(
                                         </div>
                                     )
                             )}
-                            <div className='form-group_row form-group_row__checkbox'>
+                            <div
+                                className='form-group_row form-group_row__checkbox'
+                                style={{
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                }}
+                            >
+                                <p style={{ fontWeight: 'bold' }}>
+                                    Настройки оглавления
+                                </p>
                                 <label>
                                     <span>Выводить в оглавление</span>
                                     <Checkbox
@@ -747,7 +890,7 @@ const SortableItem = SortableElement(
                                         inputsContent.paragraph.isset &&
                                         headingVar != ''
                                             ? ''
-                                            : 'hidden_soft'
+                                            : 'hidden'
                                     }
                                 >
                                     <span>Пункт оглавления = заголовку</span>
@@ -755,6 +898,21 @@ const SortableItem = SortableElement(
                                         onChange={onParagraphAsHeadingCheckbox}
                                         defaultChecked={
                                             inputsContent.paragraph.asHeading
+                                        }
+                                    />
+                                </label>
+                                <label
+                                    className={
+                                        inputsContent.paragraph.isset
+                                            ? ''
+                                            : 'hidden'
+                                    }
+                                >
+                                    <span>Назначить #href вручную</span>
+                                    <Checkbox
+                                        onChange={onCustomHrefCheckbox}
+                                        defaultChecked={
+                                            inputsContent.paragraph.customHref
                                         }
                                     />
                                 </label>
@@ -776,8 +934,80 @@ const SortableItem = SortableElement(
                                         />
                                     </div>
                                 )}
+                            {inputsContent.paragraph.isset &&
+                                inputsContent.paragraph.level == 1 && (
+                                    <div className='form-group_row'>
+                                        <div className=''>
+                                            Вид вложенных пунктов
+                                        </div>
+                                        <Select
+                                            defaultValue={
+                                                LIST_STYLES.find(
+                                                    (variant) =>
+                                                        variant.value ==
+                                                        inputsContent.paragraph
+                                                            .listStyle
+                                                ) ||
+                                                LIST_STYLES.find(
+                                                    (variant) => variant.default
+                                                )
+                                            }
+                                            value={LIST_STYLES.find(
+                                                (variant) =>
+                                                    variant.value ==
+                                                    inputsContent.paragraph
+                                                        .listStyle
+                                            )}
+                                            options={LIST_STYLES}
+                                            onChange={onSubListStyleChange}
+                                            isSearchable={false}
+                                        />
+                                    </div>
+                                )}
+                            {inputsContent.paragraph.isset &&
+                                inputsContent.paragraph.customHref && (
+                                    <div className='form-group'>
+                                        <label htmlFor=''>Введите #href</label>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            placeholder='Название якоря'
+                                            onChange={onCustomHrefChange}
+                                            defaultValue={
+                                                inputsContent.paragraph.alias
+                                            }
+                                        />
+                                    </div>
+                                )}
                         </div>
                     </div>
+                    {draftBlock.expanded.body && (
+                        <div
+                            className={`insert-after ${
+                                newBlockInsertion &&
+                                draftBlock.sort == newBlockInsertion
+                                    ? 'insert-after_active'
+                                    : ''
+                            }`}
+                        >
+                            <div
+                                className='insert-after__wrapper'
+                                onClick={() => {
+                                    setNewBlockInsertion(draftBlock.sort);
+                                }}
+                            >
+                                <div className='insert-after__label'>
+                                    Вставить новый блок после этого
+                                </div>
+                                <button
+                                    className='insert-after__btn'
+                                    type='button'
+                                >
+                                    <i className='fa fa-plus-square-o'></i>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </li>
         );
@@ -795,26 +1025,47 @@ const Editor = ({
     shouldAllBlocksExpand,
     setShouldAllBlocksExpand,
     shouldBlocksCollapseOnAction,
+    availableBlocks,
+    generalListStyle,
+    newBlockInsertion,
+    setNewBlockInsertion,
 }) => {
     const [draftBlocks, setDraftBlocks] = useState([]);
+
     const setNewDraftBlocks = (newDraftBlocks) => {
-        const withExpandedState = newDraftBlocks.map((draftBlock, idx, arr) => {
-            const blockExpandedState =
-                shouldBlocksCollapseOnAction || draftBlock.expanded == undefined
-                    ? { body: idx === arr.length - 1 }
-                    : draftBlock.expanded;
-            return {
-                ...draftBlock,
-                expanded: blockExpandedState,
-            };
-        });
-        setDraftBlocks(withExpandedState);
+        const processedBlocks = newDraftBlocks
+            .map((block) => {
+                if (!_.isObject(block.inputs)) {
+                    try {
+                        block.inputs =
+                            JSON.parse(block[BLOCK_REL_NAME].inputs) || {};
+                    } catch (error) {
+                        block.error = error;
+                    }
+                }
+                if (!_.isObject(block.content)) {
+                    try {
+                        block.content = JSON.parse(block.content) || {};
+                    } catch (error) {
+                        block.error = error;
+                    }
+                }
+                return block;
+            })
+            .map((draftBlock, idx, arr) => {
+                const blockExpandedState =
+                    shouldBlocksCollapseOnAction ||
+                    draftBlock.expanded == undefined
+                        ? { body: idx === arr.length - 1 }
+                        : draftBlock.expanded;
+                return {
+                    ...draftBlock,
+                    expanded: blockExpandedState,
+                };
+            });
+        setDraftBlocks(processedBlocks);
     };
 
-    const addBlock = (item) => {
-        setNewDraftBlocks([...draftBlocks, item]);
-        refreshSortings();
-    };
     const removeBlock = (id) => {
         ajax('delete', API_DRAFT_BLOCKS + id + '/', (data, textStatus, xhr) => {
             if (xhr.status == 204) {
@@ -851,25 +1102,47 @@ const Editor = ({
                     }
                 },
                 { items: JSON.stringify(updateData) },
-                (res) => console.log(res)
+                (res) => {
+                    console.log(res);
+                },
+                true
             );
         }
     };
+
+    const updateBlock = (item) => {
+        const updated = draftBlocks.map((draftBlock) => {
+            if (draftBlock.id == item.id) {
+                item.expanded = draftBlock.expanded;
+                item.loaded = true;
+                return item;
+            }
+            return draftBlock;
+        });
+        setNewDraftBlocks(updated);
+    };
+
+    const addBlock = (item, sort = null) => {
+        const blocks = [...draftBlocks];
+        blocks.splice(sort || draftBlocks.length, 0, item);
+        setNewDraftBlocks(blocks);
+    };
+
     const createNewDraftBlock = () => {
         if (newBlock !== null) {
             ajax(
                 'post',
                 GET_DRAFT_BLOCKS,
                 (res) => {
-                    addBlock(res);
+                    addBlock(res, newBlock.sort);
                 },
                 {
                     [DRAFT_REL_FIELD]: DRAFT_ID,
                     [BLOCK_REL_FIELD]: newBlock.id,
                 },
-                (res) => {},
-                setNewBlock(null)
+                (res) => {}
             );
+            setNewBlock(null);
         }
     };
 
@@ -903,7 +1176,9 @@ const Editor = ({
     );
 
     useEffect(() => {
+        // if (!draftBlocks.filter((block) => !block.loaded).length) {
         refreshSortings();
+        // }
     }, [draftBlocks]);
 
     const onSortEnd = ({ oldIndex, newIndex, collection, isKeySorting }) => {
@@ -942,7 +1217,7 @@ const Editor = ({
             ? (100 / draftBlocks.length) *
               draftBlocks.filter((block) => block.loaded).length
             : 0;
-    const isFullyLoaded = Math.round(percentOfBlocksLoaded) === 100;
+    const isFullyLoaded = true; //Math.round(percentOfBlocksLoaded) === 100;
 
     return (
         <div className='constructor__editor editor'>
@@ -978,6 +1253,11 @@ const Editor = ({
                                 draftBlock.id
                             )}
                             onBlockLoaded={onBlockLoaded(draftBlock.id)}
+                            availableBlocks={availableBlocks}
+                            updateBlock={updateBlock}
+                            generalListStyle={generalListStyle}
+                            setNewBlockInsertion={setNewBlockInsertion}
+                            newBlockInsertion={newBlockInsertion}
                         />
                     ))}
                 </SortableList>
@@ -992,8 +1272,11 @@ const ToolsPanel = ({
     setShouldAllBlocksExpand,
     shouldBlocksCollapseOnAction,
     setShouldBlocksCollapseOnAction,
+    availableBlocks,
+    setAvailableBlocks,
+    setGeneralListStyle,
+    newBlockInsertion,
 }) => {
-    const [availableBlocks, setAvailableBlocks] = useState([]);
     useEffect(() => {
         ajax('get', GET_BLOCKS, (res) => {
             setAvailableBlocks(res.items || []);
@@ -1020,14 +1303,21 @@ const ToolsPanel = ({
                             поста. Не нужно нажимать для сохранения состояния
                             конструктора!'
                         className='btn btn-m mr-5 mb-5 btn-primary draft-save'
-                        onClick={() => ajax('patch', SAVE_LINK)}
+                        onClick={() =>
+                            ajax(
+                                'patch',
+                                SAVE_LINK,
+                                undefined,
+                                undefined,
+                                undefined,
+                                true
+                            )
+                        }
                     >
                         Применить изменения
                     </button>
                     <a target='_blank' href={`${PREVIEW_LINK}`}>
-                        <button
-                            className='btn btn-sm mr-5 mb-5 btn-default'
-                        >
+                        <button className='btn btn-sm mr-5 mb-5 btn-default'>
                             Предпросмотр&nbsp;
                             <i className='fa fa-external-link'></i>
                         </button>
@@ -1036,7 +1326,12 @@ const ToolsPanel = ({
                 {_.keys(groups).map((key, idx) => {
                     const { label, items } = groups[key];
                     return (
-                        <div className='form_group' key={idx}>
+                        <div
+                            className={`form_group ${
+                                newBlockInsertion ? 'form_group_highlight' : ''
+                            }`}
+                            key={idx}
+                        >
                             <label>{label}</label>
                             <ul>
                                 {items.map((block, idx) => (
@@ -1077,6 +1372,16 @@ const ToolsPanel = ({
                             />
                         </label>
                     </div>
+                    <div className='form-group_row'>
+                        <div className='' style={{ fontSize: 13 }}>
+                            Вложенные пункты оглавления
+                        </div>
+                        <Select
+                            options={LIST_STYLES}
+                            onChange={setGeneralListStyle}
+                            isSearchable={false}
+                        />
+                    </div>
                     <div>
                         <button
                             className='btn btn-sm mr-5 mb-5 btn-default'
@@ -1105,6 +1410,11 @@ const App = () => {
     const [isFetching, setIsFetching] = useState(false);
     const [newBlock, setNewBlock] = useState(null);
     const [shouldAllBlocksExpand, setShouldAllBlocksExpand] = useState(null);
+    const [availableBlocks, setAvailableBlocks] = useState([]);
+    const [generalListStyle, setGeneralListStyle] = useState(null);
+    const [newBlockInsertion, setNewBlockInsertion] = useState(null);
+    const [ajaxQueue, setAjaxQueue] = useState([]);
+
     const initialShouldBlocksCollapseOnAction =
         localStorage.getItem('shouldBlocksCollapseOnAction') !== 'false';
     const [
@@ -1120,11 +1430,9 @@ const App = () => {
         error = (err) => {
             console.log(err);
         },
-        callback = () => {}
+        shouldQueue = false
     ) => {
-        if (!isFetching) {
-            setIsFetching(true);
-            console.log('sending ' + method, data);
+        const exec = (cb = () => {}) =>
             $.ajax({
                 url,
                 type: method,
@@ -1133,18 +1441,33 @@ const App = () => {
                 data,
                 dataType: 'json',
                 success: (res, textStatus, xhr) => {
-                    setIsFetching(false);
+                    cb();
                     success(res, textStatus, xhr);
                 },
                 error: (res) => {
-                    setIsFetching(false);
+                    cb();
                     error(res);
                 },
             });
+        if (!isFetching) {
+            setIsFetching(true);
+            console.log('sending ' + method, data);
+            exec(() => setIsFetching(false));
+        } else if (shouldQueue) {
+            console.log('enqueue');
+            setAjaxQueue([...ajaxQueue, exec]);
         }
-        callback();
     };
+
+    useEffect(() => {
+        if (!isFetching && ajaxQueue.length) {
+            _.first(ajaxQueue)(() => {
+                setAjaxQueue(_.tail(ajaxQueue));
+            });
+        }
+    }, [isFetching, ajaxQueue]);
     const onBlockBtnClick = (block) => {
+        block.sort = newBlockInsertion;
         setNewBlock(block);
     };
 
@@ -1157,9 +1480,26 @@ const App = () => {
         setShouldAllBlocksExpand,
         shouldBlocksCollapseOnAction,
         setShouldBlocksCollapseOnAction,
+        availableBlocks,
+        setAvailableBlocks,
+        generalListStyle,
+        setGeneralListStyle,
+        newBlockInsertion,
+        setNewBlockInsertion,
     };
+
+    const cancelBlockInsertion = () => {
+        if (newBlockInsertion) {
+            setNewBlockInsertion(null);
+        }
+    };
+
     return (
-        <div className='constructor'>
+        <div
+            className='constructor'
+            onClick={() => cancelBlockInsertion()}
+            onKeyDown={(e) => e.key === 'Escape' && cancelBlockInsertion()}
+        >
             <ToolsPanel {...props} />
             <Editor {...props} />
         </div>
@@ -1168,7 +1508,5 @@ const App = () => {
 
 $(() => {
     const domContainer = document.getElementById('react-constructor');
-    if (DRAFT_ID) {
-        ReactDOM.render(<App />, domContainer);
-    }
+    ReactDOM.render(<App />, domContainer);
 });

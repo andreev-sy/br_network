@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 import Listing from './components/listing';
 import Item from './components/item';
 import Main from './components/main';
@@ -7,8 +5,6 @@ import Index from './components/index';
 import Widget from './components/widget';
 import Form from './components/form';
 import YaMap from './components/map';
-
-window.$ = $;
 
 (function($) {
   	$(function() {

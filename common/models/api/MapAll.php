@@ -12,7 +12,7 @@ class MapAll extends BaseObject{
 
 	public $coords;
 
-	public function __construct($elastic_model, $subdomain_id, $filter = [], $type = 'restaurants') {
+	public function __construct($elastic_model, $subdomain_id, $filter = [], $type = 'restaurants', $url = '/ploshhadki/', $link_type = 'id') {
 
 		$items = new ItemsFilterElastic($filter, 9000, 1, false, $type, $elastic_model, false, false, $subdomain_id);
 		$this->coords = [
@@ -41,7 +41,7 @@ class MapAll extends BaseObject{
 			              'address' => $item->restaurant_address,
 			              'img' => $map_preview,
 			              'clusterCaption' => $item->restaurant_name,
-			              'link' => '/ploshhadki/'.$item->id.'/',
+			              'link' => $link_type == 'id' ? $url.$item->id.'/' : $url.$item->restaurant_slug.'/',
 			            ]
 					]);
 					break;

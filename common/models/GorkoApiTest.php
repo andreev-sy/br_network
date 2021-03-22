@@ -197,12 +197,12 @@ class GorkoApiTest extends Model
 				foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
 					$gorko_room_ids[$room['id']] = null;
 				}
-				//$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
-				//	'gorko_id' => $restaurant['id'],
-				//	'dsn' => Yii::$app->db->dsn,
-				//	'watermark' => $param['watermark'],
-				//	'imageHash' => $param['imageHash']
-				//]));
+				$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+					'gorko_id' => $restaurant['id'],
+					'dsn' => Yii::$app->db->dsn,
+					'watermark' => $param['watermark'],
+					'imageHash' => $param['imageHash']
+				]));
 			}
 
 			$page_count = $venues['meta']['pages_count'];
@@ -246,44 +246,44 @@ class GorkoApiTest extends Model
 					foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
 						$gorko_room_ids[$room['id']] = null;
 					}
-					//$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
-					//	'gorko_id' => $restaurant['id'],
-					//	'dsn' => Yii::$app->db->dsn,
-					//	'watermark' => $param['watermark'],
-					//	'imageHash' => $param['imageHash']
-					//]));
+					$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+						'gorko_id' => $restaurant['id'],
+						'dsn' => Yii::$app->db->dsn,
+						'watermark' => $param['watermark'],
+						'imageHash' => $param['imageHash']
+					]));
 				}
 			}
 
 
 
-			//foreach ($gorko_rest_ids as $id => $value) {
-			//	if (($key = array_search($id, $current_rest_ids)) !== false) {
-			//	    unset($current_rest_ids[$key]);
-			//	}
-			//}
+			foreach ($gorko_rest_ids as $id => $value) {
+				if (($key = array_search($id, $current_rest_ids)) !== false) {
+				    unset($current_rest_ids[$key]);
+				}
+			}
 
-			//foreach ($current_rest_ids as $key => $value) {
-			//	$restaurant = Restaurants::find()
-			//		->where(['gorko_id' => $value])
-			//		->one();
-			//	$restaurant->active = 0;
-			//	$restaurant->save();
-			//}
+			foreach ($current_rest_ids as $key => $value) {
+				$restaurant = Restaurants::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$restaurant->active = 0;
+				$restaurant->save();
+			}
 
-			//foreach ($gorko_room_ids as $id => $value) {
-			//	if (($key = array_search($id, $current_room_ids)) !== false) {
-			//	    unset($current_room_ids[$key]);
-			//	}
-			//}			
+			foreach ($gorko_room_ids as $id => $value) {
+				if (($key = array_search($id, $current_room_ids)) !== false) {
+				    unset($current_room_ids[$key]);
+				}
+			}			
 
-			//foreach ($current_room_ids as $key => $value) {
-			//	$room = Rooms::find()
-			//		->where(['gorko_id' => $value])
-			//		->one();
-			//	$room->active = 0;
-			//	$room->save();
-			//}
+			foreach ($current_room_ids as $key => $value) {
+				$room = Rooms::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$room->active = 0;
+				$room->save();
+			}
 
 			curl_multi_close($mh);
 			exit;

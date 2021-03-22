@@ -8,7 +8,7 @@ use backend\models\RestaurantsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use frontend\modules\gorko_ny\models\ElasticItems;
+use frontend\modules\banketnye_zaly_moskva\models\ElasticItems;
 
 /**
  * RestaurantsController implements the CRUD actions for Restaurants model.

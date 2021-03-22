@@ -12,7 +12,11 @@ class FilterQueryConstructorElastic extends BaseObject{
 		   $query_type,
 		   $nested,
 		   $type,
-		   $location;
+		   $location,
+		   $metro,
+		   $spec,
+		   $specials,
+		   $extra;
 
 	public function __construct($filter_data, $main_table){
 
@@ -37,7 +41,11 @@ class FilterQueryConstructorElastic extends BaseObject{
 		$this->query_arr = [];
 		$this->nested = ($filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table);
 		$this->type = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'types.id');
+		$this->spec = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'spec.id');
+		$this->specials = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'specials.id');
+		$this->extra = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'extra.id');
 		$this->location = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'location.id');
+		$this->metro = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'metro_stations.id');
 
 		//print_r($filter_data['key']);
 
@@ -55,11 +63,49 @@ class FilterQueryConstructorElastic extends BaseObject{
 			}
 		}
 		//Тип
+		if($filter_data['key'] == 'spec.id'){
+			$this->query_arr = [
+				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			];
+		}
+
+		//Тип мероприятия
 		if($filter_data['key'] == 'types.id'){
 			$this->query_arr = [
 				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
 			];
 		}
+
+		//Особенности
+		if($filter_data['key'] == 'specials.id'){
+			$this->query_arr = [
+				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			];
+		}
+
+		//Дополнительные пар-тры
+		if($filter_data['key'] == 'extra.id'){
+			$this->query_arr = [
+				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			];
+		}
+
+		//Метро ресторана
+		if($filter_data['key'] == 'metro_stations.id'){
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['match' => [$prefix.$filter_data['key'] => $value]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					["match" => [
+						$prefix.$filter_data['key'] => $filter_data['value']
+					]]
+				];
+			}
+		}
+		
 		//Локация ресторана
 		if($filter_data['key'] == 'location.id'){
 			if(is_array($filter_data['value'])){
@@ -75,6 +121,8 @@ class FilterQueryConstructorElastic extends BaseObject{
 				];
 			}
 		}
+
+
 		//Местоположение
 		elseif($filter_data['key'] == 'district'){
 			if(is_array($filter_data['value'])){

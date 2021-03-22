@@ -20,7 +20,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 	public function execute($queue) {
 
 		if( $curl = curl_init() ) {
-		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district&is_edit=1');
+		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1');
 		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		    curl_setopt($curl, CURLOPT_ENCODING, '');
 		    $response = json_decode(curl_exec($curl), true)['restaurant'];
@@ -28,12 +28,19 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 		    $connection = new \yii\db\Connection([
 			    'dsn' => $this->dsn,
-			    'username' => 'pmnetwork',
-			    'password' => 'P2t8wdBQbczLNnVT',
+			    'username' => 'root',
+			    'password' => 'Gkcfmdsop',
 			    'charset' => 'utf8',
 			]);
 			$connection->open();
 			Yii::$app->set('db', $connection);
+
+			//$log = file_get_contents('/var/www/pmnetwork/log/manual_samara_bd.log');
+			//$log = json_decode($log, true);
+			//$log[time()] = ['rest_id' => $response['id'], 'commission' => $response['commission']];
+			//$log = json_encode($log);
+			//file_put_contents('/var/www/pmnetwork/log/manual_samara_bd.log', $log);
+			//exit;
 
 			if(!$response['commission'] && $this->only_comm){
 				return 1;
@@ -104,6 +111,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			if(isset($response['params']['param_own_alcohol'])){
 				$attributes['alcohol'] = $response['params']['param_own_alcohol']['value'];
 			}
+			$attributes['alcohol_stock'] = isset($response['params']['param_alcohol']) ? $response['params']['param_alcohol']['value'] : '';
 			$attributes['cuisine'] = isset($response['params']['param_cuisine']) ? $response['params']['param_cuisine']['display']['text'] : '';
 			if(isset($response['params']['param_firework'])){
 				$attributes['firework'] = $response['params']['param_firework']['value'];
@@ -121,6 +129,45 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				$attributes['special'] = $response['params']['param_special']['display']['text'] ? $response['params']['param_special']['display']['text'] : '';
 			}	
 
+			
+
+			//$attributes['metro_station_id'] = count($response['metro']) > 0? $response['metro'][0]['id'] : 0;
+			//ТИП ПРАЗДНИКА
+			$attributes['restaurants_spec'] = '';
+			$flag = true;
+			foreach ($response['room_specs'] as $spec) {
+				if ($flag) {
+					$attributes['restaurants_spec'] .= $spec['id'];
+					$flag = false;
+				} else {
+					$attributes['restaurants_spec'] .= ',' . $spec['id'];
+				}
+			}
+
+			//Сервисы за отдельную плату
+			$attributes['extra_services_ids'] = '';
+			$flag = true;
+			foreach ($response['params']['param_extra_services']['value'] as $key => $value) {
+				if ($flag) {
+					$attributes['extra_services_ids'] .= $value;
+					$flag = false;
+				} else {
+					$attributes['extra_services_ids'] .= ',' . $value;
+				}
+			}
+
+			//Особенности
+			$attributes['special_ids'] = '';
+			$flag = true;
+			foreach ($response['params']['param_special']['value'] as $key => $value) {
+				if ($flag) {
+					$attributes['special_ids'] .= $value;
+					$flag = false;
+				} else {
+					$attributes['special_ids'] .= ',' . $value;
+				}
+			}
+
 			foreach ($response['contacts'] as $key => $value) {
 				if($value['key'] == 'phone'){
 					$attributes['phone'] = $value['value'];
@@ -129,11 +176,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 			$model->attributes = $attributes;
 		    $rest_save = $model->save();
-
-		    //$log = file_get_contents('/var/www/pmnetwork/pmnetwork/log/manual.log');
-		    //$log .= json_encode($attributes);
-		    //$log .= json_encode($model->getErrors());
-		    //file_put_contents('/var/www/pmnetwork/pmnetwork/log/manual.log', $log);
+	    
 
 		    $restModel = Restaurants::find()->where(['gorko_id' => $response['id']])->one($connection);
 
@@ -142,6 +185,11 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			    foreach ($response['covers'] as $key => $image) {
 					$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
 					$imgAttributes = [];
+
+					if($imgModel && ($imgModel->item_id != $restModel->id)) {
+						$imgModel->item_id = $restModel->id;
+						$imgModel->save();
+					}
 			    
 				    if(!$imgModel){
 				    	$imgModel = new Images();
@@ -217,10 +265,16 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 					}
 					else{
 						$roomAttributes['banquet_price'] = $room['prices'][0]['value'] * $room['params']['param_capacity_0']['value'];
-					}
+					}	
 
 			    	$roomModel->attributes = $roomAttributes;
 			    	$roomModel->save();
+
+			    	//$log = file_get_contents('/var/www/pmnetwork/log/manual.log');
+					//$log .= json_encode($attributes);
+					//$log .= json_encode($roomModel->errors);
+					//file_put_contents('/var/www/pmnetwork/log/manual.log', $log);
+			    	
 
 			    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
 
@@ -228,6 +282,11 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			    		foreach ($room['media'] as $key => $image) {
 							$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
 							$imgAttributes = [];
+
+							if($imgModel && ($imgModel->item_id != $roomModel->id)) {
+								$imgModel->item_id = $roomModel->id;
+								$imgModel->save();
+							}
 					    
 						    if(!$imgModel){
 						    	$imgModel = new Images();
@@ -257,7 +316,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 								]));
 						    }			    
 						}
-			    	}		    	
+			    	}    	
 				}
 			}	    
 	  	}

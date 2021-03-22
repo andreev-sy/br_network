@@ -50,14 +50,17 @@ class RayoniSlice extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getListForIndex()
+    public function getListForIndex($minCount = 0)
     {
         $rayoniList = RayoniSlice::find()
-            ->where(['active' => '1'])
+            ->where(['active' => '1'])                
+            ->andWhere('restaurants_count > :minCount', ['minCount' => $minCount])
             ->limit(21)
+            ->orderBy(['h1' => SORT_ASC])
             ->asArray()
             ->all();
 
         return array_chunk($rayoniList, 7);
     }
+
 }

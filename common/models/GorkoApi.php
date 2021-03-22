@@ -38,16 +38,13 @@ class GorkoApi extends Model
 				}
 			}			
 
-			$api_url = 'https://api.gorko.ru/api/v2/directory/venues?'.$param['params'];
-			$api_per_page = '&per_page=';
-			$api_page = '&page=';
+			$api_url = 'https://api.gorko.ru/api/v3/venuecard?list[seed]=1&entity[languageId]=1&list[page]=1&list[perPage]=10000&list[typeId]=1&'.$param['params'];
 
 			//ПЕРВЫЙ ЗАПРОС ПО API			
 			$ch_venues = curl_init();
-			$ch_venues_url = $api_url.$api_per_page.'20'.$api_page.'1';
 			
-			curl_setopt($ch_venues, CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1"));
-		    curl_setopt($ch_venues, CURLOPT_URL, $ch_venues_url);
+			curl_setopt($ch_venues, CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1; ab_test_perfect_venue_samara=1"));
+		    curl_setopt($ch_venues, CURLOPT_URL, $api_url);
 		    curl_setopt($ch_venues, CURLOPT_RETURNTRANSFER,true);
 		    curl_setopt($ch_venues, CURLOPT_ENCODING, '');	    
 
@@ -57,53 +54,59 @@ class GorkoApi extends Model
 			$gorko_rest_ids = [];
 			$gorko_room_ids = [];
 
-			$page_count = $venues['meta']['pages_count'];
+			$page_count = $venues['meta']['totalPages'];
 
 			//ВТОРОЙ ПАКЕТ ЗАПРОСОВ В API, В ЗАВИСИМОСТИ ОТ КОЛ-ВА ЭЛЕМЕНТОВ
-			$mh = curl_multi_init();
-			$channels = [];
+			//$mh = curl_multi_init();
+			//$channels = [];
 
-			if($page_count > 1){
-				for ($i=2; $i <= $page_count; $i++) { 
-					$channels[$i] = curl_init();
-					$ch_venues_url = $api_url.$api_per_page.'20'.$api_page.$i;
-					
-					curl_setopt($channels[$i], CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1"));
-				    curl_setopt($channels[$i], CURLOPT_URL, $ch_venues_url);
-				    curl_setopt($channels[$i], CURLOPT_RETURNTRANSFER,true);
-				    curl_setopt($channels[$i], CURLOPT_ENCODING, '');
-				    curl_multi_add_handle($mh, $channels[$i]);
-				}
-			}
-
-			$running = null;
-			do {
-				curl_multi_exec($mh, $running);
-			} while ($running);
-
-			for ($i=2; $i <= $page_count; $i++) {
-				curl_multi_remove_handle($mh, $channels[$i]);
-			}
+			//if($page_count > 1){
+			//	for ($i=2; $i <= $page_count; $i++) { 
+			//		$channels[$i] = curl_init();
+			//		$ch_venues_url = $api_url.$api_per_page.'20'.$api_page.$i;
+			//		
+			//		curl_setopt($channels[$i], CURLOPT_HTTPHEADER, array("Cookie: ab_test_venue_city_show=1; ab_test_perfect_venue_samara=1"));
+			//	    curl_setopt($channels[$i], CURLOPT_URL, $ch_venues_url);
+			//	    curl_setopt($channels[$i], CURLOPT_RETURNTRANSFER,true);
+			//	    curl_setopt($channels[$i], CURLOPT_ENCODING, '');
+			//	    curl_multi_add_handle($mh, $channels[$i]);
+			//	}
+			//}
+//
+			//$running = null;
+			//do {
+			//	curl_multi_exec($mh, $running);
+			//} while ($running);
+//
+			//for ($i=2; $i <= $page_count; $i++) {
+			//	curl_multi_remove_handle($mh, $channels[$i]);
+			//}
 
 			//ОБРАБОТКА ПЕРВОГО ПУЛА РЕСТОРАНОВ
-			foreach ($venues['restaurants'] as $key => $restaurant) {
+			foreach ($venues['entity'] as $key => $restaurant) {
 				$gorko_rest_ids[$restaurant['id']] = null;
-				foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
+				foreach ($venues['entity'][$key]['room'] as $key => $room) {
 					$gorko_room_ids[$room['id']] = null;
 				}
 			}
 
 			//ОБРАБОТКА ВТОРОГО ПУЛА РЕСТОРАНОВ
-			foreach ($channels as $channel) {
-				$venues = json_decode(curl_multi_getcontent($channel), true);
-				foreach ($venues['restaurants'] as $key => $restaurant) {
-					$gorko_rest_ids[$restaurant['id']] = null;
-					foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
-						$gorko_room_ids[$room['id']] = null;
-					}
-				}
-			}
-			curl_multi_close($mh);
+			//foreach ($channels as $channel) {
+			//	$venues = json_decode(curl_multi_getcontent($channel), true);
+			//	foreach ($venues['restaurants'] as $key => $restaurant) {
+			//		$gorko_rest_ids[$restaurant['id']] = null;
+			//		foreach ($venues['restaurants'][$key]['rooms'] as $key => $room) {
+			//			$gorko_room_ids[$room['id']] = null;
+			//		}
+			//	}
+			//}
+			//curl_multi_close($mh);
+
+			$log = file_get_contents('/var/www/pmnetwork/log/manual_samara_bd.log');
+			$log = json_decode($log, true);
+			$log[time()] = ['rest_ids' => $gorko_rest_ids, 'api_url' => $api_url];
+			$log = json_encode($log);
+			file_put_contents('/var/www/pmnetwork/log/manual_samara_bd.log', $log);
 
 			//СБРОС АКТИВНОСТИ РЕСТОРАНОВ ИЗ БАЗЫ
 			foreach ($gorko_rest_ids as $id => $value) {
@@ -134,6 +137,8 @@ class GorkoApi extends Model
 				$room->active = 0;
 				$room->save();
 			}
+
+			
 
 			//СОЗДАНИЕ ОЧЕРЕДИ ДЛЯ ОБНОВЛЕНИЯ РЕСТОРАНОВ
 			foreach ($gorko_rest_ids as $key => $value) {
@@ -190,10 +195,6 @@ class GorkoApi extends Model
 
 			$gorko_rest_ids = [];
 			$gorko_room_ids = [];
-
-			echo '<pre>';
-			print_r($venues['restaurants']);
-			echo '</pre>';
 
 			foreach ($venues['restaurants'] as $key => $restaurant) {
 				$gorko_rest_ids[$restaurant['id']] = null;
@@ -260,33 +261,33 @@ class GorkoApi extends Model
 
 
 
-			//foreach ($gorko_rest_ids as $id => $value) {
-			//	if (($key = array_search($id, $current_rest_ids)) !== false) {
-			//	    unset($current_rest_ids[$key]);
-			//	}
-			//}
+			foreach ($gorko_rest_ids as $id => $value) {
+				if (($key = array_search($id, $current_rest_ids)) !== false) {
+				    unset($current_rest_ids[$key]);
+				}
+			}
 
-			//foreach ($current_rest_ids as $key => $value) {
-			//	$restaurant = Restaurants::find()
-			//		->where(['gorko_id' => $value])
-			//		->one();
-			//	$restaurant->active = 0;
-			//	$restaurant->save();
-			//}
+			foreach ($current_rest_ids as $key => $value) {
+				$restaurant = Restaurants::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$restaurant->active = 0;
+				$restaurant->save();
+			}
 
-			//foreach ($gorko_room_ids as $id => $value) {
-			//	if (($key = array_search($id, $current_room_ids)) !== false) {
-			//	    unset($current_room_ids[$key]);
-			//	}
-			//}			
+			foreach ($gorko_room_ids as $id => $value) {
+				if (($key = array_search($id, $current_room_ids)) !== false) {
+				    unset($current_room_ids[$key]);
+				}
+			}			
 
-			//foreach ($current_room_ids as $key => $value) {
-			//	$room = Rooms::find()
-			//		->where(['gorko_id' => $value])
-			//		->one();
-			//	$room->active = 0;
-			//	$room->save();
-			//}
+			foreach ($current_room_ids as $key => $value) {
+				$room = Rooms::find()
+					->where(['gorko_id' => $value])
+					->one();
+				$room->active = 0;
+				$room->save();
+			}
 
 			curl_multi_close($mh);
 			exit;

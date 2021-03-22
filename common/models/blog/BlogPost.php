@@ -7,6 +7,7 @@ namespace common\models\blog;
 use common\models\blog\BlogPostTag;
 use Yii;
 use common\models\siteobject\BaseSiteObject;
+use frontend\components\Declension;
 use yii\behaviors\BlameableBehavior;
 use yii\helpers\ArrayHelper;
 
@@ -143,6 +144,12 @@ class BlogPost extends BaseSiteObject
     public function getBlogTags()
     {
         return $this->hasMany(\common\models\blog\BlogTag::className(), ['id' => 'blog_tag_id'])->viaTable('blog_post_tag', ['blog_post_id' => 'id']);
+    }
+
+    public function getRusDate()
+    {
+        $timestamp = strtotime($this->published_at);
+        return Declension::dateWithRusMonth($timestamp);
     }
 
     public function getHtml($extraData = [])

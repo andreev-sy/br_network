@@ -12,12 +12,6 @@ use Yii;
  * @property int $active
  * @property int $restaurants_count
  * @property string $title
- * @property string $description
- * @property string $keywords
- * @property string $img_alt
- * @property string $h1
- * @property string $text_top
- * @property string $text_bottom
  */
 class MetroSlice extends \yii\db\ActiveRecord
 {
@@ -36,8 +30,8 @@ class MetroSlice extends \yii\db\ActiveRecord
     {
         return [
             // [['id', 'city_id', 'line_id'], 'required'],
-            [['alias', 'title', 'description', 'keywords', 'img_alt', 'h1', 'text_top', 'text_bottom'], 'string'],
-            [['id', 'station_id', 'active', 'restaurants_count',],  'integer']
+            [['alias', 'title', 'same_station_id', 'latitude', 'longitude'], 'string'],
+            [['id', 'active', 'restaurants_count'],  'integer']
         ];
     }
 
@@ -51,11 +45,11 @@ class MetroSlice extends \yii\db\ActiveRecord
         ];
     }
 
-    public function getStation()
-    {
-        $station = $this->hasOne(MetroStations::className(), ['id' => 'station_id']);
-        return $station;
-    }
+    // public function getStation()
+    // {
+    //     $station = $this->hasOne(MetroStations::className(), ['id' => 'station_id']);
+    //     return $station;
+    // }
 
     public function getListForIndex($minCount = 0)
     {
@@ -63,6 +57,7 @@ class MetroSlice extends \yii\db\ActiveRecord
             ->where(['active' => '1'])                
             ->andWhere('restaurants_count > :minCount', ['minCount' => $minCount])
             ->limit(27)
+            ->orderBy(['restaurants_count' => SORT_DESC])
             ->asArray()
             ->all();
 
@@ -74,10 +69,8 @@ class MetroSlice extends \yii\db\ActiveRecord
         $stationList = MetroSlice::find()
             ->where(['active' => '1'])                
             ->andWhere('restaurants_count > :minCount', ['minCount' => $minCount])
-            ->with('station')
             ->all();
 
         return $stationList;
     }
-
 }

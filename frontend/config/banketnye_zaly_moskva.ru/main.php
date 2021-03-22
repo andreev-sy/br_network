@@ -4,6 +4,7 @@ $params = array_merge(
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
     require __DIR__ . '/../params-local.php'
+    \common\utility\SiteParamsHelper::getParamsForModule('banketnye_zaly_moskva')
 );
 
 return [
@@ -47,7 +48,7 @@ return [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
             'username' => 'root',
-            'password' => 'LP_db_',
+            'password' => 'Gkcfmdsop',
             'charset' => 'utf8',
         ],
         'elasticsearch' => [
@@ -85,13 +86,17 @@ return [
             'showScriptName' => false,
             'rules' => [
                 '/' => 'site/index',
-                ['pattern'=>'/catalog/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
+                ['pattern'=>'/catalog/restoran-<slug:[\w-]+>','route'=>'item/index', 'suffix'=>'/'],
                 ['pattern'=>'/catalog/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
                 ['pattern'=>'/catalog/','route'=>'listing/index', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter-main','route'=>'listing/ajax-filter-slice', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/filter','route'=>'listing/ajax-filter', 'suffix'=>'/'],
                 ['pattern'=>'/ajax/form','route'=>'form/validate', 'suffix'=>'/'],
-                ['pattern'=>'/api/map_all','route'=>'api/mapall', 'suffix'=>'/'],
+                ['pattern'=>'/api/map_slices','route'=>'api/mapslices', 'suffix'=>'/'],
+                ['pattern'=>'/api/map_metro','route'=>'api/mapmetro', 'suffix'=>'/'],
+                ['pattern'=>'/blog/<alias>/', 'route' => 'blog/post', 'suffix'=>'/'],
+                ['pattern'=>'/blog/preview-post/<id>/', 'route' => 'blog/preview', 'suffix'=>'/'],
+                ['pattern'=>'/privacy/', 'route' => 'other/personal-data', 'suffix'=>'/'],
             ],
         ],
         

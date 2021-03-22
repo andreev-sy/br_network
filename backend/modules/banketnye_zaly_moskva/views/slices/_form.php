@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'alias')->textInput() ?>
+    <?= $form->field($model, 'alias')->textInput(['disabled' => true]) ?>
 
     <?= $form->field($model, 'h1')->textInput() ?>
 
@@ -20,7 +20,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'description')->textInput() ?>
 
-    <?= $form->field($model, 'params')->textInput() ?>
+    <?= $form->field($model, 'params')->textInput(['disabled' => true]) ?>
 
     <?= $form->field($model, 'keywords')->textInput() ?>
 

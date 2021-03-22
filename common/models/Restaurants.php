@@ -35,8 +35,8 @@ class Restaurants extends BaseSiteObject
     {
         return [
             [['gorko_id', 'name', 'address', 'city_id'], 'required'],
-            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking', 'metro_station_id'], 'integer'],
-            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type', 'restaurants_spec'], 'string'],
+            [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking', 'alcohol_stock'], 'integer'],
+            [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type', 'restaurants_spec', 'metro_station_id', 'extra_services_ids', 'special_ids'], 'string'],
         ];
     }
 
