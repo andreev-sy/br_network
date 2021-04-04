@@ -381,6 +381,8 @@ const SortableItem = SortableElement(
                 }
             }
         }
+
+        const memoHeadingLevel = initialInputsContent.paragraph.level;
         if (!_.isEmpty(draftBlock.content)) {
             initialInputsContent = _.merge(
                 {},
@@ -388,6 +390,8 @@ const SortableItem = SortableElement(
                 draftBlock.content,
             );
         }
+        //если в описании блоков были изменения, то назначаем их вместо старых
+        initialInputsContent.paragraph.level = memoHeadingLevel;
 
         const [inputsContent, setInputContent] = useState(initialInputsContent);
         const [inputsReadyState, setInputsReadyState] = useState(
@@ -522,6 +526,11 @@ const SortableItem = SortableElement(
         };
 
         const onSave = () => {
+            if(_.isEqual(inputsContent, draftBlock.content)) {
+                setIsDirty(false);
+                return;
+            };
+            draftBlock.content = inputsContent;
             ajax(
                 'put',
                 API_DRAFT_BLOCKS + draftBlock.id + '/',
@@ -1244,7 +1253,7 @@ const Editor = ({
                 >
                     {draftBlocks.map((draftBlock, idx) => (
                         <SortableItem
-                            key={`item_${draftBlock.id}`}
+                            key={`item_${draftBlock.id}_${draftBlock.blog_block_id}`}
                             index={draftBlock.sort}
                             item={draftBlock}
                             ajax={ajax}
