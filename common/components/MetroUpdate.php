@@ -76,6 +76,7 @@ class MetroUpdate {
         $newStation->name = str_replace('метро ', '', $closestStation['stationName']);
         $newStation->latitude = $closestStation['latitude'];
         $newStation->longitude = $closestStation['longitude'];
+        $newStation->alias = $this->getTransliterationForUrl(str_replace('метро ', '', $closestStation['stationName']));
         $newStation->save(false);
       }
 

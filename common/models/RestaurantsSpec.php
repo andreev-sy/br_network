@@ -28,7 +28,7 @@ class RestaurantsSpec extends \yii\db\ActiveRecord
         return [
             [['id', 'name'], 'required'],
             [['name'], 'string'],
-            [['id'], 'integer']
+            [['id', 'table_id', 'slice_id'], 'integer']
         ];
     }
 
@@ -41,4 +41,10 @@ class RestaurantsSpec extends \yii\db\ActiveRecord
 
         ];
     }
+
+    public function getSlice()
+    {
+        return $this->hasOne(Slices::class, ['id' => 'slice_id']);
+    }
+
 }

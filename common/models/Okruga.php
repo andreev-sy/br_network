@@ -28,7 +28,7 @@ class Okruga extends \yii\db\ActiveRecord
     {
         return [
             [['id', 'name'], 'required'],
-            [['name', 'short_name'], 'string'],
+            [['name', 'short_name', 'alias'], 'string'],
             [['id'], 'integer']
         ];
     }

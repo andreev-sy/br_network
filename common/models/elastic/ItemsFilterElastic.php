@@ -268,7 +268,7 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_types","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_types","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -281,7 +281,7 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -294,7 +294,7 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_specials","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_specials","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -307,7 +307,7 @@ class ItemsFilterElastic extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_extra","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_extra","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);

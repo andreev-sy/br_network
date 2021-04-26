@@ -13,6 +13,7 @@ use common\models\Rooms;
 use common\components\MetroUpdate;
 use frontend\modules\pmnbd\models\ElasticItems;
 use frontend\modules\pmnbd\models\SubdomenFilteritem;
+use common\components\AsyncRenewPhones;
 
 class GorkoconsoleController extends Controller
 {
@@ -27,6 +28,10 @@ class GorkoconsoleController extends Controller
 				'subdomen' 		=> null,
 				'elasticModel' 	=> 'frontend\modules\pmnbd\models\ElasticItems',
 				'only_comm'		=> true,
+				'gorko_api'		=> [
+					'channel_key'	=> 'birthday-place',
+					'city' 			=> false,
+				],
 			]
 		],
 		'banket' => [
@@ -51,6 +56,46 @@ class GorkoconsoleController extends Controller
 				'subdomen' 		=> null,
 				'elasticModel' 	=> 'frontend\modules\priroda_dr\models\ElasticItems',
 				'only_comm'		=> false,
+				'gorko_api'		=> [
+					'channel_key'	=> 'drnaprirode',
+					'city' 			=> false,
+				],
+			]
+		],
+		'arenda' => [
+			'params' 	=> [
+				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}',
+				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark-arenda.png',
+				'imageHash' 	=> 'arenda',
+				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_arenda',
+				'subdomens' 	=> true,
+				'subdomen' 		=> null,
+				'elasticModel' 	=> 'frontend\modules\arenda\models\ElasticItems',
+				'only_comm'		=> false,
+			]
+		],
+		'graduation' => [
+			'params' 	=> [
+				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}&entity[filters]=event%3D11&list[filters]=event%3D11&entity[specId]=11',
+				'watermark' 	=> false,
+				'imageHash' 	=> 'graduation',
+				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_graduation',
+				'subdomens' 	=> true,
+				'subdomen' 		=> null,
+				'elasticModel' 	=> 'frontend\modules\graduation\models\ElasticItems',
+				'only_comm'		=> true,
+			]
+		],
+		'topbanket' => [
+			'params' 	=> [
+				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}&entity[filters]=event%3D11&list[filters]=event%3D11&entity[specId]=11',
+				'watermark' 	=> false,
+				'imageHash' 	=> 'topbanket',
+				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_top_banket',
+				'subdomens' 	=> true,
+				'subdomen' 		=> null,
+				'elasticModel' 	=> 'frontend\modules\top_banket\models\ElasticItems',
+				'only_comm'		=> true,
 			]
 		]
 	];
@@ -102,32 +147,40 @@ class GorkoconsoleController extends Controller
 			]);
 			$connection->open();
 			Yii::$app->set('db', $connection);
-			SubdomenFilteritem::deactivate();
-			$counterActive = 0;
-			$counterInactive = 0;
-			foreach (Subdomen::find()->all() as $key => $subdomen) {
-				$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
-				$subdomen->active = $isActive;
-				$subdomen->save();
-				if ($subdomen->active) {
-					foreach (FilterItems::find()->all() as $filterItem) {
-						$hits = $this->getFilterItemsHitsForCity($filterItem, $subdomen->city_id);
-						$where = ['subdomen_id' => $subdomen->id, 'filter_items_id' => $filterItem->id];
-						$subdomenFilterItem = SubdomenFilteritem::find()->where($where)->one() ?? new SubdomenFilteritem($where);
-						$subdomenFilterItem->hits = $hits;
-						$subdomenFilterItem->is_valid = 1;
-						$subdomenFilterItem->save();
-						$hits > 0 ? $counterActive++ : $counterInactive++;
+			if($site == 'birthday'){
+				SubdomenFilteritem::deactivate();
+				$counterActive = 0;
+				$counterInactive = 0;
+				foreach (Subdomen::find()->all() as $key => $subdomen) {
+					$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
+					$subdomen->active = $isActive;
+					$subdomen->save();
+					if ($subdomen->active) {
+						foreach (FilterItems::find()->all() as $filterItem) {
+							$hits = $this->getFilterItemsHitsForCity($filterItem, $subdomen->city_id);
+							$where = ['subdomen_id' => $subdomen->id, 'filter_items_id' => $filterItem->id];
+							$subdomenFilterItem = SubdomenFilteritem::find()->where($where)->one() ?? new SubdomenFilteritem($where);
+							$subdomenFilterItem->hits = $hits;
+							$subdomenFilterItem->is_valid = 1;
+							$subdomenFilterItem->save();
+							$hits > 0 ? $counterActive++ : $counterInactive++;
+						}
 					}
 				}
+				foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
+					$room->cover_url = '/img/bd/no_photo_s.png';
+					$room->save();
+				}
+				echo "active=$counterActive; inactive=$counterInactive";
 			}
-			foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
-				$room->cover_url = '/img/bd/no_photo_s.png';
-				$room->save();
-			}
-			echo "active=$counterActive; inactive=$counterInactive";
+			else{
+				foreach (Subdomen::find()->all() as $key => $subdomen) {
+					$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
+					$subdomen->active = $isActive;
+					$subdomen->save();
+				}
+			}				
 		}
-
 		return 1;
 	}
 
@@ -304,5 +357,72 @@ class GorkoconsoleController extends Controller
 	public function actionRefreshMetroSlicesRestaurantCount()
 	{
 		return MetroUpdate::refreshMetroSlicesRestaurantCount();
+	}
+
+	public function actionCheckPhonesApi()
+	{
+		$curl = curl_init();
+		$headers = array();
+		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
+		curl_setopt($curl, CURLOPT_URL, 'https://v.wedding.net/api2/');
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+	    curl_setopt($curl, CURLOPT_ENCODING, '');
+	    $response = json_decode(curl_exec($curl), true);
+	    curl_close($curl);
+	    print_r($response);
+	    exit;
+	}
+
+	public function actionApiNewChannel()
+	{
+		$curl = curl_init();
+		$headers = array();
+		$payload = [
+			'key' 		=> 'banket_wedding_gurugram',
+			'name' 	=> 'Лэндинг банкетов в Gurugram'
+		];
+
+		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
+		curl_setopt($curl, CURLOPT_URL, 'https://v.wedding.net/api2/sat/channel');
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
+	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+	    curl_setopt($curl, CURLOPT_ENCODING, '');
+	    $response = json_decode(curl_exec($curl), true);
+	    curl_close($curl);
+	    print_r($response);
+	    exit;
+	}
+
+	public function actionGetCityPhones($site)
+	{
+		$siteArr = $this->siteArr;
+		if (!array_key_exists($site, $siteArr)) {
+			return 0;
+		}
+
+		if($siteArr[$site]['params']['subdomens']){
+			$connection = new \yii\db\Connection([
+				'dsn' 		=> $siteArr[$site]['params']['dsn'],
+				'username' => 'root',
+				'password' => 'Gkcfmdsop',
+				'charset' => 'utf8',
+			]);
+			$connection->open();
+			Yii::$app->set('db', $connection);
+
+			$subdomen_model = Subdomen::find()
+				->all($connection);
+
+			foreach ($subdomen_model as $key => $subdomen) {
+				$subdomenArr = $siteArr;
+				$queue_id = Yii::$app->queue->push(new AsyncRenewPhones([
+					'gorko_city_id'	=> $subdomen->city_id,
+					'dsn' 			=> $siteArr[$site]['params']['dsn'],
+					'channel_key' 	=> $siteArr[$site]['params']['gorko_api']['channel_key']
+				]));
+			}
+		}
 	}
 }
