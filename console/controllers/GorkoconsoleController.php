@@ -17,172 +17,188 @@ use common\components\AsyncRenewPhones;
 
 class GorkoconsoleController extends Controller
 {
-	public $siteArr = [
-		'birthday' => [
-			'params' 	=> [
-				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}&entity[filters]=event%3D9&list[filters]=event%3D9&entity[specId]=9',
-				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark.png',
-				'imageHash' 	=> 'birthdaypmn',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_bd',
-				'subdomens' 	=> true,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\pmnbd\models\ElasticItems',
-				'only_comm'		=> true,
-				'gorko_api'		=> [
-					'channel_key'	=> 'birthday-place',
-					'city' 			=> false,
-				],
-			]
-		],
-		'banket' => [
-			'params' 	=> [
-				'params' 		=> 'city_id=4400&type_id=1',
-				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark-bzm.png',
-				'imageHash' 	=> 'banketmoscow',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_bzm',
-				'subdomens' 	=> false,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\banketnye_zaly_moskva\models\ElasticItems',
-				'only_comm'		=> true,
-			]
-		],
-		'drnaprirode' => [
-			'params' 	=> [
-				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}',
-				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark-drnaprirode.png',
-				'imageHash' 	=> 'drnaprirode',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_priroda_dr',
-				'subdomens' 	=> true,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\priroda_dr\models\ElasticItems',
-				'only_comm'		=> false,
-				'gorko_api'		=> [
-					'channel_key'	=> 'drnaprirode',
-					'city' 			=> false,
-				],
-			]
-		],
-		'arenda' => [
-			'params' 	=> [
-				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}',
-				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark-arenda.png',
-				'imageHash' 	=> 'arenda',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_arenda',
-				'subdomens' 	=> true,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\arenda\models\ElasticItems',
-				'only_comm'		=> false,
-			]
-		],
-		'graduation' => [
-			'params' 	=> [
-				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}&entity[filters]=event%3D11&list[filters]=event%3D11&entity[specId]=11',
-				'watermark' 	=> false,
-				'imageHash' 	=> 'graduation',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_graduation',
-				'subdomens' 	=> true,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\graduation\models\ElasticItems',
-				'only_comm'		=> true,
-			]
-		],
-		'topbanket' => [
-			'params' 	=> [
-				'params' 		=> 'entity[cityId]={{city_id}}&list[cityId]={{city_id}}&entity[filters]=event%3D11&list[filters]=event%3D11&entity[specId]=11',
-				'watermark' 	=> false,
-				'imageHash' 	=> 'topbanket',
-				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_top_banket',
-				'subdomens' 	=> true,
-				'subdomen' 		=> null,
-				'elasticModel' 	=> 'frontend\modules\top_banket\models\ElasticItems',
-				'only_comm'		=> true,
-			]
-		]
-	];
-
-	public function actionRenewAllData($site)
+	//ОБНОВЛЕНИЕ ROOT БАЗЫ ИЗ GORKO API
+	public function actionRenewAllData()
 	{
-		$siteArr = $this->siteArr;
-		if (!array_key_exists($site, $siteArr)) {
-			return 0;
-		}
-		if ($siteArr[$site]['params']['subdomens']) {
-			$connection = new \yii\db\Connection([
-				'dsn' 		=> $siteArr[$site]['params']['dsn'],
-				'username' => 'root',
-				'password' => 'Gkcfmdsop',
-				'charset' => 'utf8',
-			]);
-			$connection->open();
-			Yii::$app->set('db', $connection);
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
 
-			$subdomen_model = Subdomen::find()
-				->all($connection);
-			foreach ($subdomen_model as $key => $subdomen) {
-				$subdomenArr = $siteArr;
-				$subdomenArr[$site]['params']['params']   = str_replace('{{city_id}}', $subdomen->city_id, $subdomenArr[$site]['params']['params']);
-				$subdomenArr[$site]['params']['subdomen'] = $subdomen->city_id;
-				$gorko_api = GorkoApi::renewAllData([$subdomenArr[$site]['params']]);
-				print_r($gorko_api);
-			}
-		} else {
-			GorkoApi::renewAllData([$siteArr[$site]['params']]);
-		}
+		GorkoApi::renewAllData($connection_config);
 
-
-		return 'Понеслась ёбка';
+		return 1;
 	}
 
-	public function actionSubdomenCheck($site)
+	//РАБОТА С ELASTIC-ОМ НА МОДУЛЯХ
+	public function actionElasticDelete($site)
 	{
-		$siteArr = $this->siteArr;
-		if (!array_key_exists($site, $siteArr)) {
-			return 0;
-		} else {
-			$connection = new \yii\db\Connection([
-				'dsn' 		=> $siteArr[$site]['params']['dsn'],
-				'username' => 'root',
-				'password' => 'Gkcfmdsop',
-				'charset' => 'utf8',
-			]);
-			$connection->open();
-			Yii::$app->set('db', $connection);
-			if($site == 'birthday'){
-				SubdomenFilteritem::deactivate();
-				$counterActive = 0;
-				$counterInactive = 0;
-				foreach (Subdomen::find()->all() as $key => $subdomen) {
-					$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
-					$subdomen->active = $isActive;
-					$subdomen->save();
-					if ($subdomen->active) {
-						foreach (FilterItems::find()->all() as $filterItem) {
-							$hits = $this->getFilterItemsHitsForCity($filterItem, $subdomen->city_id);
-							$where = ['subdomen_id' => $subdomen->id, 'filter_items_id' => $filterItem->id];
-							$subdomenFilterItem = SubdomenFilteritem::find()->where($where)->one() ?? new SubdomenFilteritem($where);
-							$subdomenFilterItem->hits = $hits;
-							$subdomenFilterItem->is_valid = 1;
-							$subdomenFilterItem->save();
-							$hits > 0 ? $counterActive++ : $counterInactive++;
-						}
-					}
-				}
-				foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
-					$room->cover_url = '/img/bd/no_photo_s.png';
-					$room->save();
-				}
-				echo "active=$counterActive; inactive=$counterInactive";
+		$connectionAndModel = $this->moduleAttr($site);
+
+		$connectionAndModel['elasticModel']::deleteIndex();
+		return 1;
+	}
+
+	public function actionElasticRefresh($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		$params = [
+			'main_connection_config' => $connectionAndModel['main_connection_config'],
+			'site_connection_config' => $connectionAndModel['site_connection_config'],
+			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
+			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+		];
+
+		if ($connectionAndModel['site_config']['params']['subdomens']) {
+			if ($connectionAndModel['elasticModel']::refreshIndex($params)) {
+				$this->actionSubdomenCheck($site);
 			}
-			else{
-				foreach (Subdomen::find()->all() as $key => $subdomen) {
-					$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
-					$subdomen->active = $isActive;
-					$subdomen->save();
-				}
-			}				
+		}
+		else{
+			$connectionAndModel['elasticModel']::refreshIndex($params);
 		}
 		return 1;
 	}
+
+	public function actionElasticUpdate($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		$params = [
+			'main_connection_config' => $connectionAndModel['main_connection_config'],
+			'site_connection_config' => $connectionAndModel['site_connection_config'],
+			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
+			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+		];
+
+		if ($connectionAndModel['site_config']['params']['subdomens']) {
+			if ($connectionAndModel['elasticModel']::updateIndex($params)) {
+				$this->actionSubdomenCheck($site);
+			}
+		}
+		else{
+			$connectionAndModel['elasticModel']::updateIndex($params);
+		}
+		return 1;
+	}
+
+	//ПРОВЕРКА ПОДДОМЕНОВ НА НУЖНОЕ КОЛ-ВО РЕСТОВ
+	public function actionSubdomenCheck($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		
+		$connection = new \yii\db\Connection($connectionAndModel['site_connection_config']);
+		$connection->open();
+		Yii::$app->set('db', $connection);
+		
+		if($site == 'birthday'){
+			SubdomenFilteritem::deactivate();
+			$counterActive = 0;
+			$counterInactive = 0;
+			foreach (Subdomen::find()->all() as $key => $subdomen) {
+				$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
+				$subdomen->active = $isActive;
+				$subdomen->save();
+				if ($subdomen->active) {
+					foreach (FilterItems::find()->all() as $filterItem) {
+						$hits = $this->getFilterItemsHitsForCity($filterItem, $subdomen->city_id);
+						$where = ['subdomen_id' => $subdomen->id, 'filter_items_id' => $filterItem->id];
+						$subdomenFilterItem = SubdomenFilteritem::find()->where($where)->one() ?? new SubdomenFilteritem($where);
+						$subdomenFilterItem->hits = $hits;
+						$subdomenFilterItem->is_valid = 1;
+						$subdomenFilterItem->save();
+						$hits > 0 ? $counterActive++ : $counterInactive++;
+					}
+				}
+			}
+			foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
+				$room->cover_url = '/img/bd/no_photo_s.png';
+				$room->save();
+			}
+			echo "active=$counterActive; inactive=$counterInactive";
+		}
+		else{
+			foreach (Subdomen::find()->all() as $key => $subdomen) {
+				$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
+				$subdomen->active = $isActive;
+				$subdomen->save();
+			}
+		}
+		return 1;
+	}
+
+	//СБОРЩИК CONNECTION И МОДЕЛИ ИЗ КОНФИГОВ МОДУЛЯ
+	private function moduleAttr($site){
+		if(!isset(\Yii::$app->params['module_api_config'][$site])){
+			print_r('Нет конфига под '.$site);
+			exit;
+		}
+
+		$site_config = \Yii::$app->params['module_api_config'][$site];
+
+		$elasticItemsPath = $site_config['params']['module_path'].'\models\ElasticItems';
+		$elasticModel = new $elasticItemsPath();
+
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$site_connection_config = array_merge($mysql_config, $site_config['mysql_config']);
+		$main_connection_config = array_merge($mysql_config, $main_config['mysql_config']);
+
+		return [
+			'site_config'			 => $site_config,
+			'main_connection_config' => $main_connection_config,
+			'site_connection_config' => $site_connection_config,
+			'elasticModel' 			 => $elasticModel,
+		];
+	}
+
+	public function actionGetCityPhones($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+
+		$connection = new \yii\db\Connection($connectionAndModel['site_connection_config']);
+		$connection->open();
+		Yii::$app->set('db', $connection);
+
+		$subdomen_model = Subdomen::find()
+			->all($connection);
+
+		foreach ($subdomen_model as $key => $subdomen) {
+			$queue_id = Yii::$app->queue->push(new AsyncRenewPhones([
+				'gorko_city_id'			 => $subdomen->city_id,
+				'site_connection_config' => $connectionAndModel['site_connection_config'],
+				'channel_key' 			 => $connectionAndModel['site_config']['params']['gorko_api']['phone_key']
+			]));
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
 
 
 	public function actionShowAllData($site)
@@ -194,30 +210,12 @@ class GorkoconsoleController extends Controller
 			$connection = new \yii\db\Connection([
 				'dsn' 		=> $siteArr[$site]['params']['dsn'],
 				'username' => 'root',
-				'password' => 'Gkcfmdsop',
+				'password' => 'GxU25UseYmeVcsn5Xhzy',
 				'charset' => 'utf8',
 			]);
 			$connection->open();
 			Yii::$app->set('db', $connection);
 			(new GorkoApi())->showAllData([$siteArr[$site]['params']]);
-		}
-	}
-
-	public function actionElasticRefresh($site)
-	{
-		$siteArr = $this->siteArr;
-		if (!array_key_exists($site, $siteArr)) {
-			return 0;
-		}
-		$elasticItems = $siteArr[$site]['params']['elasticModel'];
-		$elasticItemsClass = new $elasticItems();
-		if ($siteArr[$site]['params']['subdomens']) {
-			if ($elasticItemsClass::refreshIndex()) {
-				$this->actionSubdomenCheck($site);
-			}
-		}
-		else{
-			$elasticItemsClass::refreshIndex();
 		}
 	}
 
@@ -336,7 +334,7 @@ class GorkoconsoleController extends Controller
 		$connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn_bd',
 			'username' => 'root',
-			'password' => 'Gkcfmdsop',
+			'password' => 'GxU25UseYmeVcsn5Xhzy',
 			'charset' => 'utf8',
 		]);
 		$connection->open();
@@ -393,36 +391,5 @@ class GorkoconsoleController extends Controller
 	    curl_close($curl);
 	    print_r($response);
 	    exit;
-	}
-
-	public function actionGetCityPhones($site)
-	{
-		$siteArr = $this->siteArr;
-		if (!array_key_exists($site, $siteArr)) {
-			return 0;
-		}
-
-		if($siteArr[$site]['params']['subdomens']){
-			$connection = new \yii\db\Connection([
-				'dsn' 		=> $siteArr[$site]['params']['dsn'],
-				'username' => 'root',
-				'password' => 'Gkcfmdsop',
-				'charset' => 'utf8',
-			]);
-			$connection->open();
-			Yii::$app->set('db', $connection);
-
-			$subdomen_model = Subdomen::find()
-				->all($connection);
-
-			foreach ($subdomen_model as $key => $subdomen) {
-				$subdomenArr = $siteArr;
-				$queue_id = Yii::$app->queue->push(new AsyncRenewPhones([
-					'gorko_city_id'	=> $subdomen->city_id,
-					'dsn' 			=> $siteArr[$site]['params']['dsn'],
-					'channel_key' 	=> $siteArr[$site]['params']['gorko_api']['channel_key']
-				]));
-			}
-		}
 	}
 }

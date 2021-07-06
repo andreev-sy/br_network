@@ -1,5 +1,10 @@
 <?php
 
+$params = array_merge(
+    \common\utility\SiteParamsHelper::getGlobalSiteParams(),
+    require __DIR__ . '/params.php',
+);
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -84,5 +89,6 @@ return [
             ],
         ],
     ],
-    'params' => \common\utility\SiteParamsHelper::getGlobalSiteParams()
+    'params' => $params,
+
 ];

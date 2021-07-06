@@ -2,10 +2,10 @@
 
 namespace common\models\api;
 
-use yii\base\BaseObject;
-use common\models\Restaurants;
-use yii\helpers\ArrayHelper;
 use Yii;
+use yii\base\BaseObject;
+use yii\helpers\ArrayHelper;
+use common\models\Restaurants;
 use common\models\elastic\ItemsFilterElastic;
 
 class MapAll extends BaseObject{
@@ -25,12 +25,13 @@ class MapAll extends BaseObject{
 			switch ($type) {
 				case 'restaurants':
 					foreach ($item->restaurant_images as $key => $image) {
-						$map_preview = $image['subpath'];
+						$map_preview = isset($image['subpath']) ? $image['subpath'] : '';
 						break;
 					}
 					array_push($this->coords['features'], [
 						'type' => "Feature",
 			            'id' => $item->id,
+			            'unique_id' => $item->restaurant_unique_id,
 			            'geometry' => [
 			              'type' => "Point",
 			              'coordinates' => [$item->restaurant_latitude, $item->restaurant_longitude]
@@ -42,17 +43,19 @@ class MapAll extends BaseObject{
 			              'img' => $map_preview,
 			              'clusterCaption' => $item->restaurant_name,
 			              'link' => $link_type == 'id' ? $url.$item->id.'/' : $url.$item->restaurant_slug.'/',
+			              'link_unique' => $link_type == 'id' ? $url.$item->restaurant_unique_id.'/' : $url.$item->restaurant_slug.'/',
 			            ]
 					]);
 					break;
 				case 'rooms':
 					foreach ($item->images as $key => $image) {
-						$map_preview = $image['subpath'];
+						$map_preview = isset($image['subpath']) ? $image['subpath'] : '';
 						break;
 					}
 					array_push($this->coords['features'], [
 						'type' => "Feature",
 			            'id' => $item->id,
+			            'unique_id' => $item->restaurant_unique_id,
 			            'geometry' => [
 			              'type' => "Point",
 			              'coordinates' => [$item->restaurant_latitude, $item->restaurant_longitude]
@@ -64,6 +67,7 @@ class MapAll extends BaseObject{
 			              'img' => $map_preview,
 			              'clusterCaption' => $item->name,
 			              'link' => '/catalog/'.$item->id.'/',
+			              'link_unique' => $link_type == 'id' ? $url.$item->unique_id.'/' : $url.$item->restaurant_slug.'/',
 			            ]
 					]);
 					break;

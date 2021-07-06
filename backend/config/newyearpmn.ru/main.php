@@ -6,16 +6,16 @@ $params = array_merge(
     require __DIR__ . '/../params-local.php',
     \common\utility\SiteParamsHelper::getParamsForModule('gorko_ny')
 );
-Yii::setAlias('@module_web', '@backend/modules/newyearpmn/web');
+Yii::setAlias('@module_web', '@backend/modules/gorko_ny/web');
 
 return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__).'/..',
-    'controllerNamespace' => 'backend\modules\newyearpmn\controllers',
-    'bootstrap' => ['log','newyearpmn'],
+    'controllerNamespace' => 'backend\modules\gorko_ny\controllers',
+    'bootstrap' => ['log','gorko_ny'],
     'modules' => [
-        'newyearpmn' => [
-            'class' => 'backend\modules\newyearpmn\Module',
+        'gorko_ny' => [
+            'class' => 'backend\modules\gorko_ny\Module',
         ],
     ],
     'components' => [
@@ -25,7 +25,7 @@ return [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@app/modules/newyearpmn/views',
+                    '@app/views' => '@app/modules/gorko_ny/views',
                 ],
             ],
         ],
@@ -41,8 +41,8 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
-            'username' => 'pmnetwork',
-            'password' => 'P2t8wdBQbczLNnVT',
+            'username' => 'root',
+            'password' => 'GxU25UseYmeVcsn5Xhzy',
             'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [

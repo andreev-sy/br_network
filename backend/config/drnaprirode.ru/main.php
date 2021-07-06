@@ -43,7 +43,7 @@ return [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_priroda_dr',
             'username' => 'root',
-            'password' => 'Gkcfmdsop',
+            'password' => 'GxU25UseYmeVcsn5Xhzy',
             'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [

@@ -1,10 +1,7 @@
 <?php
 
 namespace backend\modules\svadbanaprirode;
-use Yii;
-/**
- * svadbanaprirode module definition class
- */
+
 class Module extends \yii\base\Module
 {
     /**

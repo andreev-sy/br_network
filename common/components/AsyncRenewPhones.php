@@ -8,16 +8,11 @@ use common\models\Subdomen;
 class AsyncRenewPhones extends BaseObject implements \yii\queue\JobInterface
 {
 	public  $gorko_city_id,
-		   	$dsn,
+		   	$site_connection_config,
 		   	$channel_key;
 
 	public function execute($queue) {
-		$connection = new \yii\db\Connection([
-		    'dsn' => $this->dsn,
-		    'username' => 'root',
-		    'password' => 'Gkcfmdsop',
-		    'charset' => 'utf8',
-		]);
+		$connection = new \yii\db\Connection($this->site_connection_config);
 		$connection->open();
 		Yii::$app->set('db', $connection);
 
@@ -43,5 +38,8 @@ class AsyncRenewPhones extends BaseObject implements \yii\queue\JobInterface
 			$subdomen->phone = $response['phone'];
 			$subdomen->save();
 		}
+
+		print_r($payload);
+		print_r($response);
 	}
 }

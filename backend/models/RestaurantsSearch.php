@@ -17,7 +17,7 @@ class RestaurantsSearch extends Restaurants
     public function rules()
     {
         return [
-            [['id', 'gorko_id', 'min_capacity', 'max_capacity', 'price'], 'integer'],
+            [['id', 'gorko_id', /*'min_capacity', 'max_capacity', 'price'*/], 'integer'],
             [['name', 'address', 'cover_url'], 'safe'],
         ];
     }
@@ -60,9 +60,9 @@ class RestaurantsSearch extends Restaurants
         $query->andFilterWhere([
             'id' => $this->id,
             'gorko_id' => $this->gorko_id,
-            'min_capacity' => $this->min_capacity,
+            /*'min_capacity' => $this->min_capacity,
             'max_capacity' => $this->max_capacity,
-            'price' => $this->price,
+            'price' => $this->price,*/
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])

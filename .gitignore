@@ -6,9 +6,12 @@ backups
 *.xml
 *.bz*
 *.tar*
+
+log/*
 # yii console command
 /yii
 /node_modules/*
+frontend/modules/*
 frontend/web/assets/*
 frontend/web/index-test.php
 frontend/web/index.php

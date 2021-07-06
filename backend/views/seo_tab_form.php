@@ -68,6 +68,8 @@ if(!$seoObject) {
 
             <?php echo $form->field($seoObject, 'pagination_keywords')->textInput(['maxlength' => true]) ?>
 
+            <?php echo $form->field($seoObject, 'img_alt')->textInput(['maxlength' => true]) ?>
+
             <?= isset($seoObject->active) ? $form->field($seoObject, 'active')->checkbox() : '' ?>
             <?php endif; ?>    
 

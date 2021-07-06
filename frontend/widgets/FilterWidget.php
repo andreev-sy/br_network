@@ -10,6 +10,7 @@ class FilterWidget extends Widget
 {
     public $filter_active;
     public $filter_model;
+    public $minPrice = null;
 
     public function run()
     {
@@ -34,9 +35,12 @@ class FilterWidget extends Widget
             }
         }
 
+        // return $filter;
+
         return $this->render('//components/filter/filter.twig', [
         	'filters' => $filter,
-            'filter_active' => $this->filter_active
+            'filter_active' => $this->filter_active,
+            'minPrice' => $this->minPrice
         ]);
     }
 } 

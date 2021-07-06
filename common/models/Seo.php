@@ -22,9 +22,8 @@ class Seo extends BaseObject
 	public $seo_subdomen_obj;
 	public $rest_seo_obj;
 
-	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null)
+	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false)
 	{
-
 		if ($type == 'item' && !empty($item)) {
 			$restAr = Restaurants::findWithSeo()->where(['id' => $item->id])->one();
 			if (!empty($restAr) && !empty($restAr->seoObject) && $restAr->seoObject->active) {
@@ -67,12 +66,12 @@ class Seo extends BaseObject
 		} else {
 			foreach ($this->seo as $key => $text) {
 				if (!(strpos($text, '**') === false)) {
-					$this->seo[$key] = $this->seoRepalce($text, $count, $page);
+					$this->seo[$key] = $this->seoRepalce($text, $count, $page, $min_price);
 				}
 			}
 		}
 
-		$this->seo['img_alt'] 		= $this->seo_obj->img_alt;
+		//$this->seo['img_alt'] 		= $this->seo_obj->img_alt;
 	}
 
 	private function setSeo($seoObj, $page)
@@ -94,13 +93,14 @@ class Seo extends BaseObject
 				'text_1'		=> $isPagination ? '' : $obj->text1,
 				'text_2'		=> $isPagination ? '' : $obj->text2,
 				'text_3'		=> $isPagination ? '' : $obj->text3,
+				'img_alt'		=> $obj->img_alt,
 			];
 		};
 		$restSeoArr = empty($this->rest_seo_obj) ? [] : array_filter($getSeoArray($this->rest_seo_obj));
 		$this->seo = array_merge($getSeoArray($this->seo_obj->seoObject), array_filter($getSeoArray($seoObj)), $restSeoArr);
 	}
 
-	private function seoRepalce($text, $count = 0, $page)
+	private function seoRepalce($text, $count = 0, $page, $min_price)
 	{
 		$text = str_replace('**count**', $count, $text);
 		$text = str_replace('**year**', date("Y") + 1, $text);
@@ -114,6 +114,9 @@ class Seo extends BaseObject
 			$text = preg_replace('/\*\*count_dec=(\w+)\*\*/u', Declension::get($count, $matches[1], true), $text);
 		}
 		$text = str_replace('**page**', $page, $text);
+		if (strpos($text, '**price**') !== false) {
+			$text = str_replace('**price**', $min_price, $text);
+		}
 
 		return $text;
 	}
@@ -151,7 +154,8 @@ class Seo extends BaseObject
 		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '', $text);
 		$text = str_replace('**city_rod**', isset(Yii::$app->params['subdomen_rod']) ? Yii::$app->params['subdomen_rod'] : '', $text);
 		$text = str_replace('**room_name**', $item->restaurant_name, $text);
-		$text = str_replace('**rest_type**', $item->restaurant_main_type, $text);
+		if(isset($item->restaurant_main_type))
+			$text = str_replace('**rest_type**', $item->restaurant_main_type, $text);
 		$text = str_replace('**rest_address**', $item->restaurant_address, $text);
 		$text = str_replace('**capacity**', $item->restaurant_max_capacity, $text);
 		$text = str_replace('**min_capacity**', $item->restaurant_min_capacity, $text);

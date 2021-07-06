@@ -31,7 +31,7 @@ class Subdomen extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['id', 'alias', 'city_id'], 'required'],
+            [['id', 'city_id'], 'required'],
             [['alias', 'name', 'name_dec', 'name_rod', 'phone'], 'string'],
             [['id', 'city_id', 'active'], 'integer'],
         ];

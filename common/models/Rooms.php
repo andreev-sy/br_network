@@ -52,11 +52,11 @@ class Rooms extends \yii\db\ActiveRecord
     }
 
     public function getRestaurants(){
-        return $this->hasOne(Restaurants::className(), ['id' => 'restaurant_id']);
+        return $this->hasOne(Restaurants::className(), ['gorko_id' => 'restaurant_id']);
     }
 
     public function getImages(){
-        return $this->hasMany(Images::className(), ['item_id' => 'id'])->where(['type' => 'rooms']);
+        return $this->hasMany(Images::className(), ['item_id' => 'gorko_id'])->where(['type' => 'rooms']);
     }
 
 }

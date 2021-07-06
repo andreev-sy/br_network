@@ -46,7 +46,7 @@ class SiteObjectSeo extends \yii\db\ActiveRecord
     {
         return [
             [['site_object_id', 'active'], 'integer'],
-            [['title', 'description', 'text1', 'text2', 'text3', 'pagination_title', 'pagination_description'], 'string'],
+            [['title', 'description', 'text1', 'text2', 'text3', 'pagination_title', 'pagination_description', 'img_alt'], 'string'],
             [['heading', 'keywords', 'pagination_heading', 'pagination_keywords'], 'string', 'max' => 255],
             [['site_object_id'], 'exist', 'skipOnError' => true, 'targetClass' => \common\models\siteobject\SiteObject::className(), 'targetAttribute' => ['site_object_id' => 'id']]
         ];

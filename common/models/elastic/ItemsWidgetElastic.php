@@ -66,7 +66,7 @@ class ItemsWidgetElastic extends Model
 			            ['match' => ['restaurant_id' => $restaurant_id]]
 			        ],
 			        'must_not' => [
-			            ['match' => ['id' => $room_id]]
+			            ['match' => ['_id' => $room_id]]
 			        ],
 			    ],
 			])->all();
@@ -80,7 +80,7 @@ class ItemsWidgetElastic extends Model
 			            ['match' => ['restaurant_id' => $restaurant_id]]
 			        ],
 			        'must_not' => [
-			            ['match' => ['id' => $room_id]]
+			            ['match' => ['_id' => $room_id]]
 			        ],
 			    ],
 			])->all();

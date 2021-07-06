@@ -34,7 +34,7 @@ class Restaurants extends BaseSiteObject
     public function rules()
     {
         return [
-            [['gorko_id', 'name', 'address', 'city_id'], 'required'],
+            [['gorko_id', 'city_id'], 'required'],
             [['gorko_id', 'min_capacity', 'max_capacity', 'price', 'district', 'parent_district', 'city_id', 'alcohol', 'firework', 'img_count', 'commission', 'active', 'in_elastic', 'parking', 'alcohol_stock'], 'integer'],
             [['name', 'address', 'cover_url', 'latitude', 'longitude', 'own_alcohol', 'cuisine', 'extra_services', 'payment', 'special', 'phone', 'location', 'type', 'restaurants_spec', 'metro_station_id', 'extra_services_ids', 'special_ids'], 'string'],
         ];
@@ -58,11 +58,11 @@ class Restaurants extends BaseSiteObject
     }
 
     public function getRooms(){
-        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'id'])->orderBy(['capacity' => SORT_ASC]);
+        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'gorko_id'])->orderBy(['capacity' => SORT_ASC]);
     }
 
     public function getImages(){
-        return $this->hasMany(Images::className(), ['item_id' => 'id'])->where(['type' => 'restaurant']);
+        return $this->hasMany(Images::className(), ['item_id' => 'gorko_id'])->where(['type' => 'restaurant']);
     }
 
     public function getSubdomen(){

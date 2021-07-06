@@ -6,6 +6,7 @@ $params = array_merge(
     require __DIR__ . '/../params-local.php',
     \common\utility\SiteParamsHelper::getParamsForModule('gorko_ny')
 );
+Yii::setAlias('@module_web', '@frontend/modules/gorko_ny/web');
 
 return [
     'id' => 'app-frontend',
@@ -48,8 +49,8 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
-            'username' => 'pmnetwork',
-            'password' => 'P2t8wdBQbczLNnVT',
+            'username' => 'root',
+            'password' => 'GxU25UseYmeVcsn5Xhzy',
             'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [
@@ -88,6 +89,8 @@ return [
             'rules' => [
                 '/' => 'site/index',
                 ['pattern'=>'robots','route'=>'site/robots', 'suffix'=>'.txt'],
+                ['pattern'=>'/apitest/','route'=>'site/apitest', 'suffix'=>'/'],
+                ['pattern'=>'/contacts/','route'=>'contacts/index', 'suffix'=>'/'],
                 ['pattern'=>'/ploshhadki/<id:\d+>','route'=>'item/index', 'suffix'=>'/'],
                 ['pattern'=>'/ploshhadki/<slice>','route'=>'listing/slice', 'suffix'=>'/'],
                 ['pattern'=>'/ploshhadki/','route'=>'listing/index', 'suffix'=>'/'],

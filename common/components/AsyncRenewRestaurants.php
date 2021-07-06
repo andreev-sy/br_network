@@ -11,42 +11,22 @@ use common\components\AsyncRenewImages;
 class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterface
 {
 	public  $gorko_id,
-		   	$dsn,
-		   	$imageLoad,
-		   	$watermark = '/var/www/pmnetwork/pmnetwork/frontend/web/img/watermark.png',
-		   	$imageHash = 'svadbanaprirode',
-		   	$only_comm;
+		   	$connection_config;
 
 	public function execute($queue) {
 
 		if( $curl = curl_init() ) {
-		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1');
+		    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1&com=sat');
 		    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		    curl_setopt($curl, CURLOPT_ENCODING, '');
 		    $response = json_decode(curl_exec($curl), true)['restaurant'];
 		    curl_close($curl);
 
-		    $connection = new \yii\db\Connection([
-			    'dsn' => $this->dsn,
-			    'username' => 'root',
-			    'password' => 'Gkcfmdsop',
-			    'charset' => 'utf8',
-			]);
+		    $connection = new \yii\db\Connection($this->connection_config);
 			$connection->open();
 			Yii::$app->set('db', $connection);
 
-			//$log = file_get_contents('/var/www/pmnetwork/log/manual_samara_bd.log');
-			//$log = json_decode($log, true);
-			//$log[time()] = ['rest_id' => $response['id'], 'commission' => $response['commission']];
-			//$log = json_encode($log);
-			//file_put_contents('/var/www/pmnetwork/log/manual_samara_bd.log', $log);
-			//exit;
-
-			if(!$response['commission'] && $this->only_comm){
-				return 1;
-			}
-
-		    $model = Restaurants::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
+		    $model = Restaurants::find()->where(['gorko_id' => $this->gorko_id])->one();
 		    
 		    if(!$model){
 		    	$model = new Restaurants();
@@ -175,19 +155,29 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			}
 
 			$model->attributes = $attributes;
-		    $rest_save = $model->save();
-	    
+			$model->validate();
 
-		    $restModel = Restaurants::find()->where(['gorko_id' => $response['id']])->one($connection);
+			
+
+			
+		    $rest_save = $model->save();
+
+		    $log = file_get_contents('/var/www/pmnetwork/log/manual.log');
+			$log = json_decode($log, true);
+			$log[time()] = ['errors' => $model->getErrors()];
+			$log = json_encode($log);
+			file_put_contents('/var/www/pmnetwork/log/manual.log', $log);		    
+
+		    $restModel = Restaurants::find()->where(['gorko_id' => $response['id']])->one();
 
 		    if($restModel){
 
 			    foreach ($response['covers'] as $key => $image) {
-					$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
+					$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
 					$imgAttributes = [];
 
 					if($imgModel && ($imgModel->item_id != $restModel->id)) {
-						$imgModel->item_id = $restModel->id;
+						$imgModel->item_id = $restModel->gorko_id;
 						$imgModel->save();
 					}
 			    
@@ -197,35 +187,15 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$imgAttributes['sort'] = $key;
 				    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
 				    	$imgAttributes['type'] = 'restaurant';
-				    	$imgAttributes['item_id'] = $restModel->id;
+				    	$imgAttributes['item_id'] = $restModel->gorko_id;
+				    	$imgAttributes['timestamp'] = time();
 				    	$imgModel->attributes = $imgAttributes;
-				    	$imgModel->save();
-
-				    	if($this->watermark){
-				    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-								'item_id' => $imgModel->id,
-								'dsn' => $this->dsn,
-								'type' => 'restaurant',
-								'watermark' => $this->watermark,
-								'imageHash' => $this->imageHash,
-							]));
-				    	}					    	
-				    }
-				    elseif(!$imgModel->subpath){
-				    	if($this->watermark){
-					    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-								'item_id' => $imgModel->id,
-								'dsn' => $this->dsn,
-								'type' => 'restaurant',
-								'watermark' => $this->watermark,
-								'imageHash' => $this->imageHash,
-							]));
-					    }
+				    	$imgModel->save();				    	
 				    }
 				}
 				
 				foreach ($response['rooms'] as $key => $room) {
-					$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
+					$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
 			    
 				    if(!$roomModel){
 				    	$roomModel = new Rooms();
@@ -236,7 +206,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		    		$roomAttributes['in_elastic'] = 0;
 			    	$roomAttributes['gorko_id'] = $room['id'];
 			    	$roomAttributes['name'] = $room['name'] ? $room['name'] : $room['type_name'];
-			    	$roomAttributes['restaurant_id'] = $restModel->id;
+			    	$roomAttributes['restaurant_id'] = $restModel->gorko_id;
 			    	$roomAttributes['price'] = $room['prices'][0]['value'];
 			    	$roomAttributes['capacity'] = $room['params']['param_capacity_0']['value'];
 
@@ -272,23 +242,17 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 					}	
 
 			    	$roomModel->attributes = $roomAttributes;
-			    	$roomModel->save();
+			    	$roomModel->save();			    	
 
-			    	//$log = file_get_contents('/var/www/pmnetwork/log/manual.log');
-					//$log .= json_encode($attributes);
-					//$log .= json_encode($roomModel->errors);
-					//file_put_contents('/var/www/pmnetwork/log/manual.log', $log);
-			    	
-
-			    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one($connection);
+			    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
 
 			    	if($roomModel){
 			    		foreach ($room['media'] as $key => $image) {
-							$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one($connection);
+							$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
 							$imgAttributes = [];
 
 							if($imgModel && ($imgModel->item_id != $roomModel->id)) {
-								$imgModel->item_id = $roomModel->id;
+								$imgModel->item_id = $roomModel->gorko_id;
 								$imgModel->save();
 							}
 					    
@@ -298,29 +262,10 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						    	$imgAttributes['sort'] = $key;
 						    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
 						    	$imgAttributes['type'] = 'rooms';
-						    	$imgAttributes['item_id'] = $roomModel->id;
+						    	$imgAttributes['item_id'] = $roomModel->gorko_id;
+						    	$imgAttributes['timestamp'] = time();
 						    	$imgModel->attributes = $imgAttributes;
 					    		$imgModel->save();
-					    		if($this->watermark){
-						    		$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-										'item_id' => $imgModel->id,
-										'dsn' => $this->dsn,
-										'type' => 'rooms',
-										'watermark' => $this->watermark,
-										'imageHash' => $this->imageHash,
-									]));
-						    	}
-						    }
-						    elseif(!$imgModel->subpath){
-						    	if($this->watermark){
-							    	$queue_id = Yii::$app->queue->push(new AsyncRenewImages([
-										'item_id' => $imgModel->id,
-										'dsn' => $this->dsn,
-										'type' => 'rooms',
-										'watermark' => $this->watermark,
-										'imageHash' => $this->imageHash,
-									]));
-							    }
 						    }			    
 						}
 			    	}    	
