@@ -40,6 +40,8 @@ class GorkoLeadApi extends BaseObject{
         $log_arr['name']        = isset($payload['name']) ? $payload['name'] : 'Нет имени';
         $log_arr['phone']       = isset($payload['phone']) ? $payload['phone'] : 'Нет телефона';
         $log_arr['city_id']     = isset($payload['city_id']) ? $payload['city_id'] : 'Нет city_id';
+        $log_arr['lead_id']     = isset($response['inquiry']['id']) ? $response['inquiry']['id'] : 0;
+        $log_arr['status']      = '';
         $leadLog = new LeadLogElastic();
         $leadLog::addRecord($log_arr);
 
@@ -61,6 +63,8 @@ class GorkoLeadApi extends BaseObject{
         $log_arr['name']        = '';
         $log_arr['phone']       = '';
         $log_arr['city_id']     = '';
+        $log_arr['lead_id']     = 0;
+        $log_arr['status']      = '';
 
     	$leadLog = new LeadLogElastic();
         $leadLog::addRecord($log_arr);

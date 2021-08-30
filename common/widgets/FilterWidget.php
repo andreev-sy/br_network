@@ -10,6 +10,7 @@ class FilterWidget extends Widget
 {
     public $filter_active;
     public $filter_model;
+	 public $total = 0;
 
     public function run()
     {
@@ -35,8 +36,9 @@ class FilterWidget extends Widget
         }
 
         return $this->render('//components/filter/filter.twig', [
-        	'filters' => $filter,
-            'filter_active' => $this->filter_active
+        		'filters' => $filter,
+            'filter_active' => $this->filter_active,
+				'total' => $this->total
         ]);
     }
 } 

@@ -30,8 +30,8 @@ class RoomsModule extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['gorko_id'], 'required'],
-            [['gorko_id', 'unique_id', 'active'], 'integer'],
+            [['id'], 'required'],
+            [['id', 'unique_id', 'active'], 'integer'],
             [['text'], 'string'],
         ];
     }
@@ -39,8 +39,7 @@ class RoomsModule extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'gorko_id' => 'Gorko ID',
+            'id' => 'Gorko ID',
         ];
     }
 }

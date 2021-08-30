@@ -28,10 +28,15 @@ class MapAll extends BaseObject{
 						$map_preview = isset($image['subpath']) ? $image['subpath'] : '';
 						break;
 					}
+					foreach ($item->restaurant_types as $key => $restaurant_type) {
+						$rest_type = $restaurant_type['name'];
+						break;
+					}
+					isset($item->restaurant_unique_id) ? $restaurant_unique_id = $item->restaurant_unique_id : $restaurant_unique_id = null;
 					array_push($this->coords['features'], [
 						'type' => "Feature",
 			            'id' => $item->id,
-			            'unique_id' => $item->restaurant_unique_id,
+			            'unique_id' => $restaurant_unique_id,
 			            'geometry' => [
 			              'type' => "Point",
 			              'coordinates' => [$item->restaurant_latitude, $item->restaurant_longitude]
@@ -39,6 +44,7 @@ class MapAll extends BaseObject{
 			            'properties' => [
 			              'balloonContent' => $item->restaurant_address,
 			              'organization' => $item->restaurant_name,
+						  'type' => $rest_type,
 			              'address' => $item->restaurant_address,
 			              'img' => $map_preview,
 			              'clusterCaption' => $item->restaurant_name,
@@ -52,10 +58,11 @@ class MapAll extends BaseObject{
 						$map_preview = isset($image['subpath']) ? $image['subpath'] : '';
 						break;
 					}
+					isset($item->restaurant_unique_id) ? $restaurant_unique_id = $item->restaurant_unique_id : $restaurant_unique_id = null;
 					array_push($this->coords['features'], [
 						'type' => "Feature",
 			            'id' => $item->id,
-			            'unique_id' => $item->restaurant_unique_id,
+			            'unique_id' => $restaurant_unique_id,
 			            'geometry' => [
 			              'type' => "Point",
 			              'coordinates' => [$item->restaurant_latitude, $item->restaurant_longitude]
@@ -74,5 +81,4 @@ class MapAll extends BaseObject{
 			}			
 		}		
 	}
-
 }

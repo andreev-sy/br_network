@@ -31,8 +31,8 @@ class Rooms extends \yii\db\ActiveRecord
     {
         return [
             [['gorko_id', 'name'], 'required'],
-            [['gorko_id', 'restaurant_id', 'price', 'capacity_reception', 'capacity', 'type', 'rent_only', 'banquet_price', 'bright_room', 'separate_entrance', 'active', 'in_elastic'], 'integer'],
-            [['type_name', 'name', 'features', 'cover_url', 'description'], 'string'],
+            [['gorko_id', 'restaurant_id', 'price', 'capacity_reception', 'capacity', 'type', 'rent_only', 'banquet_price', 'bright_room', 'separate_entrance', 'active', 'in_elastic', 'payment_model'], 'integer'],
+            [['type_name', 'name', 'features', 'cover_url', 'description', 'graduation_category'], 'string'],
         ];
     }
 

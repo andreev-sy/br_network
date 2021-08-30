@@ -1,22 +1,22 @@
 <?php
-$moduleName = 'banketnye_zaly_moskva';
+
 $params = array_merge(
     require __DIR__ . '/../../../common/config/params.php',
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
     require __DIR__ . '/../params-local.php',
-    \common\utility\SiteParamsHelper::getParamsForModule($moduleName)
+    \common\utility\SiteParamsHelper::getParamsForModule('so_svoim')
 );
-Yii::setAlias('@module_web', '@backend/modules/banketnye_zaly_moskva/web');
+Yii::setAlias('@module_web', '@backend/modules/so_svoim/web');
 
 return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__).'/..',
-    'controllerNamespace' => 'backend\modules\banketnye_zaly_moskva\controllers',
-    'bootstrap' => ['log','banketnye_zaly_moskva'],
+    'controllerNamespace' => 'backend\modules\so_svoim\controllers',
+    'bootstrap' => ['log','so_svoim'],
     'modules' => [
-        'banketnye_zaly_moskva' => [
-            'class' => 'backend\modules\banketnye_zaly_moskva\Module',
+        'so_svoim' => [
+            'class' => 'backend\modules\so_svoim\Module',
         ],
     ],
     'components' => [
@@ -26,7 +26,7 @@ return [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@app/modules/banketnye_zaly_moskva/views',
+                    '@app/views' => '@app/modules/so_svoim/views',
                 ],
             ],
         ],
@@ -41,7 +41,7 @@ return [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
+            'dsn' => 'mysql:host=localhost;dbname=pmn_so_svoim',
             'username' => 'root',
             'password' => 'GxU25UseYmeVcsn5Xhzy',
             'charset' => 'utf8mb4',

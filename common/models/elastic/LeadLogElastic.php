@@ -22,6 +22,8 @@ class LeadLogElastic extends \yii\elasticsearch\ActiveRecord
             'date',
             'api_alias',
             'attempts',
+            'lead_id',
+            'status'
         ];
     }
 
@@ -54,6 +56,8 @@ class LeadLogElastic extends \yii\elasticsearch\ActiveRecord
                     'date'          => ['type' => 'text'],
                     'api_alias'     => ['type' => 'text'],
                     'attempts'      => ['type' => 'integer'],
+                    'lead_id'       => ['type' => 'integer'],
+                    'status'        => ['type' => 'text'],
                 ]
             ],
         ];
@@ -122,6 +126,8 @@ class LeadLogElastic extends \yii\elasticsearch\ActiveRecord
         $record->api_alias      = $log_arr['api_alias'];
         $record->attempts       = $log_arr['attempts'];
         $record->date           = $log_arr['date'];
+        $record->lead_id        = $log_arr['lead_id'];
+        $record->status         = $log_arr['status'];
         $record->setPrimaryKey(microtime());
         
         try{
@@ -134,6 +140,19 @@ class LeadLogElastic extends \yii\elasticsearch\ActiveRecord
         //print_r($result);
         //print_r("\n");
 
+        return $result;
+    }
+
+    public static function updateStatus($log_arr){
+        $record = self::find()
+            ->query(['bool' => ['must' => ['match'=>['lead_id' => $log_arr['lead_id']]]]])
+            ->limit(1)
+            ->one();
+        if(!$record){
+            return 'Нет записи с таким lead_id';
+        }
+        $record->status = $log_arr['status'];
+        $result = $record->update();
         return $result;
     }
 }

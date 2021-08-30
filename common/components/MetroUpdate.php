@@ -15,21 +15,25 @@ class MetroUpdate {
   private static $apiKey = '84c84f73-da0f-4da5-ab73-c91c0c210954';
 
 
-  public static function updateRestaurantClosestMetroStation($restaurantId)
+  public static function updateRestaurantClosestMetroStation($restaurantId, $params)
   {
+    // $connection = new \yii\db\Connection($params['main_connection_config']);
+    // $connection->open();
+    // Yii::$app->set('db', $connection);
+
     $log = '';
     $restaurant = Restaurants::find()->where(['id' => $restaurantId])->one();
 
     if (!Restaurants::find()->where(['id' => $restaurantId])->exists()){
 
-      $log = 'Ошибка, ресторана с id=' . $restaurantId . ' не существует' . '</br>';
+      $log = 'Ошибка, ресторана с id=' . $restaurantId . ' не существует' . "\n";
       file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
       return false;
     }
 
     $restaurant->metro_station_id = '';
-    $log = 'ресторан: ' . $restaurant->name . '</br>';
+    $log = 'ресторан: ' . $restaurant->name . "\n";
     file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
     // получение списка ближайших станций
@@ -39,18 +43,18 @@ class MetroUpdate {
       $restaurant->metro_station_id = 0;
       $restaurant->save(false);
 
-      $log = 'найдено станций поблизости: ' . count($closestStationList) . '</br>';
-      $log .= 'Список станций ресторана ' . $restaurant->name .': ' . $restaurant->metro_station_id . '</br>';
+      $log = 'найдено станций поблизости: ' . count($closestStationList) . "\n";
+      $log .= 'Список станций ресторана ' . $restaurant->name .': ' . $restaurant->metro_station_id . "\n";
       $log .= '--- Обновление ближайших станций ресторана завершено. ---';
       file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
       // Список станций ресторана
       $finalStationString = $restaurant->metro_station_id;
 
-      return $finalStationString;
+      return '0';
     }
 
-    $log = 'найдено станций поблизости: ' . count($closestStationList) . '</br>';
+    $log = 'найдено станций поблизости: ' . count($closestStationList) . "\n";
     file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
     $closestStationsIdList = [];
@@ -59,7 +63,7 @@ class MetroUpdate {
 
       $log = 'станция: ' . $closestStation['stationName'] . ', ';
       $log .= 'latitude: ' . $closestStation['latitude'] . ', ';
-      $log .= 'longitude: ' . $closestStation['longitude'] . '</br>';
+      $log .= 'longitude: ' . $closestStation['longitude'] . "\n";
       file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
 
@@ -68,7 +72,7 @@ class MetroUpdate {
             ->andWhere(['longitude' => $closestStation['longitude']])
             ->exists()
       ){
-        $log = 'станция: ' . $closestStation['stationName'] . ' не найдена в таблице metro_stations, cоздаём новую строку</br>';
+        $log = 'станция: ' . $closestStation['stationName'] . " не найдена в таблице metro_stations, cоздаём новую строку\n";
         file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
         $newStation = new MetroStations();
@@ -76,7 +80,7 @@ class MetroUpdate {
         $newStation->name = str_replace('метро ', '', $closestStation['stationName']);
         $newStation->latitude = $closestStation['latitude'];
         $newStation->longitude = $closestStation['longitude'];
-        $newStation->alias = $this->getTransliterationForUrl(str_replace('метро ', '', $closestStation['stationName']));
+        $newStation->alias = MetroUpdate::getTransliterationForUrl(str_replace('метро ', '', $closestStation['stationName']));
         $newStation->save(false);
       }
 
@@ -86,20 +90,29 @@ class MetroUpdate {
       ->one()
       ->table_id;
 
-      $log = 'id найденой/созданной станции: ' . $metroStationId . '</br>';
+      $log = 'id найденой/созданной станции: ' . $metroStationId . "\n";
       file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
       $closestStationsIdList[] =  $metroStationId;
     }
 
-    $log = 'implode(",", $closestStationsIdList): ' . implode(',', $closestStationsIdList) . '</br>';
+    $log = 'implode(",", $closestStationsIdList): ' . implode(',', $closestStationsIdList) . "\n";
     file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
     $restaurant->metro_station_id = implode(',', $closestStationsIdList);
     $restaurant->save(false);
 
-    $log = 'Список станций ресторана ' . $restaurant->name .': ' . $restaurant->metro_station_id . ' </br>';
-    $log .= '--- Обновление ближайших станций ресторана завершено. ---';
+    // $connection->close();
+
+    // $connection = new \yii\db\Connection($params['site_connection_config']);
+    // $connection->open();
+    // Yii::$app->set('db', $connection);
+
+    // $connection->close();
+
+    $log = 'Список станций ресторана ' . $restaurant->name .': ' . $restaurant->metro_station_id . "\n";
+    file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
+    $log = '--- Обновление ближайших станций ресторана завершено. ---';
     file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log.txt', $log . PHP_EOL, FILE_APPEND);
 
     // Список станций ресторана
@@ -259,7 +272,7 @@ class MetroUpdate {
     exit;
   }
 
-  private function getTransliterationForUrl($name)
+  public static function getTransliterationForUrl($name)
   {
     $latin = array('-', "Sch", "sch", 'Yo', 'Zh', 'Kh', 'Ts', 'Ch', 'Sh', 'Yu', 'ya', 'yo', 'zh', 'kh', 'ts', 'ch', 'sh', 'yu', 'ya', 'A', 'B', 'V', 'G', 'D', 'E', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', '', 'Y', '', 'E', 'a', 'b', 'v', 'g', 'd', 'e', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', '', 'y', '', 'e');
     $cyrillic = array(' ', "Щ", "щ", 'Ё', 'Ж', 'Х', 'Ц', 'Ч', 'Ш', 'Ю', 'я', 'ё', 'ж', 'х', 'ц', 'ч', 'ш', 'ю', 'я', 'А', 'Б', 'В', 'Г', 'Д', 'Е', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Ь', 'Ы', 'Ъ', 'Э', 'а', 'б', 'в', 'г', 'д', 'е', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'ь', 'ы', 'ъ', 'э');

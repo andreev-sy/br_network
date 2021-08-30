@@ -33,10 +33,11 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 		$name = $info['basename'];
 		$output = curl_file_create($file, $mime, $name);
 		$payload = [
-			'mediaId' => $imgModel->gorko_id,
-			'token'=> '4aD9u94jvXsxpDYzjQz0NFMCpvrFQJ1k',
-			'watermark' => $output,
-			'hash_key' => $this->params['imageHash']
+			'mediaId' 			=> $imgModel->gorko_id,
+			'token'				=> '4aD9u94jvXsxpDYzjQz0NFMCpvrFQJ1k',
+			'watermark' 		=> $output,
+			'hash_key' 			=> $this->params['imageHash'],
+			'watermarkPosition' => $this->params['watermark_pos']
 		];
 		curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/tools/mediaToSatellite');
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);

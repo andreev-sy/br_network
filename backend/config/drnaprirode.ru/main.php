@@ -5,18 +5,18 @@ $params = array_merge(
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
     require __DIR__ . '/../params-local.php',
-    \common\utility\SiteParamsHelper::getParamsForModule('drnaprirode')
+    \common\utility\SiteParamsHelper::getParamsForModule('priroda_dr')
 );
-Yii::setAlias('@module_web', '@backend/modules/drnaprirode/web');
+Yii::setAlias('@module_web', '@backend/modules/priroda_dr/web');
 
 return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__).'/..',
-    'controllerNamespace' => 'backend\modules\drnaprirode\controllers',
-    'bootstrap' => ['log','drnaprirode'],
+    'controllerNamespace' => 'backend\modules\priroda_dr\controllers',
+    'bootstrap' => ['log','priroda_dr'],
     'modules' => [
-        'drnaprirode' => [
-            'class' => 'backend\modules\drnaprirode\Module',
+        'priroda_dr' => [
+            'class' => 'backend\modules\priroda_dr\Module',
         ],
     ],
     'components' => [
@@ -26,7 +26,7 @@ return [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@app/modules/drnaprirode/views',
+                    '@app/views' => '@app/modules/priroda_dr/views',
                 ],
             ],
         ],

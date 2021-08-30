@@ -32,7 +32,7 @@ class Images extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['gorko_id', 'sort', 'realpath', 'type', 'item_id'], 'required'],
+            [['gorko_id', 'sort', 'realpath', 'type'], 'required'],
             [['gorko_id', 'sort', 'timestamp', 'item_id'], 'integer'],
             [['realpath', 'subpath', 'waterpath', 'type'], 'string'],
         ];

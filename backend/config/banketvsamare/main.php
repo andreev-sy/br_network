@@ -1,5 +1,5 @@
 <?php
-$moduleName = 'banketnye_zaly_moskva';
+$moduleName = 'banketvsamare';
 $params = array_merge(
     require __DIR__ . '/../../../common/config/params.php',
     require __DIR__ . '/../../../common/config/params-local.php',
@@ -7,16 +7,16 @@ $params = array_merge(
     require __DIR__ . '/../params-local.php',
     \common\utility\SiteParamsHelper::getParamsForModule($moduleName)
 );
-Yii::setAlias('@module_web', '@backend/modules/banketnye_zaly_moskva/web');
+Yii::setAlias('@module_web', "@backend/modules/$moduleName/web");
 
 return [
     'id' => 'app-backend',
-    'basePath' => dirname(__DIR__).'/..',
-    'controllerNamespace' => 'backend\modules\banketnye_zaly_moskva\controllers',
-    'bootstrap' => ['log','banketnye_zaly_moskva'],
+    'basePath' => dirname(__DIR__) . '/..',
+    'controllerNamespace' => "backend\modules\\$moduleName\controllers",
+    'bootstrap' => ['log', "$moduleName"],
     'modules' => [
-        'banketnye_zaly_moskva' => [
-            'class' => 'backend\modules\banketnye_zaly_moskva\Module',
+        "$moduleName" => [
+            'class' => "backend\modules\\$moduleName\Module",
         ],
     ],
     'components' => [
@@ -26,7 +26,7 @@ return [
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@app/modules/banketnye_zaly_moskva/views',
+                    '@app/views' => "@app/modules/$moduleName/views",
                 ],
             ],
         ],
@@ -38,13 +38,6 @@ return [
         'session' => [
             // this is the name of the session cookie used for login on the backend
             'name' => 'advanced-backend',
-        ],
-        'db' => [
-            'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
-            'username' => 'root',
-            'password' => 'GxU25UseYmeVcsn5Xhzy',
-            'charset' => 'utf8mb4',
         ],
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',
@@ -85,9 +78,10 @@ return [
                         'POST sort' => 'sort',
                     ]
                 ],
-                ['pattern'=>'/update','route'=>'update/update'],
+                '<controller>' => '<controller>/index',
                 '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
-                
+                'api/<any>' => 'site/error',
+                '<controller>/<action>' => '<controller>/<action>',
             ],
         ],
     ],

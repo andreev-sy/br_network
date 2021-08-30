@@ -46,6 +46,7 @@ class GorkoconsoleController extends Controller
 			'site_connection_config' => $connectionAndModel['site_connection_config'],
 			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
 			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 => $connectionAndModel['site_config']['params']['watermark_pos'],
 			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
 		];
 
@@ -68,6 +69,7 @@ class GorkoconsoleController extends Controller
 			'site_connection_config' => $connectionAndModel['site_connection_config'],
 			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
 			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 => $connectionAndModel['site_config']['params']['watermark_pos'],
 			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
 		];
 
@@ -170,6 +172,17 @@ class GorkoconsoleController extends Controller
 				'channel_key' 			 => $connectionAndModel['site_config']['params']['gorko_api']['phone_key']
 			]));
 		}
+	}
+
+	public function actionGetCityPhone($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		
+		$queue_id = Yii::$app->queue->push(new AsyncRenewPhones([
+			'gorko_city_id'			 => $connectionAndModel['site_config']['params']['gorko_api']['city'],
+			'site_connection_config' => $connectionAndModel['site_connection_config'],
+			'channel_key' 			 => $connectionAndModel['site_config']['params']['gorko_api']['phone_key']
+		]));
 	}
 
 
@@ -362,7 +375,7 @@ class GorkoconsoleController extends Controller
 		$curl = curl_init();
 		$headers = array();
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
-		curl_setopt($curl, CURLOPT_URL, 'https://v.wedding.net/api2/');
+		curl_setopt($curl, CURLOPT_URL, 'https://v.gorko.ru/api2/');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 	    curl_setopt($curl, CURLOPT_ENCODING, '');
@@ -377,12 +390,12 @@ class GorkoconsoleController extends Controller
 		$curl = curl_init();
 		$headers = array();
 		$payload = [
-			'key' 		=> 'banket_wedding_gurugram',
-			'name' 	=> 'Лэндинг банкетов в Gurugram'
+			'key' 		=> 'banket_wedpro_ua',
+			'name' 	=> 'Банкетный квиз для Киева'
 		];
 
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
-		curl_setopt($curl, CURLOPT_URL, 'https://v.wedding.net/api2/sat/channel');
+		curl_setopt($curl, CURLOPT_URL, 'https://v.wedpro.com.ua/api2/sat/channel');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);

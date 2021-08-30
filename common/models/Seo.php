@@ -8,7 +8,7 @@ use common\models\Pages;
 use common\models\SubdomenPages;
 use frontend\components\Declension;
 use yii\web\NotFoundHttpException;
-use common\models\Restaurants;
+use common\models\RestaurantsModule;
 
 /**
  * @property \common\models\Pages $seo_obj
@@ -25,7 +25,7 @@ class Seo extends BaseObject
 	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false)
 	{
 		if ($type == 'item' && !empty($item)) {
-			$restAr = Restaurants::findWithSeo()->where(['id' => $item->id])->one();
+			$restAr = RestaurantsModule::findWithSeo()->where(['id' => $item->restaurant_gorko_id])->one();
 			if (!empty($restAr) && !empty($restAr->seoObject) && $restAr->seoObject->active) {
 				$this->rest_seo_obj = $restAr->seoObject;
 			}
@@ -160,6 +160,13 @@ class Seo extends BaseObject
 		$text = str_replace('**capacity**', $item->restaurant_max_capacity, $text);
 		$text = str_replace('**min_capacity**', $item->restaurant_min_capacity, $text);
 		$text = str_replace('**max_capacity**', $item->restaurant_max_capacity, $text);
+		if (!(strpos($text, '**capacity_full**') === false)) {
+			if($item->restaurant_min_capacity == $item->restaurant_max_capacity){
+				$text = str_replace('**capacity_full**', 'для '.$item->restaurant_max_capacity, $text);
+			}else{
+				$text = str_replace('**capacity_full**', 'от '.$item->restaurant_min_capacity.' до '.$item->restaurant_max_capacity, $text);
+			}
+		}
 		$text = str_replace('**rest_name**', $item->restaurant_name, $text);
 		if (isset($item->restaurant_price)) {
 			$text = str_replace('**price**', $item->restaurant_price, $text);

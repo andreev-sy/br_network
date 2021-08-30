@@ -32,7 +32,7 @@ class Slices extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['alias', 'h1', 'title', 'description', 'params', 'keywords'], 'required'],
+            [['alias', 'params'], 'required'],
             [['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt'], 'string'],
         ];
     }
@@ -73,5 +73,11 @@ class Slices extends \yii\db\ActiveRecord
         }));
 
         return $filterItem;
+    }
+
+    public function getSlicesExtra()
+    {
+        $extra = $this->hasOne(SlicesExtra::className(), ['slices_id' => 'id']);
+        return $extra;
     }
 }

@@ -17,6 +17,8 @@ class Module extends \yii\base\Module
      */
     public function init()
     {
+        Yii::$app->params['uploadFolder'] = 'upload';
+
         parent::init();
 
         // custom initialization code goes here

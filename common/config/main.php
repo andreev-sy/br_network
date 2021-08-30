@@ -52,6 +52,7 @@ return [
                         'Img' => 'frontend\components\Img',
                         'ImgFactory' => 'frontend\components\ImgFactory',
                         'YamapFactory' => 'frontend\components\YamapFactory',
+                        'Slicer' => 'frontend\components\Slicer',
                     ],
                     'uses' => ['yii\bootstrap'],
                     'extensions' => ['Twig_Extension_StringLoader', new \Twig_Extension_StringLoader(), new \Twig_Extension_Debug,]

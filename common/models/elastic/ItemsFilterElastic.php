@@ -17,33 +17,38 @@ class ItemsFilterElastic extends BaseObject{
 		   $pages,
 		   $query;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false) {
 
 		//echo '<pre style="display:none;">';
 		//echo '</pre>';
 
 		$filter_main_model = ArrayHelper::map(Filter::find()->all(), 'alias', 'type');
 
-		$session = Yii::$app->session;
-		if($session->get('seed')){
-			$seed = $session->get('seed');
-		}
-		else{
-			$rand_seed = random_int(1, 999999);
-			$session->set('seed', $rand_seed);
-			$seed = $rand_seed;
-		}
-
-		if($widget_flag){
-			if($session->get('widget_seed')){
-			$seed = $session->get('widget_seed');
+		if(!$console){
+			$session = Yii::$app->session;
+			if($session->get('seed')){
+				$seed = $session->get('seed');
 			}
 			else{
 				$rand_seed = random_int(1, 999999);
-				$session->set('widget_seed', $rand_seed);
+				$session->set('seed', $rand_seed);
 				$seed = $rand_seed;
 			}
+
+			if($widget_flag){
+				if($session->get('widget_seed')){
+				$seed = $session->get('widget_seed');
+				}
+				else{
+					$rand_seed = random_int(1, 999999);
+					$session->set('widget_seed', $rand_seed);
+					$seed = $rand_seed;
+				}
+			}
 		}
+		else{
+			$seed = 1;
+		}			
 
 		if($random){
 			$seed = random_int(1, 999999);
