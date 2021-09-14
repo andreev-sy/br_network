@@ -390,8 +390,8 @@ class GorkoconsoleController extends Controller
 		$curl = curl_init();
 		$headers = array();
 		$payload = [
-			'key' 		=> 'banket_wedpro_ua',
-			'name' 	=> 'Банкетный квиз для Киева'
+			'key' 		=> 'drsamara',
+			'name' 	=> 'Квиз Дни рождения'
 		];
 
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';

@@ -167,6 +167,13 @@ class Seo extends BaseObject
 				$text = str_replace('**capacity_full**', 'от '.$item->restaurant_min_capacity.' до '.$item->restaurant_max_capacity, $text);
 			}
 		}
+		if (!(strpos($text, '**capacity_full_hall**') === false)) {
+			if($item->restaurant_min_capacity == $item->restaurant_max_capacity){
+				$text = str_replace('**capacity_full_hall**', 'зала — '.$item->restaurant_max_capacity, $text);
+			}else{
+				$text = str_replace('**capacity_full_hall**', 'залов от '.$item->restaurant_min_capacity.' до '.$item->restaurant_max_capacity, $text);
+			}
+		}
 		$text = str_replace('**rest_name**', $item->restaurant_name, $text);
 		if (isset($item->restaurant_price)) {
 			$text = str_replace('**price**', $item->restaurant_price, $text);

@@ -202,9 +202,9 @@ class BlogPost extends BaseSiteObject
         }, '');
     }
 
-    public function getUrl()
+    public function getUrl($folder = 'blog')
     {
-        return '/blog/' . $this->alias . '/';
+        return '/'.$folder.'/' . $this->alias . '/';
     }
 
     public function beforeSave($insert)
