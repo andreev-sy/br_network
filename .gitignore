@@ -7,10 +7,12 @@ backups
 *.bz*
 *.tar*
 
+common/config/*
 log/*
 # yii console command
 /yii
 /node_modules/*
+frontend/config/*
 frontend/modules/*
 frontend/web/assets/*
 frontend/web/index-test.php

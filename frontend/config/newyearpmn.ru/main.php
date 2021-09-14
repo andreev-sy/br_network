@@ -48,7 +48,7 @@ return [
         ],
         'db' => [
             'class' => 'yii\db\Connection',
-            'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny',
+            'dsn' => 'mysql:host=localhost;dbname=pmn_gorko_ny_dev',
             'username' => 'root',
             'password' => 'GxU25UseYmeVcsn5Xhzy',
             'charset' => 'utf8mb4',
