@@ -65,6 +65,10 @@ class Restaurants extends BaseSiteObject
         return $this->hasMany(Images::className(), ['item_id' => 'gorko_id'])->where(['type' => 'restaurant']);
     }
 
+    public function getImagesext(){
+        return $this->hasMany(ImagesExt::className(), ['rest_id' => 'gorko_id'])->asArray();
+    }
+
     public function getSubdomen(){
         return $this->hasOne(Subdomen::className(), ['city_id' => 'city_id']);
     }

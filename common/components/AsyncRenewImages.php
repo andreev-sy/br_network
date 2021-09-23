@@ -5,7 +5,7 @@ use Yii;
 use yii\base\BaseObject;
 use common\models\Restaurants;
 use common\models\Rooms;
-use common\models\Images;
+use common\models\ImagesExt;
 use common\models\ImagesModule;
 
 class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
@@ -23,7 +23,7 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 		$connection = new \yii\db\Connection($this->params['main_connection_config']);
         $connection->open();
         Yii::$app->set('db', $connection);
-		$imgModel = Images::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
+		$imgModel = ImagesExt::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
 
 		//Получение дублей и ватермарок для модуля по API
 		$curl = curl_init();

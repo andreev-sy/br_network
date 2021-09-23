@@ -7,7 +7,7 @@ use common\models\Restaurants;
 use common\models\Rooms;
 use common\models\Subdomen;
 use common\components\AsyncRenewRestaurants;
-use common\components\AsyncRenewImages;
+use common\components\AsyncRenewImagesExt;
 
 class GorkoApi extends Model
 {
@@ -114,5 +114,22 @@ class GorkoApi extends Model
 		}
 
 		return 1;
+	}
+
+	public function renewAllImages($connection_config) {
+		$connection = new \yii\db\Connection($connection_config);
+		$connection->open();
+		Yii::$app->set('db', $connection);
+
+		$restaurants = Restaurants::find()
+			->select('gorko_id')
+			->all();
+
+		foreach ($restaurants as $key => $restaurant) {
+			$queue_id = Yii::$app->queue->push(new AsyncRenewImagesExt([
+				'connection_config' => $connection_config,
+				'gorko_id' 	=> $restaurant->gorko_id
+			]));
+		}
 	}
 }

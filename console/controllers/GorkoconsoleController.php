@@ -185,6 +185,16 @@ class GorkoconsoleController extends Controller
 		]));
 	}
 
+	public function actionGetAllImages()
+	{
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
+
+		GorkoApi::renewAllImages($connection_config);
+
+		return 1;
+	}
 
 
 
