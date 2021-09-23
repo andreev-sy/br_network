@@ -73,11 +73,16 @@ return [
 			]
 		],
     	'korporativ' => [
+    		'elastic' 	   => [
+    			'index' 		=> 'pmn_ny_restaurants',
+    			'type'			=> 'items'
+    		],
+    		'url' => 'korporativ-ng',
 			'mysql_config' => [
 				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_gorko_ny',
 			],
 			'params' 	=> [
-				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/ny_ball.png',
+				'watermark' 	=> '/var/www/pmnetwork_dev/frontend/web/img/ny_ball.png',
 				'watermark_pos' => 9,
 				'imageHash' 	=> 'newyearpmn',
 				'subdomens' 	=> true,
