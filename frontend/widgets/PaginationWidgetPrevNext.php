@@ -53,6 +53,6 @@ class PaginationWidgetPrevNext extends Widget
 
     private function renderPageButton($page, $class, $active)
     {
-    	return '<div class="items_pagination_item '.$active.' '.$class.'" data-page-id="'.$page.'" data-listing-pagitem></div>';
+    	return '<div class="items_pagination_item '.$active.' '.$class.'" data-page-id="'.$page.'" data-listing-pagitem data-target="pag_1"></div>';
     }
 }

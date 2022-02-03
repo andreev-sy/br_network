@@ -10,7 +10,8 @@ class FilterWidget extends Widget
 {
     public $filter_active;
     public $filter_model;
-	 public $total = 0;
+	public $total = 0;
+    public $subdomen_filter_active;
 
     public function run()
     {
@@ -35,10 +36,19 @@ class FilterWidget extends Widget
             }
         }
 
+        $subdomen_filter_active_arr = [];
+        if($this->subdomen_filter_active){
+            foreach ($this->subdomen_filter_active as $key => $value) {
+                $subdomen_filter_active_arr[$key] = explode(',', $value);
+            }
+        }
+        
+
         return $this->render('//components/filter/filter.twig', [
-        		'filters' => $filter,
-            'filter_active' => $this->filter_active,
-				'total' => $this->total
+        		'filters'                 => $filter,
+                'filter_active'           => $this->filter_active,
+				'total'                   => $this->total,
+                'subdomen_filter_active'  => $subdomen_filter_active_arr
         ]);
     }
 } 

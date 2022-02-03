@@ -18,7 +18,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		$status = 'ok';
 		try{
 			if( $curl = curl_init() ) {
-			    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1&com=sat');
+			    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1');
 			    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 			    curl_setopt($curl, CURLOPT_ENCODING, '');
 			    $response = json_decode(curl_exec($curl), true)['restaurant'];

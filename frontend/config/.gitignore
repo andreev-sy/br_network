@@ -6,3 +6,4 @@ params-local.php
 params.php
 test-local.php
 test.php
+*.php

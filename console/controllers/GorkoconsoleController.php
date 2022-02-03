@@ -14,6 +14,12 @@ use common\components\MetroUpdate;
 use frontend\modules\pmnbd\models\ElasticItems;
 use frontend\modules\pmnbd\models\SubdomenFilteritem;
 use common\components\AsyncRenewPhones;
+use common\models\Filter;
+use common\models\Slices;
+use frontend\components\QueryFromSlice;
+use common\models\elastic\ItemsFilterElastic;
+use frontend\modules\banketnye_zaly_moskva\components\UpdateFilterItems;
+use common\models\SlicesExtra;
 
 class GorkoconsoleController extends Controller
 {
@@ -42,12 +48,14 @@ class GorkoconsoleController extends Controller
 	{
 		$connectionAndModel = $this->moduleAttr($site);
 		$params = [
-			'main_connection_config' => $connectionAndModel['main_connection_config'],
-			'site_connection_config' => $connectionAndModel['site_connection_config'],
-			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
-			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
-			'watermark_pos' 		 => $connectionAndModel['site_config']['params']['watermark_pos'],
-			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
+			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
+			'watermark' 			 			 	=> $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 				=> $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 			=> $connectionAndModel['site_config']['params']['watermark_pos'],
+			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+			'watermark_city' 			 		=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
+			'slug_city' 			 				=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
 		];
 
 		if ($connectionAndModel['site_config']['params']['subdomens']) {
@@ -65,12 +73,14 @@ class GorkoconsoleController extends Controller
 	{
 		$connectionAndModel = $this->moduleAttr($site);
 		$params = [
-			'main_connection_config' => $connectionAndModel['main_connection_config'],
-			'site_connection_config' => $connectionAndModel['site_connection_config'],
-			'watermark' 			 => $connectionAndModel['site_config']['params']['watermark'],
-			'imageHash' 			 => $connectionAndModel['site_config']['params']['imageHash'],
-			'watermark_pos' 		 => $connectionAndModel['site_config']['params']['watermark_pos'],
-			'elasticModel'			 => $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
+			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
+			'watermark' 			 			 	=> $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 				=> $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 			=> $connectionAndModel['site_config']['params']['watermark_pos'],
+			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+			'watermark_city' 			 		=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
+			'slug_city' 			 				=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
 		];
 
 		if ($connectionAndModel['site_config']['params']['subdomens']) {
@@ -185,6 +195,16 @@ class GorkoconsoleController extends Controller
 		]));
 	}
 
+	public function actionGetAllImages()
+	{
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
+
+		GorkoApi::renewAllImages($connection_config);
+
+		return 1;
+	}
 
 
 
@@ -210,9 +230,90 @@ class GorkoconsoleController extends Controller
 
 
 
-
+	// ОБНОВИТЬ КОЛИЧЕСТВО РЕСТОРАНОВ У СРЕЗОВ ДЛЯ banketnye-zaly-moskva.ru 
 	
+	public function actionRefreshRestCount(){
+		$connection_bzm = new \yii\db\Connection([
+			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
+			'username' => 'root',
+			'password' => 'GxU25UseYmeVcsn5Xhzy',
+			'charset' => 'utf8',
+		]);
+		$connection_bzm->open();
+		Yii::$app->set('db', $connection_bzm);
 
+		$filter_model = Filter::find()->with('items')->orderBy(['sort' => SORT_ASC])->all($connection_bzm);
+    $slices_model = Slices::find()->all($connection_bzm);
+    $elastic_model = new \frontend\modules\banketnye_zaly_moskva\models\ElasticItems;
+
+    foreach ($slices_model as $slice){
+      $slice_obj = new QueryFromSlice($slice->alias);
+      $params = UpdateFilterItems::parseGetQuery($slice_obj->params, $filter_model, $slices_model);
+      $items = new ItemsFilterElastic($params['params_filter'], 1, 1, false, 'restaurants', $elastic_model, false, false, false, true);
+      
+
+      if (SlicesExtra::find()->where(['slices_id' => $slice->id])->exists($connection_bzm)){
+        $totalItem = SlicesExtra::find()->where(['slices_id' => $slice->id])->one($connection_bzm);
+        $totalItem->restaurant_count = $items->total;
+        $totalItem->save();
+      } else {
+        $totalItem = new SlicesExtra($connection_bzm);
+        $totalItem->slices_id = $slice->id;
+        $totalItem->restaurant_count = $items->total;
+        $totalItem->save();
+      }
+    }
+
+		$log = "";
+
+		date_default_timezone_set('Europe/Moscow');
+		$log .= date('d\.m\.Y H:i:s', time()) . "\n";
+		$log .= 'Количество ресторанов у всех срезов обновлено' . "\n";
+		$log .= "\n";
+
+		file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log/updateActiveSlices.log', $log, FILE_APPEND);
+
+    // echo 'Количество ресторанов у всех срезов обновлено';
+    exit;
+	}
+
+	// ДЕАКТИВИРОВАТЬ СРЕЗЫ БЕЗ РЕСТОРАНОВ ДЛЯ banketnye-zaly-moskva.ru 
+
+	public function actionRefreshActiveFilterItems(){
+		$connection_bzm = new \yii\db\Connection([
+			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
+			'username' => 'root',
+			'password' => 'GxU25UseYmeVcsn5Xhzy',
+			'charset' => 'utf8',
+		]);
+		$connection_bzm->open();
+		Yii::$app->set('db', $connection_bzm);
+
+		$slices_model = Slices::find()->with('slicesExtra')->all($connection_bzm);
+
+    foreach ($slices_model as $slice){
+      $filterItem = FilterItems::find()->where(['value' => $slice->alias])->one($connection_bzm);
+
+      if ($slice->slicesExtra->restaurant_count > 0){
+        $filterItem->active = 1;
+      } elseif ($slice->slicesExtra->restaurant_count === 0){
+        $filterItem->active = 0;
+      }
+      $filterItem->save();
+    }
+
+		$log = "";
+
+		date_default_timezone_set('Europe/Moscow');
+		$log .= date('d\.m\.Y H:i:s', time()) . "\n";
+		$log .= 'Срезы без ресторанов деактивированы' . "\n";
+		$log .= "\n";
+
+		file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log/updateActiveSlices.log', $log, FILE_APPEND);
+
+    // echo 'Срезы без ресторанов деактивированы';
+    exit;
+	}
 
 	public function actionShowAllData($site)
 	{
@@ -377,12 +478,12 @@ class GorkoconsoleController extends Controller
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
 		curl_setopt($curl, CURLOPT_URL, 'https://v.gorko.ru/api2/');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-	    curl_setopt($curl, CURLOPT_ENCODING, '');
-	    $response = json_decode(curl_exec($curl), true);
-	    curl_close($curl);
-	    print_r($response);
-	    exit;
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($curl, CURLOPT_ENCODING, '');
+    $response = json_decode(curl_exec($curl), true);
+    curl_close($curl);
+    print_r($response);
+    exit;
 	}
 
 	public function actionApiNewChannel()
@@ -390,19 +491,19 @@ class GorkoconsoleController extends Controller
 		$curl = curl_init();
 		$headers = array();
 		$payload = [
-			'key' 		=> 'drsamara',
-			'name' 	=> 'Квиз Дни рождения'
+			'key' 		=> 'banketyvspb',
+			'name' 	=> 'Сателлит банкеты в Санкт-Петербурге'
 		];
 
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
-		curl_setopt($curl, CURLOPT_URL, 'https://v.wedpro.com.ua/api2/sat/channel');
+		curl_setopt($curl, CURLOPT_URL, 'https://v.gorko.ru/api2/sat/channel');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
-	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-	    curl_setopt($curl, CURLOPT_ENCODING, '');
-	    $response = json_decode(curl_exec($curl), true);
-	    curl_close($curl);
-	    print_r($response);
-	    exit;
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($curl, CURLOPT_ENCODING, '');
+    $response = json_decode(curl_exec($curl), true);
+    curl_close($curl);
+    print_r($response);
+    exit;
 	}
 }

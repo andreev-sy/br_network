@@ -63,6 +63,8 @@ class MapAll extends BaseObject
 							'link_unique' => $link_type == 'id' ? $url . $item->restaurant_unique_id . '/' : $url . $item->restaurant_slug . '/',
 							'lowestPrice' => $lowest_price,
 							'capacity' => $item->restaurant_max_capacity,
+							'restaurant_slug' => isset($item->restaurant_slug) ? $item->restaurant_slug : null,
+							'restaurant_unique_id' => $item->restaurant_unique_id,
 						]
 					]);
 					break;

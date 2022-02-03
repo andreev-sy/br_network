@@ -16,9 +16,20 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 			$rest_gorko_id,
 			$room_gorko_id,
 			$elastic_index,
-			$elastic_type;
+			$elastic_type,
+			$city_id;
 
 	public function execute($queue) {
+		$watermark_path = $this->params['watermark'];
+		if(!$watermark_path)
+			return 1;
+		$imageHash = $this->params['imageHash'];
+		$watermark_pos = $this->params['watermark_pos'];
+		if(isset($this->params['watermark_city']) && isset($this->params['watermark_city'][$this->city_id])){
+			$watermark_path = $this->params['watermark_city'][$this->city_id]['watermark'];
+			$imageHash = $this->params['watermark_city'][$this->city_id]['imageHash'];
+			$watermark_pos = $this->params['watermark_city'][$this->city_id]['watermark_pos'];
+		}
 		//Получение картинки из root таблицы
 		$connection = new \yii\db\Connection($this->params['main_connection_config']);
         $connection->open();
@@ -26,8 +37,9 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 		$imgModel = ImagesExt::find()->where(['gorko_id' => $this->gorko_id])->one($connection);
 
 		//Получение дублей и ватермарок для модуля по API
+
 		$curl = curl_init();
-		$file = $this->params['watermark'];
+		$file = $watermark_path;
 		$mime = mime_content_type($file);
 		$info = pathinfo($file);
 		$name = $info['basename'];
@@ -36,8 +48,8 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 			'mediaId' 			=> $imgModel->gorko_id,
 			'token'				=> '4aD9u94jvXsxpDYzjQz0NFMCpvrFQJ1k',
 			'watermark' 		=> $output,
-			'hash_key' 			=> $this->params['imageHash'],
-			'watermarkPosition' => $this->params['watermark_pos']
+			'hash_key' 			=> $imageHash,
+			'watermarkPosition' => $watermark_pos
 		];
 		curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/tools/mediaToSatellite');
 	    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
@@ -53,7 +65,10 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
         $connection->open();
         Yii::$app->set('db', $connection);
         $timestamp = time();
-        $imgModel = new ImagesModule;
+        $imgModel = ImagesModule::find()
+        	->where(['gorko_id' => $this->gorko_id])
+        	->one();
+        if(!$imgModel) $imgModel = new ImagesModule;
         $imgModel->gorko_id = $this->gorko_id;
 	    $imgModel->subpath = $response_obj->url;
 	    $imgModel->waterpath = $response_obj->url_watermark;

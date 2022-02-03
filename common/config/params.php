@@ -23,6 +23,55 @@ return [
 				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketvsamare.png',
 				'watermark_pos' => 8,
 				'imageHash' 	=> 'banketvsamare',
+				'slug_city'		=>[
+					4917 =>[
+						'slug' => '-v-samare',
+						'yandex_id' => 'data-yandex-id="84074572"'
+					],
+					4400 =>[
+						'slug' => '-v-moskve',
+						'yandex_id' => 'data-yandex-id="86984317"'
+					],
+					5269 =>[
+						'slug' => '-v-kazani',
+						'yandex_id' => 'data-yandex-id="86418943"'
+					],
+					3612 =>[
+						'slug' => '-v-nn',
+						'yandex_id' => 'data-yandex-id="86350805"'
+					],
+					4962 =>[
+						'slug' => '-v-spb',
+						'yandex_id' => 'data-yandex-id="87018223"'
+					],
+				],
+				'watermark_city'=>[
+					4917 =>[
+						'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketvsamare.png',
+						'watermark_pos' => 8,
+						'imageHash' 	=> 'banketvsamare',
+					],
+					4400 =>[
+						'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketvmoskve.png',
+						'watermark_pos' => 8,
+						'imageHash' 	=> 'banketvmoskve',
+					],
+					5269 =>[
+						'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketyvkazani.png',
+						'watermark_pos' => 8,
+						'imageHash' 	=> 'banketyvkazani',
+					],
+					3612 =>[
+						'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketvnn.png',
+						'watermark_pos' => 8,
+						'imageHash' 	=> 'banketvnn',
+					],
+					4962 =>[
+						'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark_banketyvspb.png',
+						'watermark_pos' => 8,
+						'imageHash' 	=> 'banketyvspb',
+					],
+				],
 				'subdomens' 	=> false,
 				'subdomen' 		=> null,
 				'module_path' 	=> 'frontend\modules\banketvsamare',
@@ -49,6 +98,25 @@ return [
 				'gorko_api'		=> [
 					'phone_key'		=> 'birthday-place',
 					'channel_key'	=> 'birthday-place',
+					'city' 			=> false,
+				],
+			]
+		],
+		'kidsbd' => [
+			'mysql_config' => [
+				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_kidsbd',
+			],
+			'params' 	=> [
+				'watermark' 	=> '/var/www/pmnetwork/frontend/web/img/watermark-kidsbd.png',
+				'watermark_pos' => 9,
+				'imageHash' 	=> 'kidsbdpmn',
+				'subdomens' 	=> true,
+				'subdomen' 		=> null,
+				'module_path' 	=> 'frontend\modules\kidsbd',
+				'only_comm'		=> true,
+				'gorko_api'		=> [
+					'phone_key'		=> 'kidsbd',
+					'channel_key'	=> 'kidsbd',
 					'city' 			=> false,
 				],
 			]
@@ -187,6 +255,29 @@ return [
 				'gorko_api'		=> [
 					'phone_key'		=> 'so_svoim',
 					'channel_key'	=> 'so_svoim',
+					'city' 			=> false,
+				],
+			]
+		],
+		'top_banket' => [
+			'elastic' 	   => [
+    			'index' 		=> 'pmn_top_banket',
+    			'type'			=> 'items'
+    		],
+			'mysql_config' => [
+				'dsn' 			=> 'mysql:host=localhost;dbname=pmn_top_banket',
+			],
+			'params' 	=> [
+				'watermark' 	=> false,
+				'watermark_pos' => 9,
+				'imageHash' 	=> 'top_banket',
+				'subdomens' 	=> true,
+				'subdomen' 		=> null,
+				'module_path' 	=> 'frontend\modules\top_banket',
+				'only_comm'		=> true,
+				'gorko_api'		=> [
+					'phone_key'		=> 'top_banket',
+					'channel_key'	=> 'top_banket',
 					'city' 			=> false,
 				],
 			]

@@ -71,9 +71,18 @@ class FilterQueryConstructorElastic extends BaseObject{
 
 		//Тип мероприятия
 		if($filter_data['key'] == 'types.id'){
-			$this->query_arr = [
-				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
-			];
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['match' => [$prefix.$filter_data['key'] => $value]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					["match" => [
+						$prefix.$filter_data['key'] => $filter_data['value']
+					]]
+				];
+			}
 		}
 
 		//Особенности
