@@ -24,6 +24,7 @@ class QueryFromSlice extends BaseObject{
 	            'text_top' => $slice_model->text_top,
 	            'text_bottom' => $slice_model->text_bottom,
 	            'img_alt' => $slice_model->img_alt,
+					'feature' => $slice_model->feature,
 			];
 			$this->flag = true;
 		}

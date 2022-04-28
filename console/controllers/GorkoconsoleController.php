@@ -69,6 +69,23 @@ class GorkoconsoleController extends Controller
 		return 1;
 	}
 
+	public function actionElasticSearchRefresh($site)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		$params = [
+			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
+			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
+			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticSearch',
+		];
+
+		$elasticSearchPath = $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticSearch';
+		$elasticSearchModel = new $elasticSearchPath();
+
+		$elasticSearchModel::refreshIndex($params);
+
+		return 1;
+	}
+
 	public function actionElasticUpdate($site)
 	{
 		$connectionAndModel = $this->moduleAttr($site);

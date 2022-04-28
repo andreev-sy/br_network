@@ -40,7 +40,7 @@ class GorkoApi extends Model
 				}
 			}			
 
-			$api_url = 'https://api.gorko.ru/api/v3/venuecard?list[seed]=1&entity[languageId]=1&list[page]=1&list[perPage]=10000&list[typeId]=1&entity[cityId]='.$subdomen->city_id.'&list[cityId]='.$subdomen->city_id.'&entity%5Bfilters%5D=event%3D1,17,9,11,12,14,15,16,24,25,26,27,28,29,30,32,33,31,34,35,36,37,38,10,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85&list%5Bfilters%5D=event%3D1,17,9,11,12,14,15,16,24,25,26,27,28,29,30,32,33,31,34,35,36,37,38,10,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85';
+			$api_url = 'https://api.gorko.ru/api/v3/venuecard?list[seed]=1&entity[languageId]=1&list[page]=1&list[perPage]=10000&list[misc]=satellite&list[typeId]=1&entity[cityId]='.$subdomen->city_id.'&list[cityId]='.$subdomen->city_id.'&entity%5Bfilters%5D=event%3D1,17,9,11,12,14,15,16,24,25,26,27,28,29,30,32,33,31,34,35,36,37,38,10,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85&list%5Bfilters%5D=event%3D1,17,9,11,12,14,15,16,24,25,26,27,28,29,30,32,33,31,34,35,36,37,38,10,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,74,75,76,77,78,80,81,82,83,84,85';
 
 			//ПЕРВЫЙ ЗАПРОС ПО API			
 			$ch_venues = curl_init();
@@ -113,6 +113,8 @@ class GorkoApi extends Model
 			print_r("$subdomen->city_id - ".count($gorko_rest_ids)."\n");
 		}
 
+		//$this->renewAllImages($connection_config);
+
 		return 1;
 	}
 
@@ -130,6 +132,7 @@ class GorkoApi extends Model
 				'connection_config' => $connection_config,
 				'gorko_id' 	=> $restaurant->gorko_id
 			]));
+			print_r("$restaurant->gorko_id - "."\n");
 		}
 	}
 }

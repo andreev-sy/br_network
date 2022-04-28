@@ -64,7 +64,7 @@ class MapAll extends BaseObject
 							'lowestPrice' => $lowest_price,
 							'capacity' => $item->restaurant_max_capacity,
 							'restaurant_slug' => isset($item->restaurant_slug) ? $item->restaurant_slug : null,
-							'restaurant_unique_id' => $item->restaurant_unique_id,
+							'restaurant_unique_id' => isset($item->restaurant_unique_id) ? $item->restaurant_unique_id : null,
 						]
 					]);
 					break;

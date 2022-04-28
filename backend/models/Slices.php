@@ -17,40 +17,41 @@ use Yii;
  */
 class Slices extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'slices';
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public static function tableName()
+	{
+		return 'slices';
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['alias', 'h1', 'title', 'description', 'params', 'keywords'], 'required'],
-            [['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt'], 'string'],
-        ];
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function rules()
+	{
+		return [
+			[['alias', 'h1', 'title', 'description', 'params', 'keywords'], 'required'],
+			[['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt', 'feature'], 'string'],
+		];
+	}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'alias' => 'Alias',
-            'h1' => 'H1',
-            'title' => 'Title',
-            'description' => 'Description',
-            'params' => 'Params',
-            'keywords' => 'keywords',
-            'text_top' => 'text_top',
-            'text_bottom' => 'text_bottom',
-        ];
-    }
+	/**
+	 * {@inheritdoc}
+	 */
+	public function attributeLabels()
+	{
+		return [
+			'id' => 'ID',
+			'alias' => 'Alias',
+			'h1' => 'H1',
+			'title' => 'Title',
+			'description' => 'Description',
+			'params' => 'Params',
+			'keywords' => 'keywords',
+			'text_top' => 'text_top',
+			'text_bottom' => 'text_bottom',
+			'feature' => 'Feature',
+		];
+	}
 }

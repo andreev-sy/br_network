@@ -65,7 +65,7 @@ class AsyncRenewImagesExt extends BaseObject implements \yii\queue\JobInterface
 		}
 
 		foreach ($images_cur as $gorko_id => $image_cur) {
-			$image_del = ImagesExt::findOne($image_cur->id);
+			$image_del = ImagesExt::findOne($image_cur['id']);
 			$image_del->delete();
 		}
 	}

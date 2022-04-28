@@ -91,6 +91,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				$attributes['parent_district'] = isset($response['district']['parent_id']) ? $response['district']['parent_id'] : 0;
 				$attributes['city_id'] = $response['city']['id'];
 				$attributes['commission'] = $response['commission'] ? $response['commission'] : 0;
+				$attributes['top'] = $response['top'] ? $response['top'] : 0;
 				if(isset($response['params']['param_own_alcohol']) && isset($response['params']['param_own_alcohol']['display']['text'])){
 					$attributes['own_alcohol'] = $response['params']['param_own_alcohol']['display']['text'] ? $response['params']['param_own_alcohol']['display']['text'] : '';
 				}
@@ -166,7 +167,11 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						$attributes['phone'] = $value['value'];
 					}
 				}
-				
+
+				if(isset($response['schema']['aggregateRating']) && isset($response['schema']['aggregateRating']['ratingValue'])){
+					$rating = intval($response['schema']['aggregateRating']['ratingValue']*10);
+					$attributes['rating'] = $rating ? $rating : '';
+				}
 
 				$model->attributes = $attributes;
 				$model->validate();
@@ -189,27 +194,27 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 			    if($restModel){
 
-				    foreach ($response['covers'] as $key => $image) {
-						$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
-						$imgAttributes = [];
-
-						if($imgModel && ($imgModel->item_id != $restModel->id)) {
-							$imgModel->item_id = $restModel->gorko_id;
-							$imgModel->save();
-						}
-				    
-					    if(!$imgModel){
-					    	$imgModel = new Images();
-					    	$imgAttributes['gorko_id'] = $image['id'];
-					    	$imgAttributes['sort'] = $key;
-					    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
-					    	$imgAttributes['type'] = 'restaurant';
-					    	$imgAttributes['item_id'] = $restModel->gorko_id;
-					    	$imgAttributes['timestamp'] = time();
-					    	$imgModel->attributes = $imgAttributes;
-					    	$imgModel->save();				    	
-					    }
-					}
+				    //foreach ($response['covers'] as $key => $image) {
+					//	$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
+					//	$imgAttributes = [];
+//
+					//	if($imgModel && ($imgModel->item_id != $restModel->id)) {
+					//		$imgModel->item_id = $restModel->gorko_id;
+					//		$imgModel->save();
+					//	}
+				    //
+					//    if(!$imgModel){
+					//    	$imgModel = new Images();
+					//    	$imgAttributes['gorko_id'] = $image['id'];
+					//    	$imgAttributes['sort'] = $key;
+					//    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
+					//    	$imgAttributes['type'] = 'restaurant';
+					//    	$imgAttributes['item_id'] = $restModel->gorko_id;
+					//    	$imgAttributes['timestamp'] = time();
+					//    	$imgModel->attributes = $imgAttributes;
+					//    	$imgModel->save();				    	
+					//    }
+					//}
 					
 					foreach ($response['rooms'] as $key => $room) {
 						$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
@@ -285,29 +290,29 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 				    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
 
-				    	if($roomModel){
-				    		foreach ($room['media'] as $key => $image) {
-								$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
-								$imgAttributes = [];
-
-								if($imgModel && ($imgModel->item_id != $roomModel->id)) {
-									$imgModel->item_id = $roomModel->gorko_id;
-									$imgModel->save();
-								}
-						    
-							    if(!$imgModel){
-							    	$imgModel = new Images();
-							    	$imgAttributes['gorko_id'] = $image['id'];
-							    	$imgAttributes['sort'] = $key;
-							    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
-							    	$imgAttributes['type'] = 'rooms';
-							    	$imgAttributes['item_id'] = $roomModel->gorko_id;
-							    	$imgAttributes['timestamp'] = time();
-							    	$imgModel->attributes = $imgAttributes;
-						    		$imgModel->save();
-							    }			    
-							}
-				    	}    	
+				    	//if($roomModel){
+				    	//	foreach ($room['media'] as $key => $image) {
+						//		$imgModel = Images::find()->where(['gorko_id' => $image['id']])->one();
+						//		$imgAttributes = [];
+//
+						//		if($imgModel && ($imgModel->item_id != $roomModel->id)) {
+						//			$imgModel->item_id = $roomModel->gorko_id;
+						//			$imgModel->save();
+						//		}
+						//    
+						//	    if(!$imgModel){
+						//	    	$imgModel = new Images();
+						//	    	$imgAttributes['gorko_id'] = $image['id'];
+						//	    	$imgAttributes['sort'] = $key;
+						//	    	$imgAttributes['realpath'] = str_replace('=s0', '', $image['original_url']);
+						//	    	$imgAttributes['type'] = 'rooms';
+						//	    	$imgAttributes['item_id'] = $roomModel->gorko_id;
+						//	    	$imgAttributes['timestamp'] = time();
+						//	    	$imgModel->attributes = $imgAttributes;
+						//    		$imgModel->save();
+						//	    }			    
+						//	}
+				    	//}    	
 					}
 				}	    
 		  	}

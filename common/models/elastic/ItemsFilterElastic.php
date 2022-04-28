@@ -17,7 +17,7 @@ class ItemsFilterElastic extends BaseObject{
 		   $pages,
 		   $query;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = false) {
 
 		//echo '<pre style="display:none;">';
 		//echo '</pre>';
@@ -359,12 +359,52 @@ class ItemsFilterElastic extends BaseObject{
 				"function_score" => [
 			      "query" => $final_query,
 			      "functions" => [
-			      	  [
-		                  "filter" => [ "range" => [ "restaurant_min_price" => [ "gte" => 100 ] ] ],
-		                  "random_score" => [ "seed" => $seed ],
-		                  "weight" => 10000
-		              ],
+			      		[
+							"field_value_factor" => [ 
+								"field" => "restaurant_rating",
+								"factor" => 0.01 
+							],
+							"weight" => 2
+						],
+						[
+		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+		                	"weight" => 100
+		              	],
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ],
+						[
+							"filter" => [ "range" => [ "restaurant_min_price" => [ "gte" => 100 ] ] ],
+							"random_score" => [ "seed" => $seed ],
+							"weight" => 100
+						],
 		          ]
+			    ]
+			];
+		}
+		elseif($rating_sort){
+			$final_query = [
+				"function_score" => [
+			      "query" => $final_query,
+			      "score_mode" => "sum",
+			      "functions" => [
+        				[
+							"field_value_factor" => [ 
+								"field" => "restaurant_rating",
+								"factor" => 0.01 
+							],
+							"weight" => 2
+						],
+						[
+		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+		                	"weight" => 100
+		              	],
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ]
+		          	]
 			    ]
 			];
 		}
@@ -372,15 +412,23 @@ class ItemsFilterElastic extends BaseObject{
 			$final_query = [
 				"function_score" => [
 			      "query" => $final_query,
+			      "score_mode" => "sum",
 			      "functions" => [
-		              [
-		                  "filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
-		                  "random_score" => [], 
-		                  "weight" => 100
-		              ],
-		              [
-		              	"random_score" => [ "seed" => $seed ],
-		              ]
+		           		[
+							"field_value_factor" => [ 
+								"field" => "restaurant_rating",
+								"factor" => 0.01 
+							],
+							"weight" => 2
+						],
+						[
+		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+		                	"weight" => 100
+		              	],
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ]
 		          ]
 			    ]
 			];
