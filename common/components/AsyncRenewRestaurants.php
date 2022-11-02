@@ -5,6 +5,7 @@ use Yii;
 use yii\base\BaseObject;
 use common\models\Restaurants;
 use common\models\Rooms;
+use common\models\RoomsSpec;
 use common\models\Images;
 use common\components\AsyncRenewImages;
 use common\models\elastic\ApiLoaderLogElastic;
@@ -289,6 +290,20 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$roomModel->save();			    	
 
 				    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
+
+				    	$arr_spec_prices = array();
+				    	$i = 1;
+				    	while (isset($room['params']['param_banquet_price_'.$i])) {
+				    		$spec_price = $room['params']['param_banquet_price_'.$i];
+				    		if ($spec_price['value'] > 0) {
+				    			$arr_spec_prices[$spec_price['spec_id']] = $spec_price['value'];
+				    		}
+				    		$i++;
+				    	}
+
+				    	if (!empty($arr_spec_prices)){
+				    		RoomsSpec::updateSpecPrices($roomModel->id, $arr_spec_prices);
+				    	}
 
 				    	//if($roomModel){
 				    	//	foreach ($room['media'] as $key => $image) {

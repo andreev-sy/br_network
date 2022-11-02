@@ -73,4 +73,8 @@ class Restaurants extends BaseSiteObject
         return $this->hasOne(Subdomen::className(), ['city_id' => 'city_id']);
     }
 
+    public function getYandexReview(){
+        return $this->hasOne(RestaurantsYandex::className(), ['gorko_id' => 'gorko_id']);
+    }
+
 }

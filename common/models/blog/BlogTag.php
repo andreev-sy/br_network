@@ -24,8 +24,8 @@ use yii\helpers\ArrayHelper;
  *
  * @property \common\models\blog\BlogPostTag[] $blogPostTags
  * @property \common\models\blog\BlogPost[] $blogPosts
- * @property \common\models\blog\User $createdBy
- * @property \common\models\blog\User $updatedBy
+ * @property \common\models\User $createdBy
+ * @property \common\models\User $updatedBy
  * @property string $aliasModel
  */
 class BlogTag extends BaseSiteObject

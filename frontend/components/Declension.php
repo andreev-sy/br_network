@@ -93,6 +93,7 @@ class Declension {
 			'Найден' => ['а', 'о', 'о'],
 			'банкетны' => ['й зал', 'х зала', 'х залов'],
 			'гостиниц' => ['а', 'ы', ''],
+			'клуб' => ['', 'а', 'ов'],
 		];
 		if(empty($parts[$part])) {
 			return ($withCount ? $count . ' ' : '') . 'мест' . self::get_num_ending($count, $parts['мест']);

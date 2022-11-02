@@ -20,6 +20,18 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 			$city_id;
 
 	public function execute($queue) {
+		//$imgModel = ImagesModule::find()
+        //	->where(['gorko_id' => $this->gorko_id])
+        //	->one();
+        //$current = false;
+        //if($imgModel) $current = true;
+		//$log = file_get_contents('/var/www/pmnetwork/log/images.log');
+	    //$log_arr = json_decode($log, true);
+	    //$log_arr[] = ['id' => $this->gorko_id];
+	    //$log_new = json_encode($log_arr);
+	    //file_put_contents('/var/www/pmnetwork/log/images.log', $log_new);
+	    //exit;
+
 		$watermark_path = $this->params['watermark'];
 		if(!$watermark_path)
 			return 1;
@@ -73,7 +85,13 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 	    $imgModel->subpath = $response_obj->url;
 	    $imgModel->waterpath = $response_obj->url_watermark;
 	    $imgModel->timestamp = $timestamp;
-	    $imgModel->save();
+	    //$imgModel->save();
+
+	    $log = file_get_contents('/var/www/pmnetwork/log/images.log');
+	    $log_arr = json_decode($log, true);
+	    $log_arr[] = ['finish' => $imgModel->save(), 'id' => $this->gorko_id];
+	    $log_new = json_encode($log_arr);
+	    file_put_contents('/var/www/pmnetwork/log/images.log', $log_new);
 
 	    //Добавление waterpath/subpath/timestamp в elastic
 	    if($this->elastic_type == 'rest'){

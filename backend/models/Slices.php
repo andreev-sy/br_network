@@ -14,7 +14,9 @@ use Yii;
  * @property string $description
  * @property string $params
  * @property string $img_alt
+ * @property integer $also_looking
  */
+
 class Slices extends \yii\db\ActiveRecord
 {
 	/**
@@ -31,8 +33,9 @@ class Slices extends \yii\db\ActiveRecord
 	public function rules()
 	{
 		return [
-			[['alias', 'h1', 'title', 'description', 'params', 'keywords'], 'required'],
+			[['alias', 'h1', 'params'], 'required'],
 			[['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt', 'feature'], 'string'],
+			// [['also_looking'], 'integer']
 		];
 	}
 
@@ -52,6 +55,7 @@ class Slices extends \yii\db\ActiveRecord
 			'text_top' => 'text_top',
 			'text_bottom' => 'text_bottom',
 			'feature' => 'Feature',
+			// 'also_looking' => 'Также ищут'
 		];
 	}
 }

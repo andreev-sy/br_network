@@ -11,9 +11,10 @@ class QueryFromSlice extends BaseObject{
 	public $params;
 	public $seo;
 	public $flag = false;
+	public $slice_model = null;
 
 	public function __construct($slice) {
-		$slice_model = Slices::find()->where(['alias' => $slice])->one();
+		$this->slice_model = $slice_model = Slices::find()->where(['alias' => $slice])->one();
 		if($slice_model){
 			$this->params = json_decode($slice_model->params, true);
 			$this->seo = [

@@ -5,7 +5,7 @@ $params = array_merge(
     require __DIR__ . '/../../../common/config/params-local.php',
     require __DIR__ . '/../params.php',
     require __DIR__ . '/../params-local.php',
-    \common\utility\SiteParamsHelper::getParamsForModule('moybanket')
+    \common\utility\SiteParamsHelper::getParamsForModule('top_banket')
 );
 Yii::setAlias('@module_web', '@backend/modules/moybanket/web');
 

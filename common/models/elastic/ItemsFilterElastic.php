@@ -17,7 +17,7 @@ class ItemsFilterElastic extends BaseObject{
 		   $pages,
 		   $query;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = true, $premium = false) {
 
 		//echo '<pre style="display:none;">';
 		//echo '</pre>';
@@ -228,6 +228,8 @@ class ItemsFilterElastic extends BaseObject{
 			]
 		];
 
+		
+
 		if($must_not){
 			$final_query['bool']['must_not'] = ['match' => ['id' => $must_not]];
 		}
@@ -244,7 +246,16 @@ class ItemsFilterElastic extends BaseObject{
 
 		if($subdomen_id){
 			array_push($final_query['bool']['must'], ['match' => ['restaurant_city_id' => $subdomen_id]]);
-		}			
+		}
+
+		if($premium){
+			array_push($final_query['bool']['must'], ['match' => ['restaurant_premium' => 1]]);
+		}
+		else{
+			if(!isset($final_query['bool']['must_not'])){
+				$final_query['bool']['must_not'] = ['match' => ['restaurant_premium' => 1]];
+			}
+		}
 
 		foreach ($simple_query as $type => $arr_filter) {
 			$temp_type_arr = [];
@@ -414,17 +425,6 @@ class ItemsFilterElastic extends BaseObject{
 			      "query" => $final_query,
 			      "score_mode" => "sum",
 			      "functions" => [
-		           		[
-							"field_value_factor" => [ 
-								"field" => "restaurant_rating",
-								"factor" => 0.01 
-							],
-							"weight" => 2
-						],
-						[
-		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
-		                	"weight" => 100
-		              	],
 		              	[
 			              	"random_score" => [ "seed" => $seed ],
 			              	"weight" => 1

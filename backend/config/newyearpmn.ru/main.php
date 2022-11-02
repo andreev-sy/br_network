@@ -70,7 +70,9 @@ return [
             'showScriptName' => false,
             'suffix' => '/',
             'rules' => [
-                ['pattern' => '/update', 'route' => 'update/update'],
+					['pattern' => 'blog-post/<id:\d+>/update', 'route' => 'blog-posts/update'],
+					['pattern' => 'blog-post/<id:\d+>/view', 'route' => 'blog-posts/view'],
+               //  ['pattern' => '/update', 'route' => 'update/update'],
                 'media/<id:\d+>/resort/<sort:\d+>' => 'media/resort',
                 [
                     'class' => 'yii\rest\UrlRule',
