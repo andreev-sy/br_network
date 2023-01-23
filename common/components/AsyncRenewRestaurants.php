@@ -292,17 +292,17 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
 
 				    	$arr_spec_prices = array();
-				    	$i = 1;
-				    	while (isset($room['params']['param_banquet_price_'.$i])) {
-				    		$spec_price = $room['params']['param_banquet_price_'.$i];
-				    		if ($spec_price['value'] > 0) {
-				    			$arr_spec_prices[$spec_price['spec_id']] = $spec_price['value'];
-				    		}
-				    		$i++;
-				    	}
+				    	for ($i=1; $i<85; $i++) {
+					    	if (isset($room['params']['param_banquet_price_'.$i])) {
+					    		$spec_price = $room['params']['param_banquet_price_'.$i];
+					    		if ($spec_price['value'] > 0) {
+					    			$arr_spec_prices[$spec_price['spec_id']] = $spec_price['value'];
+					    		}
+					    	}
+					    }
 
 				    	if (!empty($arr_spec_prices)){
-				    		RoomsSpec::updateSpecPrices($roomModel->id, $arr_spec_prices);
+				    		RoomsSpec::updateSpecPrices($roomModel->id, $roomModel->gorko_id, $arr_spec_prices);
 				    	}
 
 				    	//if($roomModel){

@@ -22,7 +22,7 @@ class Seo extends BaseObject
 	public $seo_subdomen_obj;
 	public $rest_seo_obj;
 
-	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false, $is_post = false, $post_seo = false, $autofill = false)
+	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false, $is_post = false, $post_seo = false, $autofill = false, $max_price = false)
 	{
 		if($is_post){
 			$seoObj = $post_seo;
@@ -68,7 +68,7 @@ class Seo extends BaseObject
 				foreach ($this->seo as $key => $text) {
 					if (!(strpos($text, '**') === false)) {
 						if ($item_type == 'room') {
-							$this->seo[$key] = $this->seoRepalceItem($text, $item, $rest_item);
+							$this->seo[$key] = $this->seoRepalceItem($text, $item, $rest_item, $min_price, $max_price);
 						} else {
 							$this->seo[$key] = $this->seoRepalceRest($text, $item);
 						}
@@ -77,7 +77,7 @@ class Seo extends BaseObject
 			} else {
 				foreach ($this->seo as $key => $text) {
 					if (!(strpos($text, '**') === false)) {
-						$this->seo[$key] = $this->seoRepalce($text, $count, $page, $min_price);
+						$this->seo[$key] = $this->seoRepalce($text, $count, $page, $min_price, false, $this->seo_obj['name']);
 					}
 				}
 			}
@@ -114,7 +114,7 @@ class Seo extends BaseObject
 		$this->seo = array_merge($getSeoArray($this->seo_obj->seoObject, true), array_filter($getSeoArray($seoObj)), $restSeoArr);	
 	}
 
-	private function seoRepalce($text, $count = 0, $page, $min_price, $name = false)
+	private function seoRepalce($text, $count = 0, $page, $min_price, $name = false, $page_name = false)
 	{
 		$text = str_replace('**count**', $count, $text);
 		$text = str_replace('**year**', isset(Yii::$app->params['cur_year']) ? Yii::$app->params['cur_year'] : date('Y'), $text);
@@ -138,10 +138,16 @@ class Seo extends BaseObject
 			}
 		}
 
+		if ($page_name) {
+			$page_name_lcase = mb_strtolower($page_name);
+			$text = str_replace('**page_name**', $page_name, $text);
+			$text = str_replace('**page_name_lcase**', $page_name_lcase, $text);
+		}
+
 		return $text;
 	}
 
-	private function seoRepalceItem($text, $item, $rest_item = null)
+	private function seoRepalceItem($text, $item, $rest_item = null, $min_price = false, $max_price = false)
 	{
 		$text = str_replace('**year**', isset(Yii::$app->params['cur_year']) ? Yii::$app->params['cur_year'] : date('Y'), $text);
 		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '', $text);
@@ -155,9 +161,23 @@ class Seo extends BaseObject
 			$text = str_replace('**rest_address**', $rest_item->restaurant_address, $text);
 			$text = str_replace('**rest_type**', $rest_item->restaurant_main_type, $text);
 			$text = str_replace('**rest_type_lcase**', mb_strtolower($rest_item->restaurant_main_type), $text);
+		} else {
+			$text = str_replace('**rest_address**', $item->restaurant_address, $text);
+		}
+		if ($min_price) {
+			$text = str_replace('**min_price**', $min_price, $text);
+		}
+		if ($max_price) {
+			$text = str_replace('**max_price**', $max_price, $text);
 		}
 
-		if (!(strpos($text, '**area**') === false)) {
+		if (!(strpos($text, '**area**') === false) && $rest_item) {
+			if ($rest_item && ($rest_item->restaurant_district == 547 || $rest_item->restaurant_parent_district == 547)) {
+				$text = str_replace('**area**', 'в Подмосковье', $text);
+			} else {
+				$text = str_replace('**area**', 'в Москве', $text);
+			}
+		} elseif (!(strpos($text, '**area**') === false)) {
 			if ($item->restaurant_district == 547 || $item->restaurant_parent_district == 547) {
 				$text = str_replace('**area**', 'в Подмосковье', $text);
 			} else {

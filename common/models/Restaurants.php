@@ -58,7 +58,7 @@ class Restaurants extends BaseSiteObject
     }
 
     public function getRooms(){
-        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'gorko_id'])->orderBy(['capacity' => SORT_ASC]);
+        return $this->hasMany(Rooms::className(), ['restaurant_id' => 'gorko_id'])->onCondition(['active' => 1])->orderBy(['capacity' => SORT_ASC]);
     }
 
     public function getImages(){

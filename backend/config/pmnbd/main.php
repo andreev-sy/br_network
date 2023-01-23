@@ -39,6 +39,13 @@ return [
             // this is the name of the session cookie used for login on the backend
             'name' => 'advanced-backend',
         ],
+        'db' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'mysql:host=localhost;dbname=pmn_bd',
+            'username' => 'root',
+            'password' => 'GxU25UseYmeVcsn5Xhzy',
+            'charset' => 'utf8',
+        ],
         'elasticsearch' => [
             'class' => 'yii\elasticsearch\Connection',
             'autodetectCluster' => false,
@@ -80,10 +87,12 @@ return [
                         'POST sort' => 'sort',
                     ]
                 ],
-                '<controller>' => '<controller>/index',
+                // '<controller>' => '<controller>/index',
+                // '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
+                // 'api/<any>' => 'site/error',
+                // '<controller>/<action>' => '<controller>/<action>',
+                ['pattern'=>'/update','route'=>'update/update'],
                 '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
-                'api/<any>' => 'site/error',
-                '<controller>/<action>' => '<controller>/<action>',
             ],
         ],
     ],

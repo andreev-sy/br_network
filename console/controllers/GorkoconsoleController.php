@@ -24,6 +24,18 @@ use common\models\SlicesExtra;
 class GorkoconsoleController extends Controller
 {
 	//ОБНОВЛЕНИЕ ROOT БАЗЫ ИЗ GORKO API
+	public function actionRenewRoomSpecs()
+	{
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
+		
+		GorkoApi::renewRoomSpecs($connection_config);
+
+		return 1;
+	}
+
+	//ОБНОВЛЕНИЕ ROOT БАЗЫ ИЗ GORKO API
 	public function actionRenewAllData()
 	{
 		$mysql_config =	\Yii::$app->params['mysql_config'];
@@ -31,6 +43,8 @@ class GorkoconsoleController extends Controller
 		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
 
 		GorkoApi::renewAllData($connection_config);
+
+		GorkoApi::renewRoomSpecs($connection_config);
 
 		return 1;
 	}
@@ -509,7 +523,7 @@ class GorkoconsoleController extends Controller
 		$headers = array();
 		$payload = [
 			'key' 		=> 'banketyvspb',
-			'name' 	=> 'Сателлит банкеты в Санкт-Петербурге'
+			'name' 	=> 'banketyvspb.ru'
 		];
 
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';

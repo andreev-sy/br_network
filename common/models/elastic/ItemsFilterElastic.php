@@ -17,7 +17,7 @@ class ItemsFilterElastic extends BaseObject{
 		   $pages,
 		   $query;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = true, $premium = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = true, $premium = false, $check_sort='') {
 
 		//echo '<pre style="display:none;">';
 		//echo '</pre>';
@@ -88,6 +88,10 @@ class ItemsFilterElastic extends BaseObject{
 
 		];
 
+		$rooms_spec_query = [
+
+		];
+
 		$specials_query = [
 
 		];
@@ -129,9 +133,15 @@ class ItemsFilterElastic extends BaseObject{
 								$type_query[$filter_query->query_type] = [];
 							}
 						}
+
 						elseif($filter_query->spec){
 							if(!isset($spec_query[$filter_query->query_type])){
 								$spec_query[$filter_query->query_type] = [];
+							}
+						}
+						elseif($filter_query->rooms_spec){
+							if(!isset($rooms_spec_query[$filter_query->query_type])){
+								$rooms_spec_query[$filter_query->query_type] = [];
 							}
 						}
 						elseif($filter_query->specials){
@@ -169,6 +179,9 @@ class ItemsFilterElastic extends BaseObject{
 							}
 							elseif($filter_query->spec){
 								array_push($spec_query[$filter_query->query_type], $filter_value);
+							}
+							elseif($filter_query->rooms_spec){
+								array_push($rooms_spec_query[$filter_query->query_type], $filter_value);
 							}
 							elseif($filter_query->specials){
 								array_push($specials_query[$filter_query->query_type], $filter_value);
@@ -304,6 +317,19 @@ class ItemsFilterElastic extends BaseObject{
 			}
 		}
 
+		foreach ($rooms_spec_query as $type => $arr_filter) {
+			$temp_type_arr = [];
+			foreach ($arr_filter as $key => $value) {
+				array_push($temp_type_arr, $value);
+			}
+			if($main_table == 'rooms'){
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "room_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+			else{
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "room_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+		}
+
 		foreach ($specials_query as $type => $arr_filter) {
 			$temp_type_arr = [];
 			foreach ($arr_filter as $key => $value) {
@@ -436,6 +462,9 @@ class ItemsFilterElastic extends BaseObject{
 		
 		$query->query($final_query);
 
+        if (!empty($check_sort))
+            $query->orderBy([ 'restaurant_min_check' => $check_sort ]);
+        
 		$query->limit($limit)
 			  ->offset(($offset-1)*$limit);
 

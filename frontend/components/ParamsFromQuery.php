@@ -32,6 +32,10 @@ class ParamsFromQuery extends BaseObject{
 						if(isset($filter_item->hits)) {
 							$this->query_hits += intval($filter_item->hits);
 						}
+
+//						echo '<pre>';
+//						print_r($filter_item);
+//						die();
 						foreach ($base_arr as $value) {
 							//echo '<pre>';
 							//print_r($value);
@@ -121,6 +125,7 @@ class ParamsFromQuery extends BaseObject{
 		$slice_model = $slices_model ?? Slices::find()->all();
 		$slice_alias = false;
 		$temp = $filter;
+
 		unset($temp['page']);
 		foreach ($slice_model as $key => $value) {
 			$temp2 = json_decode($value->params, true);

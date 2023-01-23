@@ -16,7 +16,8 @@ class FilterQueryConstructorElastic extends BaseObject{
 		   $metro,
 		   $spec,
 		   $specials,
-		   $extra;
+		   $extra,
+		   $rooms_spec;
 
 	public function __construct($filter_data, $main_table){
 
@@ -46,6 +47,7 @@ class FilterQueryConstructorElastic extends BaseObject{
 		$this->extra = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'extra.id');
 		$this->location = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'location.id');
 		$this->metro = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'metro_stations.id');
+		$this->rooms_spec = ($filter_data['table'] == 'rooms' and $filter_data['key'] == 'room_spec.id');
 
 		//print_r($filter_data['key']);
 
@@ -64,6 +66,13 @@ class FilterQueryConstructorElastic extends BaseObject{
 		}
 		//Тип
 		if($filter_data['key'] == 'spec.id'){
+			$this->query_arr = [
+				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			];
+		}
+
+		//Тип по залу
+		if($filter_data['key'] == 'room_spec.id'){
 			$this->query_arr = [
 				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
 			];
