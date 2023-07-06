@@ -78,6 +78,7 @@ return [
                         'POST sort' => 'sort',
                     ]
                 ],
+                'rooms/set-beautiful' => 'rooms/set-beautiful',
                 '<controller>' => '<controller>/index',
                 '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
                 'api/<any>' => 'site/error',

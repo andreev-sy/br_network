@@ -5,12 +5,17 @@ namespace console\controllers;
 use common\models\elastic\FilterQueryConstructorElastic;
 use common\models\FilterItems;
 use Yii;
+use yii\helpers\ArrayHelper;
+use common\widgets\ProgressWidget;
 use yii\console\Controller;
 use common\models\GorkoApi;
+use common\models\GorkoPhoneApi;
 use common\models\Subdomen;
 use common\models\Restaurants;
+use common\models\RestaurantsYandex;
 use common\models\Rooms;
 use common\components\MetroUpdate;
+use common\components\RenewPremiumRest;
 use frontend\modules\pmnbd\models\ElasticItems;
 use frontend\modules\pmnbd\models\SubdomenFilteritem;
 use common\components\AsyncRenewPhones;
@@ -20,6 +25,7 @@ use frontend\components\QueryFromSlice;
 use common\models\elastic\ItemsFilterElastic;
 use frontend\modules\banketnye_zaly_moskva\components\UpdateFilterItems;
 use common\models\SlicesExtra;
+use common\components\PremiumSendEmail;
 
 class GorkoconsoleController extends Controller
 {
@@ -29,7 +35,7 @@ class GorkoconsoleController extends Controller
 		$mysql_config =	\Yii::$app->params['mysql_config'];
 		$main_config = \Yii::$app->params['main_api_config'];
 		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
-		
+
 		GorkoApi::renewRoomSpecs($connection_config);
 
 		return 1;
@@ -58,7 +64,7 @@ class GorkoconsoleController extends Controller
 		return 1;
 	}
 
-	public function actionElasticRefresh($site)
+	public function actionElasticRefresh($site, $id = 0)
 	{
 		$connectionAndModel = $this->moduleAttr($site);
 		$params = [
@@ -67,17 +73,17 @@ class GorkoconsoleController extends Controller
 			'watermark' 			 			 	=> $connectionAndModel['site_config']['params']['watermark'],
 			'imageHash' 			 				=> $connectionAndModel['site_config']['params']['imageHash'],
 			'watermark_pos' 		 			=> $connectionAndModel['site_config']['params']['watermark_pos'],
-			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
+			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'] . '\models\ElasticItems',
 			'watermark_city' 			 		=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
 			'slug_city' 			 				=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
+			'gorko_id'					=> $id,
 		];
 
 		if ($connectionAndModel['site_config']['params']['subdomens']) {
 			if ($connectionAndModel['elasticModel']::refreshIndex($params)) {
 				$this->actionSubdomenCheck($site);
 			}
-		}
-		else{
+		} else {
 			$connectionAndModel['elasticModel']::refreshIndex($params);
 		}
 		return 1;
@@ -89,10 +95,10 @@ class GorkoconsoleController extends Controller
 		$params = [
 			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
 			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
-			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticSearch',
+			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'] . '\models\ElasticSearch',
 		];
 
-		$elasticSearchPath = $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticSearch';
+		$elasticSearchPath = $connectionAndModel['site_config']['params']['module_path'] . '\models\ElasticSearch';
 		$elasticSearchModel = new $elasticSearchPath();
 
 		$elasticSearchModel::refreshIndex($params);
@@ -100,28 +106,48 @@ class GorkoconsoleController extends Controller
 		return 1;
 	}
 
-	public function actionElasticUpdate($site)
+	public function actionElasticUpdate($site, $id = 0)
 	{
 		$connectionAndModel = $this->moduleAttr($site);
 		$params = [
 			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
 			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
-			'watermark' 			 			 	=> $connectionAndModel['site_config']['params']['watermark'],
-			'imageHash' 			 				=> $connectionAndModel['site_config']['params']['imageHash'],
-			'watermark_pos' 		 			=> $connectionAndModel['site_config']['params']['watermark_pos'],
-			'elasticModel'			 			=> $connectionAndModel['site_config']['params']['module_path'].'\models\ElasticItems',
-			'watermark_city' 			 		=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
-			'slug_city' 			 				=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
+			'watermark' 			 	=> $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 	=> $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 	=> $connectionAndModel['site_config']['params']['watermark_pos'],
+			'elasticModel'			 	=> $connectionAndModel['site_config']['params']['module_path'] . '\models\ElasticItems',
+			'watermark_city' 			=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
+			'slug_city' 			 	=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
+			'gorko_id'					=> $id,
 		];
 
 		if ($connectionAndModel['site_config']['params']['subdomens']) {
 			if ($connectionAndModel['elasticModel']::updateIndex($params)) {
 				$this->actionSubdomenCheck($site);
 			}
-		}
-		else{
+		} else {
 			$connectionAndModel['elasticModel']::updateIndex($params);
 		}
+		return 1;
+	}
+
+	public function actionAddPremiumRest($site, $gorko_id)
+	{
+		$connectionAndModel = $this->moduleAttr($site);
+		$params = [
+			'main_connection_config' 	=> $connectionAndModel['main_connection_config'],
+			'site_connection_config' 	=> $connectionAndModel['site_connection_config'],
+			'watermark' 			 	=> $connectionAndModel['site_config']['params']['watermark'],
+			'imageHash' 			 	=> $connectionAndModel['site_config']['params']['imageHash'],
+			'watermark_pos' 		 	=> $connectionAndModel['site_config']['params']['watermark_pos'],
+			'elasticModel'			 	=> $connectionAndModel['site_config']['params']['module_path'] . '\models\ElasticItems',
+			'watermark_city' 			=> isset($connectionAndModel['site_config']['params']['watermark_city']) ? $connectionAndModel['site_config']['params']['watermark_city'] : false,
+			'slug_city' 			 	=> isset($connectionAndModel['site_config']['params']['slug_city']) ? $connectionAndModel['site_config']['params']['slug_city'] : false,
+			'gorko_id'					=> $gorko_id,
+		];
+
+		RenewPremiumRest::renew_rest($params);
+
 		return 1;
 	}
 
@@ -129,19 +155,19 @@ class GorkoconsoleController extends Controller
 	public function actionSubdomenCheck($site)
 	{
 		$connectionAndModel = $this->moduleAttr($site);
-		
+
 		$connection = new \yii\db\Connection($connectionAndModel['site_connection_config']);
 		$connection->open();
 		Yii::$app->set('db', $connection);
-		
-		if($site == 'birthday'){
+
+		if ($site == 'birthday') {
 			SubdomenFilteritem::deactivate();
 			$counterActive = 0;
 			$counterInactive = 0;
 			foreach (Subdomen::find()->all() as $key => $subdomen) {
-				$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
-				$subdomen->active = $isActive;
-				$subdomen->save();
+				// $isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
+				// $subdomen->active = $isActive;
+				// $subdomen->save();
 				if ($subdomen->active) {
 					foreach (FilterItems::find()->all() as $filterItem) {
 						$hits = $this->getFilterItemsHitsForCity($filterItem, $subdomen->city_id);
@@ -154,13 +180,12 @@ class GorkoconsoleController extends Controller
 					}
 				}
 			}
-			foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
-				$room->cover_url = '/img/bd/no_photo_s.png';
-				$room->save();
-			}
+			// foreach (Rooms::find()->where(['like', 'cover_url', 'no_photo'])->all() as $room) {
+			// 	$room->cover_url = '/img/bd/no_photo_s.png';
+			// 	$room->save();
+			// }
 			echo "active=$counterActive; inactive=$counterInactive";
-		}
-		else{
+		} else {
 			foreach (Subdomen::find()->all() as $key => $subdomen) {
 				$isActive = Restaurants::find()->where(['city_id' => $subdomen->city_id])->count() > 9;
 				$subdomen->active = $isActive;
@@ -171,15 +196,16 @@ class GorkoconsoleController extends Controller
 	}
 
 	//СБОРЩИК CONNECTION И МОДЕЛИ ИЗ КОНФИГОВ МОДУЛЯ
-	private function moduleAttr($site){
-		if(!isset(\Yii::$app->params['module_api_config'][$site])){
-			print_r('Нет конфига под '.$site);
+	private function moduleAttr($site)
+	{
+		if (!isset(\Yii::$app->params['module_api_config'][$site])) {
+			print_r('Нет конфига под ' . $site);
 			exit;
 		}
 
 		$site_config = \Yii::$app->params['module_api_config'][$site];
 
-		$elasticItemsPath = $site_config['params']['module_path'].'\models\ElasticItems';
+		$elasticItemsPath = $site_config['params']['module_path'] . '\models\ElasticItems';
 		$elasticModel = new $elasticItemsPath();
 
 		$mysql_config =	\Yii::$app->params['mysql_config'];
@@ -218,7 +244,7 @@ class GorkoconsoleController extends Controller
 	public function actionGetCityPhone($site)
 	{
 		$connectionAndModel = $this->moduleAttr($site);
-		
+
 		$queue_id = Yii::$app->queue->push(new AsyncRenewPhones([
 			'gorko_city_id'			 => $connectionAndModel['site_config']['params']['gorko_api']['city'],
 			'site_connection_config' => $connectionAndModel['site_connection_config'],
@@ -237,23 +263,25 @@ class GorkoconsoleController extends Controller
 		return 1;
 	}
 
+	public function actionGetOneImages($id)
+	{
+		$mysql_config =	\Yii::$app->params['mysql_config'];
+		$main_config = \Yii::$app->params['main_api_config'];
+		$connection_config = array_merge($mysql_config, $main_config['mysql_config']);
 
+		GorkoApi::renewOneImages($connection_config, $id);
 
+		return 1;
+	}
 
+	//ОБНОВЛЕНИЕ ПРЕМИУМ ТЕЛЕФОНОВ
+	public function actionRenewPremiumPhones()
+	{
+		$premium_config =	\Yii::$app->params['premium_config'];
+		GorkoPhoneApi::renewAllPhones($premium_config);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+		return 1;
+	}
 
 
 
@@ -262,8 +290,9 @@ class GorkoconsoleController extends Controller
 
 
 	// ОБНОВИТЬ КОЛИЧЕСТВО РЕСТОРАНОВ У СРЕЗОВ ДЛЯ banketnye-zaly-moskva.ru 
-	
-	public function actionRefreshRestCount(){
+
+	public function actionRefreshRestCount()
+	{
 		$connection_bzm = new \yii\db\Connection([
 			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
 			'username' => 'root',
@@ -274,26 +303,26 @@ class GorkoconsoleController extends Controller
 		Yii::$app->set('db', $connection_bzm);
 
 		$filter_model = Filter::find()->with('items')->orderBy(['sort' => SORT_ASC])->all($connection_bzm);
-    $slices_model = Slices::find()->all($connection_bzm);
-    $elastic_model = new \frontend\modules\banketnye_zaly_moskva\models\ElasticItems;
+		$slices_model = Slices::find()->all($connection_bzm);
+		$elastic_model = new \frontend\modules\banketnye_zaly_moskva\models\ElasticItems;
 
-    foreach ($slices_model as $slice){
-      $slice_obj = new QueryFromSlice($slice->alias);
-      $params = UpdateFilterItems::parseGetQuery($slice_obj->params, $filter_model, $slices_model);
-      $items = new ItemsFilterElastic($params['params_filter'], 1, 1, false, 'restaurants', $elastic_model, false, false, false, true);
-      
+		foreach ($slices_model as $slice) {
+			$slice_obj = new QueryFromSlice($slice->alias);
+			$params = UpdateFilterItems::parseGetQuery($slice_obj->params, $filter_model, $slices_model);
+			$items = new ItemsFilterElastic($params['params_filter'], 1, 1, false, 'restaurants', $elastic_model, false, false, false, true);
 
-      if (SlicesExtra::find()->where(['slices_id' => $slice->id])->exists($connection_bzm)){
-        $totalItem = SlicesExtra::find()->where(['slices_id' => $slice->id])->one($connection_bzm);
-        $totalItem->restaurant_count = $items->total;
-        $totalItem->save();
-      } else {
-        $totalItem = new SlicesExtra($connection_bzm);
-        $totalItem->slices_id = $slice->id;
-        $totalItem->restaurant_count = $items->total;
-        $totalItem->save();
-      }
-    }
+
+			if (SlicesExtra::find()->where(['slices_id' => $slice->id])->exists($connection_bzm)) {
+				$totalItem = SlicesExtra::find()->where(['slices_id' => $slice->id])->one($connection_bzm);
+				$totalItem->restaurant_count = $items->total;
+				$totalItem->save();
+			} else {
+				$totalItem = new SlicesExtra($connection_bzm);
+				$totalItem->slices_id = $slice->id;
+				$totalItem->restaurant_count = $items->total;
+				$totalItem->save();
+			}
+		}
 
 		$log = "";
 
@@ -304,13 +333,14 @@ class GorkoconsoleController extends Controller
 
 		file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log/updateActiveSlices.log', $log, FILE_APPEND);
 
-    // echo 'Количество ресторанов у всех срезов обновлено';
-    exit;
+		// echo 'Количество ресторанов у всех срезов обновлено';
+		exit;
 	}
 
 	// ДЕАКТИВИРОВАТЬ СРЕЗЫ БЕЗ РЕСТОРАНОВ ДЛЯ banketnye-zaly-moskva.ru 
 
-	public function actionRefreshActiveFilterItems(){
+	public function actionRefreshActiveFilterItems()
+	{
 		$connection_bzm = new \yii\db\Connection([
 			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
 			'username' => 'root',
@@ -322,16 +352,16 @@ class GorkoconsoleController extends Controller
 
 		$slices_model = Slices::find()->with('slicesExtra')->all($connection_bzm);
 
-    foreach ($slices_model as $slice){
-      $filterItem = FilterItems::find()->where(['value' => $slice->alias])->one($connection_bzm);
+		foreach ($slices_model as $slice) {
+			$filterItem = FilterItems::find()->where(['value' => $slice->alias])->one($connection_bzm);
 
-      if ($slice->slicesExtra->restaurant_count > 0){
-        $filterItem->active = 1;
-      } elseif ($slice->slicesExtra->restaurant_count === 0){
-        $filterItem->active = 0;
-      }
-      $filterItem->save();
-    }
+			if ($slice->slicesExtra->restaurant_count > 0) {
+				$filterItem->active = 1;
+			} elseif ($slice->slicesExtra->restaurant_count === 0) {
+				$filterItem->active = 0;
+			}
+			$filterItem->save();
+		}
 
 		$log = "";
 
@@ -342,8 +372,8 @@ class GorkoconsoleController extends Controller
 
 		file_put_contents('/var/www/pmnetwork/frontend/modules/banketnye_zaly_moskva/log/updateActiveSlices.log', $log, FILE_APPEND);
 
-    // echo 'Срезы без ресторанов деактивированы';
-    exit;
+		// echo 'Срезы без ресторанов деактивированы';
+		exit;
 	}
 
 	public function actionShowAllData($site)
@@ -372,6 +402,7 @@ class GorkoconsoleController extends Controller
 		$nested_query = [];
 		$type_query = [];
 		$location_query = [];
+		$metro_query = [];
 		foreach ($filter_item_arr as $filter_data) {
 
 			$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
@@ -388,6 +419,10 @@ class GorkoconsoleController extends Controller
 				if (!isset($location_query[$filter_query->query_type])) {
 					$location_query[$filter_query->query_type] = [];
 				}
+			} elseif ($filter_query->metro) {
+				if (!isset($metro_query[$filter_query->query_type])) {
+					$metro_query[$filter_query->query_type] = [];
+				}
 			} else {
 				if (!isset($simple_query[$filter_query->query_type])) {
 					$simple_query[$filter_query->query_type] = [];
@@ -401,6 +436,8 @@ class GorkoconsoleController extends Controller
 					array_push($type_query[$filter_query->query_type], $filter_value);
 				} elseif ($filter_query->location) {
 					array_push($location_query[$filter_query->query_type], $filter_value);
+				} elseif ($filter_query->metro) {
+					array_push($metro_query[$filter_query->query_type], $filter_value);
 				} else {
 					array_push($simple_query[$filter_query->query_type], $filter_value);
 				}
@@ -455,6 +492,19 @@ class GorkoconsoleController extends Controller
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_location", "query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 		}
+
+		foreach ($metro_query as $type => $arr_filter) {
+			$temp_type_arr = [];
+			foreach ($arr_filter as $key => $value) {
+				array_push($temp_type_arr, $value);
+			}
+			if ($main_table == 'rooms') {
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_metro_stations", "query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			} else {
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_metro_stations", "query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+		}
+
 		$final_query = [
 			"function_score" => [
 				"query" => $final_query,
@@ -509,12 +559,12 @@ class GorkoconsoleController extends Controller
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
 		curl_setopt($curl, CURLOPT_URL, 'https://v.gorko.ru/api2/');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl, CURLOPT_ENCODING, '');
-    $response = json_decode(curl_exec($curl), true);
-    curl_close($curl);
-    print_r($response);
-    exit;
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_ENCODING, '');
+		$response = json_decode(curl_exec($curl), true);
+		curl_close($curl);
+		print_r($response);
+		exit;
 	}
 
 	public function actionApiNewChannel()
@@ -522,19 +572,24 @@ class GorkoconsoleController extends Controller
 		$curl = curl_init();
 		$headers = array();
 		$payload = [
-			'key' 		=> 'banketyvspb',
-			'name' 	=> 'banketyvspb.ru'
+			'key' 		=> 'gdedr',
+			'name' 	=> 'gdedr'
 		];
 
 		$headers[] = 'X-AUTH-TOKEN:J3QQ4-H7H2V-2HCH4-M3HK8-6M8VW';
 		curl_setopt($curl, CURLOPT_URL, 'https://v.gorko.ru/api2/sat/channel');
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl, CURLOPT_ENCODING, '');
-    $response = json_decode(curl_exec($curl), true);
-    curl_close($curl);
-    print_r($response);
-    exit;
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_ENCODING, '');
+		$response = json_decode(curl_exec($curl), true);
+		curl_close($curl);
+		print_r($response);
+		exit;
+	}
+
+	public function actionPremiumSendEmail()
+	{
+		PremiumSendEmail::sendEmail();
 	}
 }

@@ -17,33 +17,38 @@ class ItemsFilterElasticNew extends BaseObject{
 		   $pages,
 		   $query;
 
-	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false) {
+	public function __construct($filter_arr = [], $limit = 24, $offset = 0, $widget_flag = false, $main_table, $elastic_model = false, $random = false, $must_not = false, $api_subdomen = false, $console = false, $price_sort = false, $rating_sort = true, $premium = false, $check_sort='') {
 
 		//echo '<pre style="display:none;">';
 		//echo '</pre>';
 
 		$filter_main_model = ArrayHelper::map(Filter::find()->all(), 'alias', 'type');
 
-		$session = Yii::$app->session;
-		if($session->get('seed')){
-			$seed = $session->get('seed');
-		}
-		else{
-			$rand_seed = random_int(1, 999999);
-			$session->set('seed', $rand_seed);
-			$seed = $rand_seed;
-		}
-
-		if($widget_flag){
-			if($session->get('widget_seed')){
-			$seed = $session->get('widget_seed');
+		if(!$console){
+			$session = Yii::$app->session;
+			if($session->get('seed')){
+				$seed = $session->get('seed');
 			}
 			else{
 				$rand_seed = random_int(1, 999999);
-				$session->set('widget_seed', $rand_seed);
+				$session->set('seed', $rand_seed);
 				$seed = $rand_seed;
 			}
+
+			if($widget_flag){
+				if($session->get('widget_seed')){
+				$seed = $session->get('widget_seed');
+				}
+				else{
+					$rand_seed = random_int(1, 999999);
+					$session->set('widget_seed', $rand_seed);
+					$seed = $rand_seed;
+				}
+			}
 		}
+		else{
+			$seed = 1;
+		}			
 
 		if($random){
 			$seed = random_int(1, 999999);
@@ -65,19 +70,42 @@ class ItemsFilterElasticNew extends BaseObject{
 				'restaurant_min_capacity',
 				'restaurant_max_capacity',
 			]);
-		}
+		}		
 
-		$simple_query = [];
+		$simple_query = [
 
-		$rooms_query = [];
+		];
 
 		$nested_query = [
-			'type_query' => null,
-			'spec_query' => null,
-			'specials_query' => null,
-			'extra_query' => null,
-			'location_query' => null,
-			'metro_query' => null
+
+		];
+
+		$type_query = [
+
+		];
+
+		$spec_query = [
+
+		];
+
+		$rooms_spec_query = [
+
+		];
+
+		$specials_query = [
+
+		];
+
+		$extra_query = [
+
+		];
+
+		$location_query = [
+
+		];
+
+		$metro_query = [
+
 		];
 		
 		foreach ($filter_arr as $key => $value_temp) {
@@ -93,11 +121,11 @@ class ItemsFilterElasticNew extends BaseObject{
 
 					foreach ($filter_item_arr as $filter_data) {
 
-						$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
+						$filter_query = new FilterQueryConstructorElasticNew($filter_data, $main_table);
 
-						if($filter_query->rooms){
-							if(!isset($rooms_query[$filter_query->query_type])){
-								$rooms_query[$filter_query->query_type] = [];
+						if($filter_query->nested){
+							if(!isset($nested_query[$filter_query->query_type])){
+								$nested_query[$filter_query->query_type] = [];
 							}
 						}
 						elseif($filter_query->type){
@@ -105,9 +133,15 @@ class ItemsFilterElasticNew extends BaseObject{
 								$type_query[$filter_query->query_type] = [];
 							}
 						}
+
 						elseif($filter_query->spec){
 							if(!isset($spec_query[$filter_query->query_type])){
 								$spec_query[$filter_query->query_type] = [];
+							}
+						}
+						elseif($filter_query->rooms_spec){
+							if(!isset($rooms_spec_query[$filter_query->query_type])){
+								$rooms_spec_query[$filter_query->query_type] = [];
 							}
 						}
 						elseif($filter_query->specials){
@@ -137,14 +171,17 @@ class ItemsFilterElasticNew extends BaseObject{
 						}
 
 						foreach ($filter_query->query_arr as $filter_value) {
-							if($filter_query->rooms){
-								array_push($rooms_query[$filter_query->query_type], $filter_value);
+							if($filter_query->nested){
+								array_push($nested_query[$filter_query->query_type], $filter_value);
 							}
 							elseif($filter_query->type){
 								array_push($type_query[$filter_query->query_type], $filter_value);
 							}
 							elseif($filter_query->spec){
 								array_push($spec_query[$filter_query->query_type], $filter_value);
+							}
+							elseif($filter_query->rooms_spec){
+								array_push($rooms_spec_query[$filter_query->query_type], $filter_value);
 							}
 							elseif($filter_query->specials){
 								array_push($specials_query[$filter_query->query_type], $filter_value);
@@ -175,11 +212,11 @@ class ItemsFilterElasticNew extends BaseObject{
 
 					foreach ($filter_item_arr as $filter_data) {
 
-						$filter_query = new FilterQueryConstructorElastic($filter_data, $main_table);
+						$filter_query = new FilterQueryConstructorElasticNew($filter_data, $main_table);
 
-						if($filter_query->rooms){
-							if(!isset($rooms_query[$filter_query->query_type])){
-								$rooms_query[$filter_query->query_type] = [];
+						if($filter_query->nested){
+							if(!isset($nested_query[$filter_query->query_type])){
+								$nested_query[$filter_query->query_type] = [];
 							}
 						}
 						else{
@@ -189,8 +226,8 @@ class ItemsFilterElasticNew extends BaseObject{
 						}
 
 						foreach ($filter_query->query_arr as $filter_value) {
-							$filter_query->rooms ? 
-								array_push($rooms_query[$filter_query->query_type], $filter_value): 
+							$filter_query->nested ? 
+								array_push($nested_query[$filter_query->query_type], $filter_value): 
 								array_push($simple_query[$filter_query->query_type], $filter_value);
 						}
 					}	
@@ -203,6 +240,8 @@ class ItemsFilterElasticNew extends BaseObject{
 				'must' => [],
 			]
 		];
+
+		
 
 		if($must_not){
 			$final_query['bool']['must_not'] = ['match' => ['id' => $must_not]];
@@ -220,7 +259,16 @@ class ItemsFilterElasticNew extends BaseObject{
 
 		if($subdomen_id){
 			array_push($final_query['bool']['must'], ['match' => ['restaurant_city_id' => $subdomen_id]]);
-		}			
+		}
+
+		if($premium){
+			array_push($final_query['bool']['must'], ['match' => ['restaurant_premium' => 1]]);
+		}
+		else{
+			if(!isset($final_query['bool']['must_not'])){
+				$final_query['bool']['must_not'] = ['match' => ['restaurant_premium' => 1]];
+			}
+		}
 
 		foreach ($simple_query as $type => $arr_filter) {
 			$temp_type_arr = [];
@@ -230,7 +278,7 @@ class ItemsFilterElasticNew extends BaseObject{
 			array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
 		}
 
-		foreach ($rooms_query as $type => $arr_filter) {
+		foreach ($nested_query as $type => $arr_filter) {
 			$temp_type_arr = [];
 			foreach ($arr_filter as $key => $value) {
 				array_push($temp_type_arr, $value);
@@ -249,7 +297,7 @@ class ItemsFilterElasticNew extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_types","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_types","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -262,10 +310,23 @@ class ItemsFilterElasticNew extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+		}
+
+		foreach ($rooms_spec_query as $type => $arr_filter) {
+			$temp_type_arr = [];
+			foreach ($arr_filter as $key => $value) {
+				array_push($temp_type_arr, $value);
+			}
+			if($main_table == 'rooms'){
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "room_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
+			}
+			else{
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "room_spec","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 		}
 
@@ -275,7 +336,7 @@ class ItemsFilterElasticNew extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_specials","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_specials","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -288,7 +349,7 @@ class ItemsFilterElasticNew extends BaseObject{
 				array_push($temp_type_arr, $value);
 			}
 			if($main_table == 'rooms'){
-				array_push($final_query['bool']['must'], ['bool' => ['should' => $temp_type_arr]]);
+				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_extra","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
 			}
 			else{
 				array_push($final_query['bool']['must'], ['nested' => ["path" => "restaurant_extra","query" => ['bool' => ['must' => ['bool' => ['should' => $temp_type_arr]]]]]]);
@@ -328,28 +389,87 @@ class ItemsFilterElasticNew extends BaseObject{
 			//exit;
 		}
 
-		$final_query = [
-			"function_score" => [
-		      "query" => $final_query,
-		      "functions" => [
-	              [
-	                  "filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
-	                  "random_score" => [], 
-	                  "weight" => 100
-	              ],
-	              [
-	              	"random_score" => [ "seed" => $seed ],
-	              ]
-	          ]
-		    ]
-		];
+		
+
+		if($price_sort){
+			$final_query = [
+				"function_score" => [
+			      "query" => $final_query,
+			      "functions" => [
+			      		[
+							"field_value_factor" => [ 
+								"field" => "restaurant_rating",
+								"factor" => 0.01 
+							],
+							"weight" => 2
+						],
+						[
+		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+		                	"weight" => 100
+		              	],
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ],
+						[
+							"filter" => [ "range" => [ "restaurant_min_price" => [ "gte" => 100 ] ] ],
+							"random_score" => [ "seed" => $seed ],
+							"weight" => 100
+						],
+		          ]
+			    ]
+			];
+		}
+		elseif($rating_sort){
+			$final_query = [
+				"function_score" => [
+			      "query" => $final_query,
+			      "score_mode" => "sum",
+			      "functions" => [
+        				[
+							"field_value_factor" => [ 
+								"field" => "restaurant_rating",
+								"factor" => 0.01 
+							],
+							"weight" => 2
+						],
+						[
+		                	"filter" => [ "match" => [ "restaurant_commission" => "2" ] ],
+		                	"weight" => 100
+		              	],
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ]
+		          	]
+			    ]
+			];
+		}
+		else{
+			$final_query = [
+				"function_score" => [
+			      "query" => $final_query,
+			      "score_mode" => "sum",
+			      "functions" => [
+		              	[
+			              	"random_score" => [ "seed" => $seed ],
+			              	"weight" => 1
+			            ]
+		          ]
+			    ]
+			];
+		}
 		
 		$query->query($final_query);
 
+        if (!empty($check_sort))
+            $query->orderBy([ 'restaurant_min_check' => $check_sort ]);
+        
 		$query->limit($limit)
 			  ->offset(($offset-1)*$limit);
 
 		$elastic_search = $query->search();
+
 
 		if(!$widget_flag){
 			$this->total = $elastic_search['hits']['total'];

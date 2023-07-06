@@ -72,8 +72,7 @@ return [
             'suffix' => '/',
             'rules' => [
                 ['pattern' => 'blog-post/<id:\d+>/update', 'route' => 'blog-posts/update'],
-                ['pattern' => 'blog-post/<id:\d+>/view', 'route' => 'blog-posts/view'],
-                // ['pattern' => '/update', 'route' => 'update/update'],
+				['pattern' => 'blog-post/<id:\d+>/view', 'route' => 'blog-posts/view'],
                 'media/<id:\d+>/resort/<sort:\d+>' => 'media/resort',
                 [
                     'class' => 'yii\rest\UrlRule',
@@ -87,12 +86,9 @@ return [
                         'POST sort' => 'sort',
                     ]
                 ],
-                // '<controller>' => '<controller>/index',
-                // '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
-                // 'api/<any>' => 'site/error',
-                // '<controller>/<action>' => '<controller>/<action>',
                 ['pattern'=>'/update','route'=>'update/update'],
                 '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
+                'site/robots' => 'site/robots',
             ],
         ],
     ],

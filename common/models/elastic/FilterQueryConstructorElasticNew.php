@@ -10,13 +10,14 @@ class FilterQueryConstructorElasticNew extends BaseObject{
 	public $join = null,
 		   $query_arr,
 		   $query_type,
-		   $rooms,
+		   $nested,
 		   $type,
 		   $location,
 		   $metro,
 		   $spec,
 		   $specials,
-		   $extra;
+		   $extra,
+		   $rooms_spec;
 
 	public function __construct($filter_data, $main_table){
 
@@ -39,13 +40,14 @@ class FilterQueryConstructorElasticNew extends BaseObject{
 		
 		$this->query_type = $filter_data['key'];
 		$this->query_arr = [];
-		$this->rooms = ($filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table);
+		$this->nested = ($filter_data['table'] == 'rooms' and $filter_data['table'] != $main_table);
 		$this->type = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'types.id');
 		$this->spec = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'spec.id');
 		$this->specials = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'specials.id');
 		$this->extra = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'extra.id');
 		$this->location = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'location.id');
 		$this->metro = ($filter_data['table'] == 'restaurants' and $filter_data['key'] == 'metro_stations.id');
+		$this->rooms_spec = ($filter_data['table'] == 'rooms' and $filter_data['key'] == 'room_spec.id');
 
 		//print_r($filter_data['key']);
 
@@ -69,18 +71,46 @@ class FilterQueryConstructorElasticNew extends BaseObject{
 			];
 		}
 
-		//Тип мероприятия
-		if($filter_data['key'] == 'types.id'){
+		//Тип по залу
+		if($filter_data['key'] == 'room_spec.id'){
 			$this->query_arr = [
 				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
 			];
 		}
 
+		//Тип мероприятия
+		if($filter_data['key'] == 'types.id'){
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['match' => [$prefix.$filter_data['key'] => $value]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					["match" => [
+						$prefix.$filter_data['key'] => $filter_data['value']
+					]]
+				];
+			}
+		}
+
 		//Особенности
 		if($filter_data['key'] == 'specials.id'){
-			$this->query_arr = [
-				['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
-			];
+			// $this->query_arr = [
+			// 	['match' => [$prefix.$filter_data['key'] => $filter_data['value']]]
+			// ];
+			if(is_array($filter_data['value'])){
+				foreach ($filter_data['value'] as $key => $value) {
+					array_push($this->query_arr, ['match' => [$prefix.$filter_data['key'] => $value]]);
+				}
+			}
+			else{
+				$this->query_arr = [
+					["match" => [
+						$prefix.$filter_data['key'] => $filter_data['value']
+					]]
+				];
+			}
 		}
 
 		//Дополнительные пар-тры
@@ -136,6 +166,59 @@ class FilterQueryConstructorElasticNew extends BaseObject{
 					['term' => [$prefix."district" => $filter_data['value']]],
 					['term' => [$prefix."parent_district" => $filter_data['value']]]
 				];
+			}
+		}
+		//Местоположение
+		elseif($filter_data['key'] == 'capacity'){
+			switch (substr($filter_data['value'], 0, 1)) {
+				case '<':
+					$this->query_arr = [
+						[
+							"range" => [
+								$prefix.'capacity_min' => [
+									'lte' => str_replace('<', '', $filter_data['value'])
+								]
+							]
+						]
+					];
+					break;
+				case '&':
+					$value_arr = explode(',', substr($filter_data['value'], 1));
+					$this->query_arr = [
+						'capacity' => [
+							'bool' => [
+								'must' => [],
+							]
+						]
+					];
+					array_push($this->query_arr['capacity']['bool']['must'], [
+						"range" => [
+							$prefix.$filter_data['key'] => [
+								'gte' => $value_arr[0]
+							]
+						]
+					]);
+					array_push($this->query_arr['capacity']['bool']['must'], [
+						"range" => [
+							$prefix.'capacity_min' => [
+								'lte' => $value_arr[1]
+							]
+						]
+					]);
+					break;
+				case '>':
+					$this->query_arr = [
+						[
+							"range" => [
+								$prefix.$filter_data['key'] => [
+									'gte' => str_replace('>', '', $filter_data['value'])
+								]
+							]
+						]
+					];
+					break;
+				default:
+					break;
 			}
 		}
 		//Остальные фильтры

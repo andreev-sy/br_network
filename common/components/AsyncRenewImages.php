@@ -85,13 +85,7 @@ class AsyncRenewImages extends BaseObject implements \yii\queue\JobInterface
 	    $imgModel->subpath = $response_obj->url;
 	    $imgModel->waterpath = $response_obj->url_watermark;
 	    $imgModel->timestamp = $timestamp;
-	    //$imgModel->save();
-
-	    $log = file_get_contents('/var/www/pmnetwork/log/images.log');
-	    $log_arr = json_decode($log, true);
-	    $log_arr[] = ['finish' => $imgModel->save(), 'id' => $this->gorko_id];
-	    $log_new = json_encode($log_arr);
-	    file_put_contents('/var/www/pmnetwork/log/images.log', $log_new);
+	    $imgModel->save();
 
 	    //Добавление waterpath/subpath/timestamp в elastic
 	    if($this->elastic_type == 'rest'){

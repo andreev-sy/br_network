@@ -33,7 +33,7 @@ class Slices extends \yii\db\ActiveRecord
     {
         return [
             [['alias', 'params'], 'required'],
-            [['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt'], 'string'],
+            [['alias', 'h1', 'title', 'description', 'params', 'keywords', 'text_top', 'text_bottom', 'img_alt', ], 'string'],
         ];
     }
 

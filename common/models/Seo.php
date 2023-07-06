@@ -9,6 +9,7 @@ use common\models\SubdomenPages;
 use frontend\components\Declension;
 use yii\web\NotFoundHttpException;
 use common\models\RestaurantsModule;
+use common\models\RoomsModule;
 
 /**
  * @property \common\models\Pages $seo_obj
@@ -21,8 +22,9 @@ class Seo extends BaseObject
 	public $seo_obj;
 	public $seo_subdomen_obj;
 	public $rest_seo_obj;
+	public $room_seo_obj;
 
-	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false, $is_post = false, $post_seo = false, $autofill = false, $max_price = false)
+	public function __construct($type, $page = 1, $count = 0, $item = false, $item_type = 'room', $rest_item = null, $min_price = false, $is_post = false, $post_seo = false, $autofill = false, $max_price = false, $station_name = false)
 	{
 		if($is_post){
 			$seoObj = $post_seo;
@@ -39,6 +41,14 @@ class Seo extends BaseObject
 				$restAr = RestaurantsModule::findWithSeo()->where(['id' => $item->restaurant_gorko_id])->one();
 				if (!empty($restAr) && !empty($restAr->seoObject) && $restAr->seoObject->active) {
 					$this->rest_seo_obj = $restAr->seoObject;
+				}
+			}
+			if ($type == 'room' && !empty($item)) {
+				$roomId = $item->gorko_id;
+				if (Yii::$app->params['siteAddress'] == 'birthday-place.ru') $roomId = $item->id;
+				$roomAr = RoomsModule::findWithSeo()->where(['id' => $roomId ])->one();
+				if (!empty($roomAr) && !empty($roomAr->seoObject) && $roomAr->seoObject->active) {
+					$this->room_seo_obj = $roomAr->seoObject;
 				}
 			}
 
@@ -65,19 +75,25 @@ class Seo extends BaseObject
 			$this->setSeo($seoObj, $page, $autofill);
 
 			if ($type == 'item' || $type == 'room') {
+				// echo ('<pre>');
+				// print_r(4444);
+				// exit;
 				foreach ($this->seo as $key => $text) {
 					if (!(strpos($text, '**') === false)) {
 						if ($item_type == 'room') {
-							$this->seo[$key] = $this->seoRepalceItem($text, $item, $rest_item, $min_price, $max_price);
+							$this->seo[$key] = $this->seoRepalceItem($text, $item, $rest_item, $min_price, $max_price, $station_name);
 						} else {
-							$this->seo[$key] = $this->seoRepalceRest($text, $item);
+							$this->seo[$key] = $this->seoRepalceRest($text, $item, $station_name);
 						}
 					}
 				}
 			} else {
+				// echo ('<pre>');
+				// print_r(55555);
+				// exit;
 				foreach ($this->seo as $key => $text) {
 					if (!(strpos($text, '**') === false)) {
-						$this->seo[$key] = $this->seoRepalce($text, $count, $page, $min_price, false, $this->seo_obj['name']);
+						$this->seo[$key] = $this->seoRepalce($text, $count, $page, $min_price, false, $this->seo_obj['name'], $station_name, $max_price);
 					}
 				}
 			}
@@ -110,17 +126,26 @@ class Seo extends BaseObject
 			];
 		};
 		$restSeoArr = empty($this->rest_seo_obj) ? [] : array_filter($getSeoArray($this->rest_seo_obj));
-
-		$this->seo = array_merge($getSeoArray($this->seo_obj->seoObject, true), array_filter($getSeoArray($seoObj)), $restSeoArr);	
+		$roomSeoArr = empty($this->room_seo_obj) ? [] : array_filter($getSeoArray($this->room_seo_obj));
+		$this->seo = array_merge( $getSeoArray($this->seo_obj->seoObject, true), array_filter($getSeoArray($seoObj)), $restSeoArr, $roomSeoArr );	
 	}
 
-	private function seoRepalce($text, $count = 0, $page, $min_price, $name = false, $page_name = false)
+	private function seoRepalce($text, $count = 0, $page, $min_price, $name = false, $page_name = false, $station_name, $max_price = false)
 	{
 		$text = str_replace('**count**', $count, $text);
 		$text = str_replace('**year**', isset(Yii::$app->params['cur_year']) ? Yii::$app->params['cur_year'] : date('Y'), $text);
+		$text = str_replace('**next_year**', isset(Yii::$app->params['next_year']) ? Yii::$app->params['next_year'] : (date('Y')+1), $text);
 		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '', $text);
 		$text = str_replace('**city_dec**', isset(Yii::$app->params['subdomen_dec']) ? Yii::$app->params['subdomen_dec'] : '', $text);
 		$text = str_replace('**city_rod**', isset(Yii::$app->params['subdomen_rod']) ? Yii::$app->params['subdomen_rod'] : '', $text);
+		$text = str_replace('**min_price**', isset(Yii::$app->params['subdomen_min_price']) ? Yii::$app->params['subdomen_min_price'] : '', $text);
+
+	
+
+		if (preg_match('/\*\*city_area_dec=(\w+)\*\*/u', $text, $matches)) {
+			$text = preg_replace('/\*\*city_area_dec=(\w+)\*\*/u', Declension::getAreaCity($matches[1]), $text);
+		}
+
 		if (preg_match('/\*\*dec=(\w+)\*\*/u', $text, $matches)) {
 			$text = preg_replace('/\*\*dec=(\w+)\*\*/u', Declension::get($count, $matches[1]), $text);
 		}
@@ -131,6 +156,21 @@ class Seo extends BaseObject
 		if (strpos($text, '**price**') !== false) {
 			$text = str_replace('**price**', $min_price, $text);
 		}
+		if ($min_price) {
+			if (preg_match('/\*\*price_count\*(\w+)\*\*/u', $text, $matches)) {
+				$min_price = $min_price * $matches[1];
+				$text = preg_replace('/\*\*price_count\*(\w+)\*\*/u', $min_price, $text);
+			}
+		}
+		if ($max_price) {
+			$text = str_replace('**max_price**', $max_price, $text);
+
+			if (preg_match('/\*\*max_price_count\*(\w+)\*\*/u', $text, $matches)) {
+				$max_price_count = $max_price * $matches[1];
+				$text = preg_replace('/\*\*max_price_count\*(\w+)\*\*/u', $max_price_count, $text);
+			}
+		}
+
 
 		if($name){
 			if (strpos($text, '**post_title**') !== false) {
@@ -144,10 +184,14 @@ class Seo extends BaseObject
 			$text = str_replace('**page_name_lcase**', $page_name_lcase, $text);
 		}
 
+		if (strpos($text, '**station_name**') !== false) {
+			$text = str_replace('**station_name**', $station_name, $text);
+		}
+
 		return $text;
 	}
 
-	private function seoRepalceItem($text, $item, $rest_item = null, $min_price = false, $max_price = false)
+	private function seoRepalceItem($text, $item, $rest_item = null, $min_price = false, $max_price = false, $station_name)
 	{
 		$text = str_replace('**year**', isset(Yii::$app->params['cur_year']) ? Yii::$app->params['cur_year'] : date('Y'), $text);
 		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '', $text);
@@ -184,11 +228,14 @@ class Seo extends BaseObject
 				$text = str_replace('**area**', 'в Москве', $text);
 			}
 		}
+		if (strpos($text, '**station_name**') !== false) {
+			$text = str_replace('**station_name**', $station_name, $text);
+		}
 
 		return $text;
 	}
 
-	private function seoRepalceRest($text, $item)
+	private function seoRepalceRest($text, $item, $station_name)
 	{
 		$text = str_replace('**year**', date("Y") + 1, $text);
 		$text = str_replace('**city**', isset(Yii::$app->params['subdomen_name']) ? Yii::$app->params['subdomen_name'] : '', $text);
@@ -228,6 +275,9 @@ class Seo extends BaseObject
 			} else {
 				$text = str_replace('**area**', 'в Москве', $text);
 			}
+		}
+		if (strpos($text, '**station_name**') !== false) {
+			$text = str_replace('**station_name**', $station_name, $text);
 		}
 
 		return $text;

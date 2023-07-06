@@ -53,6 +53,6 @@ class Filter extends \yii\db\ActiveRecord
 
     public function getItems()
     {
-        return $this->hasMany(FilterItems::className(), ['filter_id' => 'id']);
+        return $this->hasMany(FilterItems::className(), ['filter_id' => 'id'])->where(['active' => 1]);
     }
 }

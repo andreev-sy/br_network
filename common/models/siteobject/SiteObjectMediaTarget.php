@@ -105,4 +105,6 @@ class SiteObjectMediaTarget extends \yii\db\ActiveRecord
     {
         return $this->hasOne(\common\models\siteobject\SiteObject::className(), ['id' => 'site_object_id']);
     }
+
+    
 }

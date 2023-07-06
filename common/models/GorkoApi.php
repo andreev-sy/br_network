@@ -69,10 +69,30 @@ class GorkoApi extends Model
 
 			$gorko_rest_ids[466513] = null;
 			$gorko_rest_ids[479393] = null;
+			$gorko_rest_ids[91275] = null;
+			$gorko_rest_ids[455577] = null;
+			$gorko_rest_ids[483343] = null;
+			$gorko_rest_ids[483969] = null;
+			$gorko_rest_ids[425325] = null;
+			$gorko_rest_ids[467041] = null;
 			$gorko_room_ids[250449] = null;
 			$gorko_room_ids[272029] = null;
 			$gorko_room_ids[272031] = null;
 			$gorko_room_ids[274293] = null;
+			$gorko_room_ids[425325] = null;
+			$gorko_room_ids[274987] = null;
+			$gorko_room_ids[275756] = null;
+			$gorko_room_ids[275754] = null;
+			$gorko_room_ids[201439] = null;
+			$gorko_room_ids[234461] = null;
+			$gorko_room_ids[203845] = null;
+			$gorko_room_ids[203843] = null;
+			$gorko_room_ids[280055] = null;
+			$gorko_room_ids[281095] = null;
+			$gorko_room_ids[55401] = null;
+			$gorko_room_ids[238981] = null;
+			$gorko_room_ids[234717] = null;
+			$gorko_room_ids[280107] = null;
 
 			$log = file_get_contents('/var/www/pmnetwork/log/manual_samara_bd.log');
 			$log = json_decode($log, true);
@@ -123,7 +143,19 @@ class GorkoApi extends Model
 			]));
 			$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
 				'connection_config' => $connection_config,
+				'gorko_id' 	=> 91275
+			]));
+			$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+				'connection_config' => $connection_config,
 				'gorko_id' 	=> 479393
+			]));
+			$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+				'connection_config' => $connection_config,
+				'gorko_id' 	=> 425325
+			]));
+			$queue_id = Yii::$app->queue->push(new AsyncRenewRestaurants([
+				'connection_config' => $connection_config,
+				'gorko_id' 	=> 455577
 			]));
 
 			print_r("$subdomen->city_id - ".count($gorko_rest_ids)."\n");
@@ -152,8 +184,20 @@ class GorkoApi extends Model
 		}
 	}
 
+	public function renewOneImages($connection_config, $id) {
+		$connection = new \yii\db\Connection($connection_config);
+		$connection->open();
+		Yii::$app->set('db', $connection);
+
+			$queue_id = Yii::$app->queue->push(new AsyncRenewImagesExt([
+				'connection_config' => $connection_config,
+				'gorko_id' 	=> $id
+			]));
+			print_r("ok");
+	}
+
 	public function renewRoomSpecs($connection_config) {
-		$start = microtime(true);
+		//$start = microtime(true);
 		$connection = new \yii\db\Connection($connection_config);
 		$connection->open();
 		Yii::$app->set('db', $connection);
@@ -165,6 +209,6 @@ class GorkoApi extends Model
 					'restaurant' 	=> $restaurant
 				]));
 		}
-		echo 'Время выполнения скрипта: '.round(microtime(true) - $start, 4).' сек.';
+		//echo 'Время выполнения скрипта: '.round(microtime(true) - $start, 4).' сек.';
 	}
 }

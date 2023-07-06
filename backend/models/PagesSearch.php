@@ -18,7 +18,7 @@ class PagesSearch extends Pages
     {
         return [
             [['id'], 'integer'],
-            [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom'], 'safe'],
+            [['name', 'title', 'description', 'keywords', 'h1', 'text_top', 'text_bottom', 'type'], 'safe'],
         ];
     }
 
@@ -68,6 +68,9 @@ class PagesSearch extends Pages
             ->andFilterWhere(['like', 'h1', $this->h1])
             ->andFilterWhere(['like', 'text_top', $this->text_top])
             ->andFilterWhere(['like', 'text_bottom', $this->text_bottom]);
+
+        if (!empty($this->type))
+            $query->andFilterWhere(['like', 'type', $this->type]);
 
         return $dataProvider;
     }

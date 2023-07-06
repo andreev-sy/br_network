@@ -16,20 +16,30 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		   	$connection_config;
 
 	public function execute($queue) {
+		$this->renew_rest($this->gorko_id, $this->connection_config);
+		return 1;
+	}
+
+	public function premium_rest() {
+		$this->renew_rest($this->gorko_id, $this->connection_config);
+		return 1;
+	}
+
+	private function renew_rest($gorko_id, $connection_config){
 		$status = 'ok';
 		try{
 			if( $curl = curl_init() ) {
-			    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$this->gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1');
+			    curl_setopt($curl, CURLOPT_URL, 'https://api.gorko.ru/api/v2/restaurants/'.$gorko_id.'?embed=rooms,contacts&fields=address,params,covers,district,metro,specs,room_specs&is_edit=1');
 			    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 			    curl_setopt($curl, CURLOPT_ENCODING, '');
 			    $response = json_decode(curl_exec($curl), true)['restaurant'];
 			    curl_close($curl);
 
-			    $connection = new \yii\db\Connection($this->connection_config);
+			    $connection = new \yii\db\Connection($connection_config);
 				$connection->open();
 				Yii::$app->set('db', $connection);
 
-			    $model = Restaurants::find()->where(['gorko_id' => $this->gorko_id])->one();
+			    $model = Restaurants::find()->where(['gorko_id' => $gorko_id])->one();
 			    
 			    if(!$model){
 			    	$model = new Restaurants();
@@ -41,7 +51,6 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 			    $attributes['gorko_id'] = $response['id'];
 			    $attributes['name'] = strval($response['name']);
 				$attributes['address'] = $response['address'];
-				print_r($response['id']);
 
 				if(isset($response['params']['param_location'])){
 					$attributes['location'] = '';
@@ -106,7 +115,6 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				if(isset($response['params']['param_cuisine']) && isset($response['params']['param_cuisine']['display']['text'])){
 					$attributes['cuisine'] = $response['params']['param_cuisine']['display']['text'] ? $response['params']['param_cuisine']['display']['text'] : '';
 				}
-				print_r('-1-');
 				if(isset($response['params']['param_firework'])){
 					$attributes['firework'] = $response['params']['param_firework']['value'];
 				}
@@ -116,7 +124,6 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				if(isset($response['params']['param_extra_services']) && isset($response['params']['param_extra_services']['display']['text'])){
 					$attributes['extra_services'] = $response['params']['param_extra_services']['display']['text'] ? $response['params']['param_extra_services']['display']['text'] : '';
 				}
-				print_r('-2-');
 				if(isset($response['params']['param_payment']) && isset($response['params']['param_payment']['display']['text'])){
 					$attributes['payment'] = $response['params']['param_payment']['display']['text'] ? $response['params']['param_payment']['display']['text'] : '';
 				}
@@ -235,12 +242,23 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 				    	}				    	
 				    	$roomAttributes['capacity'] = $room['params']['param_capacity_0']['value'];
 
+				    	if(isset($room['params']['param_capacity_min_0'])){
+				    		$roomAttributes['capacity_min'] = $room['params']['param_capacity_min_0']['value'] ? $room['params']['param_capacity_min_0']['value'] : 0;
+				    	}
+
 				    	if($room['cover_url']){
 							$roomAttributes['cover_url'] = str_replace("w230-h150-n-l95", "w445-h302-n-l95", $room['cover_url']);
 						}
 
 				    	if(isset($room['params']['param_capacity_reception_0'])){
 				    		$roomAttributes['capacity_reception'] = $room['params']['param_capacity_reception_0']['value'] ? $room['params']['param_capacity_reception_0']['value'] : 0;
+				    	}
+
+				    	if(isset($room['params']['param_empty_price_0'])){
+				    		$roomAttributes['rent_room_only'] = $room['params']['param_empty_price_0']['value'] ? $room['params']['param_empty_price_0']['value'] : 0;
+				    	}
+				    	if(isset($room['params']['param_banquet_price_0'])){
+				    		$roomAttributes['banquet_price_person'] = $room['params']['param_banquet_price_0']['value'] ? $room['params']['param_banquet_price_0']['value'] : 0;
 				    	}
 				    	
 				    	$roomAttributes['type'] = $room['type'];
@@ -257,6 +275,10 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 						}
 						if(isset($room['params']['param_features_0'])){
 							$roomAttributes['features'] = $room['params']['param_features_0']['value'] ? $room['params']['param_features_0']['value'] : '';
+						}
+
+						if(isset($room['params']['param_min_price_0'])){
+							$roomAttributes['banquet_price_min'] = $room['params']['param_min_price_0']['value'];
 						}
 
 						if(isset($room['params']['param_min_price_0']) && $room['params']['param_min_price_0']['value']){
@@ -291,12 +313,17 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 
 				    	$roomModel = Rooms::find()->where(['gorko_id' => $room['id']])->one();
 
-				    	$arr_spec_prices = array();
+				    	$arr_spec_prices = $arr_spec_room = array();
+				        foreach (RoomsSpec::getRoomsSpecByRoom($roomModel->id) as $key => $spec_room) {
+				           $arr_spec_room[$spec_room->spec_id] = $spec_room;
+				        }
 				    	for ($i=1; $i<85; $i++) {
 					    	if (isset($room['params']['param_banquet_price_'.$i])) {
 					    		$spec_price = $room['params']['param_banquet_price_'.$i];
 					    		if ($spec_price['value'] > 0) {
 					    			$arr_spec_prices[$spec_price['spec_id']] = $spec_price['value'];
+					    		} elseif (isset($arr_spec_room[$spec_price['spec_id']])) {
+					    			$arr_spec_prices[$spec_price['spec_id']] = null;
 					    		}
 					    	}
 					    }
@@ -336,7 +363,7 @@ class AsyncRenewRestaurants extends BaseObject implements \yii\queue\JobInterfac
 		}
 
 		$log_arr = [
-			'rest_id' => $this->gorko_id,
+			'rest_id' => $gorko_id,
 			'status' => json_encode($status),
 			'date' => date("Y-m-d H:i:s", time() + (4 * 60 * 60)),
 		];

@@ -207,6 +207,19 @@ class BlogPost extends BaseSiteObject
         return '/'.$folder.'/' . $this->alias . '/';
     }
 
+    public function getUrlCollection($folder = 'collection')
+	{
+		return '/' . $folder . '/' . $this->alias . '/';
+	}
+
+    /**
+	 * @return \yii\db\ActiveQuery
+	 */
+	public function getBlogPostSubdomens()
+	{
+		return $this->hasMany(\backend\modules\pmnbd\models\blog\BlogPostSubdomen::className(), ['blog_post_id' => 'id'])->orderBy('blog_post_id');
+	}
+
     public function beforeSave($insert)
     {
         if (!parent::beforeSave($insert)) {

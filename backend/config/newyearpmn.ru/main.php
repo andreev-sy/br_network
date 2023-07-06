@@ -28,7 +28,7 @@ return [
                     '@app/views' => '@app/modules/gorko_ny/views',
                 ],
             ],
-        ],
+        ], 
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
@@ -70,9 +70,8 @@ return [
             'showScriptName' => false,
             'suffix' => '/',
             'rules' => [
-					['pattern' => 'blog-post/<id:\d+>/update', 'route' => 'blog-posts/update'],
-					['pattern' => 'blog-post/<id:\d+>/view', 'route' => 'blog-posts/view'],
-               //  ['pattern' => '/update', 'route' => 'update/update'],
+				['pattern' => 'blog-post/<id:\d+>/update', 'route' => 'blog-posts/update'],
+				['pattern' => 'blog-post/<id:\d+>/view', 'route' => 'blog-posts/view'],
                 'media/<id:\d+>/resort/<sort:\d+>' => 'media/resort',
                 [
                     'class' => 'yii\rest\UrlRule',

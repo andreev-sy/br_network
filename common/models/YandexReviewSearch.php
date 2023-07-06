@@ -4,12 +4,11 @@ namespace common\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\RestaurantsYandex;
 
 /**
- * RestaurantsYandexSearch represents the model behind the search form of `common\models\RestaurantsYandex`.
+ * YandexReviewSearch represents the model behind the search form of `common\models\YandexReview`.
  */
-class RestaurantsYandexSearch extends RestaurantsYandex
+class YandexReviewSearch extends Restaurants
 {
 	/**
 	 * {@inheritdoc}
@@ -17,8 +16,8 @@ class RestaurantsYandexSearch extends RestaurantsYandex
 	public function rules()
 	{
 		return [
-			[['gorko_id', 'district', 'parent_district', 'city_id', 'commission', 'active', 'rev_ya_id'], 'integer'],
-			[['name', 'address', 'latitude', 'longitude', 'phone', 'rev_ya_rate', 'rev_ya_count',], 'string'],
+			[['gorko_id'], 'integer'],
+			[['name', 'address'], 'string'],
 		];
 	}
 
@@ -40,7 +39,7 @@ class RestaurantsYandexSearch extends RestaurantsYandex
 	 */
 	public function search($params)
 	{
-		$query = RestaurantsYandexSearch::find();
+		$query = Restaurants::find()->with('yandexReview');
 
 		// add conditions that should always apply here
 

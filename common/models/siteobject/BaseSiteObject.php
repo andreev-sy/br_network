@@ -109,6 +109,7 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
             },
             $this->mediaTargets
         );
+
         foreach ($this->mediaEnumClass::getForSiteObject($this) as $type) {
             if (!in_array($type, $existingMediaTargets)) {
                 $newMediaTarget = new SiteObjectMediaTarget([
@@ -116,8 +117,10 @@ abstract class BaseSiteObject extends \yii\db\ActiveRecord
                     'type' => $type,
                     'index' => 1 //TODO more instances
                 ]);
-                if ($newMediaTarget->save()) {
-                };
+                if (!$newMediaTarget->save()) {
+                    echo 'не удалось создать newMediaTarget';
+                    die();
+                }
             }
         }
     }

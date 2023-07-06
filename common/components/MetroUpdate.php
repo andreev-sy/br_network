@@ -123,6 +123,9 @@ class MetroUpdate {
 
   public static function getClosestMetro($restaurant)
   {
+    if (empty($restaurant->longitude) || empty($restaurant->latitude)) {
+      return [];
+    }
     // порядок важен - долгота, широта
     $restraurantCoordinates = $restaurant->longitude . ',' . $restaurant->latitude;
 

@@ -74,7 +74,8 @@ class Restaurants extends BaseSiteObject
     }
 
     public function getYandexReview(){
-        return $this->hasOne(RestaurantsYandex::className(), ['gorko_id' => 'gorko_id']);
+      //   return $this->hasOne(RestaurantsYandex::className(), ['gorko_id' => 'gorko_id']);
+        return $this->hasOne(YandexReview::className(), ['gorko_id' => 'gorko_id']);
     }
 
 }

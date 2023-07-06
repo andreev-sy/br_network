@@ -53,4 +53,36 @@ class FilterItems extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Filter::className(), ['id' => 'filter_id']);
     }
+
+    public function getItemsFilterArray()
+    {
+        $items_filter_arr = [];
+        $items = self::find()->where(['active' => 1])->orderBy(['filter_id'=>SORT_ASC])->all();
+
+        foreach ($items as $key => $item) {
+            $items_filter_arr[$item->filter->name][$item->id] = $item->text;
+        }
+
+        return $items_filter_arr;
+    }
+
+    public function getItemsFilterVia($params)
+    {
+        $json = json_decode($params, true);
+        $items_filter_arr = [];
+        if (!empty($json))
+            foreach ($json as $filter_alias => $filter_item_value) {
+                $ex = explode(',', $filter_item_value);
+                $items = [];
+                foreach ($ex as $arr) {
+                    $filter_model = Filter::findOne(['alias' => $filter_alias]);
+                    $filter_item_model = self::findOne(['filter_id' => $filter_model->id, 'value' => $arr]);
+                    $items[] = $filter_item_model->id;
+                }
+                $items_filter_arr = array_merge($items_filter_arr, $items);
+            }
+
+        return $items_filter_arr;
+    }
+
 }

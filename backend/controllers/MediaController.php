@@ -95,7 +95,7 @@ class MediaController extends BaseBackendController
                 'type' => $res->media->getFileTypeForPreview(),
                 'previewAsData' => true
             ];
-        };
+        }
 
         $response =
             [
