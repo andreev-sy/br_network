@@ -7,29 +7,33 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 
-$this->title = 'Login';
+$this->title = Yii::t('app', 'Авторизация');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="site-login">
-    <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>Please fill out the following fields to login:</p>
-
-    <div class="row">
-        <div class="col-lg-5">
-            <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
-
-                <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
-
-                <?= $form->field($model, 'password')->passwordInput() ?>
-
-                <?= $form->field($model, 'rememberMe')->checkbox() ?>
-
-                <div class="form-group">
-                    <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-                </div>
-
-            <?php ActiveForm::end(); ?>
-        </div>
+<div class="login-box">
+    <div class="login-logo">
+        <b>Diazao</b> <?= Html::encode($this->title) ?>
     </div>
+
+    <div class="login-box-body">
+        <p class="login-box-msg"><?= Yii::t('app', 'Пожалуйста, заполните следующие поля для входа в систему') ?>:</p>
+        <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
+            <div class="form-group has-feedback">
+                <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
+            </div>
+            <div class="form-group has-feedback">
+                <?= $form->field($model, 'password')->passwordInput() ?>
+            </div>
+            <div class="row">
+                <div class="col-xs-8">
+                    <?= $form->field($model, 'rememberMe')->checkbox() ?>
+                </div>
+                <div class="col-xs-4">
+                    <?= Html::submitButton(Yii::t('app', 'Войти'), ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
+                </div>
+            </div>
+        <?php ActiveForm::end(); ?>
+    </div>
+
 </div>

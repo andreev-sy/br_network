@@ -39,7 +39,14 @@
         "mobiledetect/mobiledetectlib": "^2.8",
         "yii2mod/yii2-comments": "*",
         "irazasyed/telegram-bot-sdk": "^2.0",
-        "mihaildev/yii2-ckeditor": "*"
+        "mihaildev/yii2-ckeditor": "*",
+        "yii2mod/yii2-rbac": "*",
+        "kartik-v/yii2-detail-view": "dev-master",
+        "kartik-v/yii2-grid": "dev-master",
+        "kartik-v/yii2-popover-x": "dev-master",
+        "kartik-v/yii2-editable": "@dev",
+        "kartik-v/yii2-widget-switchinput": "dev-master",
+        "kartik-v/yii2-dynagrid": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

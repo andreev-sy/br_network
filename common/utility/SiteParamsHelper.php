@@ -31,6 +31,12 @@ class SiteParamsHelper
         $hostParts = explode('.', $_SERVER['HTTP_HOST']);
         $hostParts = array_reverse($hostParts);
         $siteAddress = $hostParts[1] . '.' . $hostParts[0];
+
+        // для домена типа 4u.diazao.com.br
+        if(count($hostParts) == 4){
+            $siteAddress = $hostParts[3] . '.' . $hostParts[2] . '.' . $hostParts[1] . '.' . $hostParts[0];
+        }
+
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
         return [
             'siteAddress' => $siteAddress,

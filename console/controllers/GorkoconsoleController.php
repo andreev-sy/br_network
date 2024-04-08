@@ -295,8 +295,8 @@ class GorkoconsoleController extends Controller
 	{
 		$connection_bzm = new \yii\db\Connection([
 			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
-			'username' => 'root',
-			'password' => 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+			'password' => 'P6L19tiZhPtfgseN',
 			'charset' => 'utf8',
 		]);
 		$connection_bzm->open();
@@ -343,8 +343,8 @@ class GorkoconsoleController extends Controller
 	{
 		$connection_bzm = new \yii\db\Connection([
 			'dsn' => 'mysql:host=localhost;dbname=pmn_bzm',
-			'username' => 'root',
-			'password' => 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+			'password' => 'P6L19tiZhPtfgseN',
 			'charset' => 'utf8',
 		]);
 		$connection_bzm->open();
@@ -384,8 +384,8 @@ class GorkoconsoleController extends Controller
 		} else {
 			$connection = new \yii\db\Connection([
 				'dsn' 		=> $siteArr[$site]['params']['dsn'],
-				'username' => 'root',
-				'password' => 'GxU25UseYmeVcsn5Xhzy',
+				'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 				'charset' => 'utf8',
 			]);
 			$connection->open();
@@ -528,8 +528,8 @@ class GorkoconsoleController extends Controller
 
 		$connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn_bd',
-			'username' => 'root',
-			'password' => 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+			'password' => 'P6L19tiZhPtfgseN',
 			'charset' => 'utf8',
 		]);
 		$connection->open();

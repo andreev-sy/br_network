@@ -20,6 +20,11 @@ frontend/web/index.php
 frontend/web/dist/*
 frontend/web/img/
 
+frontend/web/google_parsed/
+frontend/web/img_d/
+frontend/web/user_photo/
+        
+
 backend/modules/*
 backend/web/assets/*
 backend/web/index-test.php

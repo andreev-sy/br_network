@@ -6,6 +6,20 @@ use Yii;
 
 class Declension {
 
+	public static function horizontalImage($filename)
+	{
+		$dimensions = getimagesize($filename);
+		$width = $dimensions[0];
+		$height = $dimensions[1];
+
+		return ($height > $width) ? false : true;
+	}
+
+	public static function clearPhone($phone)
+	{
+		return str_replace(['(',')','+',' ','-'], '', $phone);
+	}
+	
 	public static function end_restaurants($num) {
 		$ost=$num%10;
 		$ost100 = $num%100;

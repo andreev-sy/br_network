@@ -51,8 +51,8 @@ class RoomsModule extends BaseSiteObject
                 $current_connection = Yii::$app->get('db');
                 $connection = new \yii\db\Connection([
                     'dsn'       => 'mysql:host=localhost;dbname=pmn',
-                    'username' => 'root',
-                    'password' => 'GxU25UseYmeVcsn5Xhzy',
+                    'username' => 'pmnetwork',
+                    'password' => 'P6L19tiZhPtfgseN',
                     'charset' => 'utf8mb4',
                 ]);
                 $connection->open();

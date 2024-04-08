@@ -36,8 +36,8 @@ class TelegramBot extends BaseObject{
 
 	    $connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn_premium',
-			'username' 	=> 'root',
-			'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 			'charset'  	=> 'utf8mb4',
 		]);
 		$connection->open();
@@ -63,8 +63,8 @@ class TelegramBot extends BaseObject{
 
 	    	$connection = new \yii\db\Connection([
 				'dsn' 		=> 'mysql:host=localhost;dbname=pmn',
-				'username' 	=> 'root',
-				'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+				'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 				'charset'  	=> 'utf8mb4',
 			]);
 			$connection->open();
@@ -141,8 +141,8 @@ class TelegramBot extends BaseObject{
 
 			$connection = new \yii\db\Connection([
 				'dsn' 		=> 'mysql:host=localhost;dbname=pmn_premium',
-				'username' 	=> 'root',
-				'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+				'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 				'charset'  	=> 'utf8mb4',
 			]);
 			$connection->open();
@@ -160,8 +160,8 @@ class TelegramBot extends BaseObject{
 			if($unique_user || $phone_clicks){
 				$connection = new \yii\db\Connection([
 					'dsn' 		=> 'mysql:host=localhost;dbname=pmn',
-					'username' 	=> 'root',
-					'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+					'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 					'charset'  	=> 'utf8mb4',
 				]);
 				$connection->open();
@@ -198,8 +198,8 @@ class TelegramBot extends BaseObject{
 
 		$connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn_premium',
-			'username' 	=> 'root',
-			'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 			'charset'  	=> 'utf8mb4',
 		]);
 		$connection->open();
@@ -245,8 +245,8 @@ class TelegramBot extends BaseObject{
 
 		$connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn_premium',
-			'username' 	=> 'root',
-			'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 			'charset'  	=> 'utf8mb4',
 		]);
 		$connection->open();
@@ -270,8 +270,8 @@ class TelegramBot extends BaseObject{
 			
 		$connection = new \yii\db\Connection([
 			'dsn' 		=> 'mysql:host=localhost;dbname=pmn',
-			'username' 	=> 'root',
-			'password' 	=> 'GxU25UseYmeVcsn5Xhzy',
+			'username' => 'pmnetwork',
+				'password' => 'P6L19tiZhPtfgseN',
 			'charset'  	=> 'utf8mb4',
 		]);
 		$connection->open();

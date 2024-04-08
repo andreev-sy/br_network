@@ -1,18 +1,14 @@
 <?php
 
-use yii\helpers\Html;
-
 /* @var $this yii\web\View */
 /* @var $model backend\models\Rooms */
 
-$this->title = 'Update Rooms: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Rooms', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->title = Yii::t('app', 'Изменение элемента') .' '. $model->param_name_alt;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Залы'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->param_name_alt, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = Yii::t('app', 'Изменение');
 ?>
 <div class="rooms-update">
-
-    <h1><?= Html::encode($this->title) ?></h1>
 
     <?= $this->render('_form', [
         'model' => $model,

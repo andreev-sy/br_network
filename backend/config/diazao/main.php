@@ -44,8 +44,8 @@ return [
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => "mysql:host=localhost;dbname=$moduleDBName",
-            'username' => 'root',
-            'password' => 'GxU25UseYmeVcsn5Xhzy',
+            'username' => 'pmnetwork',
+            'password' => 'P6L19tiZhPtfgseN',
             'charset' => 'utf8',
         ],
         'elasticsearch' => [
@@ -81,8 +81,8 @@ return [
                 // 'api/<any>' => 'site/error',
                 // '<controller>/<action>' => '<controller>/<action>',
                 '/translate/<lang:(ru-RU|pt-BR)>' => 'translate/index',
-                '/restaurant/<type:(casamentos|spacevents|processed|archive)>' => 'restaurant/index',
-                '/form-request/<type:(client|rest)>' => 'form-request/index',
+                '/restaurant/<type:(parsed|processed|archive)>' => 'restaurant/index',
+                '/form-request/<type:(client|rest|partners)>' => 'form-request/index',
                 '<controller>/<id:\d+>/<action>' => '<controller>/<action>',
             ],
         ],

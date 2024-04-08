@@ -6,6 +6,7 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use backend\models\User;
 
 /**
  * Site controller
@@ -26,7 +27,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index', 'update'],
+                        'actions' => ['logout', 'language', 'index', 'profile'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -97,4 +98,32 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
+
+
+    public function actionLanguage($language)
+    {
+        Yii::$app->language = $language;
+
+        $languageCookie = new yii\web\Cookie([
+            'name' => 'language',
+            'value' => $language,
+            'expire' => time() + 60 * 60 * 24 * 30, // 30 days
+        ]);
+        Yii::$app->response->cookies->add($languageCookie);
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
+     * Displays homepage.
+     *
+     * @return string
+     */
+    public function actionProfile()
+    {
+        return $this->render('profile', [
+            'model' => User::findOne(Yii::$app->user->id)
+        ]);
+    }
+
 }
