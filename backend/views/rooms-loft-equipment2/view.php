@@ -11,16 +11,22 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Принадлежн
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="rooms-loft-equipment2-view box box-primary">
-    <div class="box-header">
-        <?= Html::a(Yii::t('app', 'Изменить'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary btn-flat']) ?>
-        <?= Html::a(Yii::t('app', 'Удалить'), ['delete', 'id' => $model->id], [
-            'class' => 'btn btn-danger btn-flat',
-            'data' => [
-                'confirm' => Yii::t('app', 'Вы уверены, что хотите удалить элемент?'),
-                'method' => 'post',
-            ],
-        ]) ?>
-    </div>
+    <?php if(Yii::$app->user->can('/rooms-loft-equipment2/update') or Yii::$app->user->can('/rooms-loft-equipment2/delete')): ?>
+        <div class="box-header">
+            <?php if(Yii::$app->user->can('/rooms-loft-equipment2/update')): ?>
+                <?= Html::a(Yii::t('app', 'Изменить'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary btn-flat']) ?>
+            <?php endif; ?>
+            <?php if(Yii::$app->user->can('/rooms-loft-equipment2/delete')): ?>
+                <?= Html::a(Yii::t('app', 'Удалить'), ['delete', 'id' => $model->id], [
+                    'class' => 'btn btn-danger btn-flat',
+                    'data' => [
+                        'confirm' => Yii::t('app', 'Вы уверены, что хотите удалить элемент?'),
+                        'method' => 'post',
+                    ],
+                ]) ?>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
     <div class="box-body">
         <?= DetailView::widget([
             'model' => $model,

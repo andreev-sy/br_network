@@ -26,6 +26,9 @@ class ImportController extends Controller
 
     public function actionIndex()
     {
+        // Venues::deleteAll();
+        
+        die;
         $props = 'Banquet hall|Banquet hall, Childrens party buffet, Wedding buffet|Salão de festas';
 
        
@@ -83,6 +86,8 @@ class ImportController extends Controller
     // ЭТО ОК (лимитами по 5к)
     public function actionVenues()
     {
+        ini_set('memory_limit', '1024M');
+
         $restaurants = Yii::$app->db->createCommand(
             "SELECT * FROM `banket-brazil`.`restaurant_common` order by `banket-brazil`.`restaurant_common`.`id` limit 5000 offset 15000"
         )->queryAll();
@@ -138,6 +143,9 @@ class ImportController extends Controller
             $model->is_processed = $rest['processed'];
             $model->is_contract_signed = $rest['contract_signed'];
             $model->is_phoned = $rest['phoned'];
+            $model->param_pool = $rest['pool'];
+            $model->param_open_area = $rest['open_area'];
+            $model->param_place_barbecue = $rest['place_barbecue'];
             $model->param_type = $this->getType($rest);
             //$model->param_location = $rest[''];
             $model->param_kitchen = (int)$this->getProp($rest, 'Своя кухня');
@@ -185,6 +193,8 @@ class ImportController extends Controller
      // ЭТО ОК (лимитами по 5к)
     public function actionRooms()
     {
+        ini_set('memory_limit', '1024M');
+
         $restaurants = Yii::$app->db->createCommand(
             "SELECT * FROM `banket-brazil`.`restaurant_common` order by `banket-brazil`.`restaurant_common`.`id` limit 5000 offset 15000"
         )->queryAll();
@@ -248,6 +258,8 @@ class ImportController extends Controller
     // ЭТО ОК
     public function actionForm()
     {
+        ini_set('memory_limit', '1024M');
+
         $form = Yii::$app->db->createCommand(
             "SELECT * FROM `banket-brazil`.`form_request` order by `banket-brazil`.`form_request`.`id`"
         )->queryAll();
@@ -275,6 +287,8 @@ class ImportController extends Controller
     // ЭТО ОК
     public function actionImages()
     {
+        ini_set('memory_limit', '1024M');
+
         $rest_images = Yii::$app->db->createCommand(
             "SELECT * FROM `banket-brazil`.`restaurant_image` ORDER BY `banket-brazil`.`restaurant_image`.`restaurant_id` ASC, `banket-brazil`.`restaurant_image`.`sort` ASC"
         )->queryAll();
@@ -316,6 +330,7 @@ class ImportController extends Controller
     // разобраться почему навыходе подборок меньше
     public function actionCollection()
     {
+        ini_set('memory_limit', '1024M');
         // $form = FormRequest::find()->indexBy('id')->all();
 
         $collections = Yii::$app->db->createCommand("SELECT * FROM `banket-brazil`.`collection` ORDER BY `banket-brazil`.`collection`.`id`")->queryAll();
@@ -329,6 +344,9 @@ class ImportController extends Controller
        
         foreach ($collections as $col) {
             // if(empty($form[$col['form_request_id']])) continue;
+            if($col['user_id'] == 2 or $col['user_id'] == 5){
+                $col['user_id'] = 9;
+            }
 
             $model = new Collection();
             $model->id = $col['id'];
@@ -339,6 +357,7 @@ class ImportController extends Controller
             $model->guest_id = !empty($collection_guest[$col['guest']]) ? $collection_guest[$col['guest']]['id'] : null;
             $model->price_person_id = !empty($collection_price_person[$col['price_person']]) ? $collection_price_person[$col['price_person']]['id'] : null;
             $model->contact_type_id = !empty($collection_contact_type[$col['contact_type']]) ? $collection_contact_type[$col['contact_type']]['id'] : null;
+            $model->agglomeration_id = 1;
             $model->city_id = 1;
             $model->desire = $col['desire'];
             $model->form_request_id = $col['form_request_id'];
@@ -352,6 +371,7 @@ class ImportController extends Controller
 
             if (!$model->save()) {
                 echo '<pre>';
+                print_r($model->id);
                 print_r($model->errors);
                 die;
             }

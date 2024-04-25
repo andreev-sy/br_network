@@ -22,6 +22,7 @@ use backend\models\VenuesParkingType;
 use backend\models\VenuesKitchenType;
 use backend\models\ViaHelper;
 use kartik\detail\DetailView;
+use yii\grid\GridView;
 
 /**
  * @var $this yii\web\View
@@ -366,6 +367,33 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                     ], 
                     [
+                        'attribute'=>'param_pool',
+                        'format'=>'raw',
+                        'value'=> ViaHelper::getIntIcon($model->param_pool),
+                        'type'=> DetailView::INPUT_SWITCH,
+                        'widgetOptions' => [
+                            'pluginOptions' => [ 'onText' => Yii::t('app', 'Да'), 'offText' => Yii::t('app', 'Нет') ]
+                        ],
+                    ],
+                    [
+                        'attribute'=>'param_open_area',
+                        'format'=>'raw',
+                        'value'=> ViaHelper::getIntIcon($model->param_open_area),
+                        'type'=> DetailView::INPUT_SWITCH,
+                        'widgetOptions' => [
+                            'pluginOptions' => [ 'onText' => Yii::t('app', 'Да'), 'offText' => Yii::t('app', 'Нет') ]
+                        ],
+                    ],
+                    [
+                        'attribute'=>'param_place_barbecue',
+                        'format'=>'raw',
+                        'value'=> ViaHelper::getIntIcon($model->param_place_barbecue),
+                        'type'=> DetailView::INPUT_SWITCH,
+                        'widgetOptions' => [
+                            'pluginOptions' => [ 'onText' => Yii::t('app', 'Да'), 'offText' => Yii::t('app', 'Нет') ]
+                        ],
+                    ],
+                    [
                         'attribute'=>'param_firework',
                         'format'=>'raw',
                         'value'=> ViaHelper::getIntIcon($model->param_firework),
@@ -636,7 +664,11 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if(Yii::$app->user->can('/venues/update')): ?>
         <?php $this->beginBlock('other');?>
             <div class="box-body">
-                <?= $this->render('_form_other.php', ['model'=>$model]) ?>
+                <?php if($is_create): ?>
+                    <h4><?= Yii::t('app', 'Чтобы работала вкладка, нужно сохранить элемент.') ?></h4>
+                <?php else: ?>
+                    <?= $this->render('_form_other.php', ['model'=>$model]) ?>
+                <?php endif; ?>
             </div>
         <?php $this->endBlock();?>
     <?php endif; ?>
@@ -664,6 +696,33 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         <?php $this->endBlock(); ?>
     <?php endif; ?>
+
+    <?php if(Yii::$app->user->can('/rooms/index')): ?>
+        <?php $this->beginBlock('rooms'); ?>
+            <div class="box-body">
+                <?php if($is_create): ?>
+                    <h4><?= Yii::t('app', 'Чтобы работала вкладка, нужно сохранить элемент.') ?></h4>
+                <?php else: ?>
+                    <?= GridView::widget([
+                        'dataProvider' => $dataProviderRooms,
+                        'layout' => "{items}\n{summary}\n{pager}",
+                        'columns' => [
+                            //['class' => 'yii\grid\SerialColumn'],
+                            'id',
+                            [
+                                'attribute' => 'param_name_alt',
+                                'format' => 'raw',
+                                'value' => function($data){
+                                    return Html::a($data->param_name_alt, ['rooms/view', 'id'=>$data->id], ['target'=>'_blank']);
+                                },
+                            ],
+                            ['class' => 'yii\grid\ActionColumn', 'template' => Yii::$app->RbacActionTemplate::check()],
+                        ],
+                    ]); ?>
+                <?php endif; ?>
+            </div>
+        <?php $this->endBlock(); ?>
+    <?php endif; ?>
 	
     <?php
     $items[] = [
@@ -687,6 +746,12 @@ $this->params['breadcrumbs'][] = $this->title;
         $items[] = [
             'content' => $this->blocks['images'],
             'label'   => '<div>'.Yii::t('app', 'Изображения').'<span class="badge badge-default"></span></div>',
+        ];
+    }
+    if(Yii::$app->user->can('/rooms/index')){
+        $items[] = [
+            'content' => $this->blocks['rooms'],
+            'label'   => '<div>'.Yii::t('app', 'Залы').'<span class="badge badge-default"></span></div>',
         ];
     }
     echo Tabs::widget([

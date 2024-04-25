@@ -164,13 +164,13 @@ class ImagesController extends Controller
 
 		Images::updateSortIndex($image);
 
-		$webp = str_replace($image->subpath, $image->webppath, $image->realpath);
+		// $webp = str_replace($image->subpath, $image->webppath, $image->realpath);
 
-		if( file_exists($webp) ) unlink($webp);
-        if( file_exists($image->realpath) ) unlink($image->realpath);
+		// if( file_exists($webp) ) unlink($webp);
+        // if( file_exists($image->realpath) ) unlink($image->realpath);
 			
 		if($image->delete()) return ['success' => 'Удалено'];
-
+ 
 		return ['error' => 'Ошибка загрузки'];
 	}
 

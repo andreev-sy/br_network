@@ -153,7 +153,7 @@ class RoomsController extends Controller
             $model = $this->findModel($id);
             if ($model->load($post)) {
                 if(!$model->save())
-                    Yii::$app->session->setFlash('kv-detail-warning', Yii::t('app', 'Не удалсоь сохранить элемент, проверьте правильность заполнения полей'));
+                    Yii::$app->session->setFlash('kv-detail-warning', Yii::t('app', 'Не удалось сохранить элемент, проверьте правильность заполнения полей'));
             }
         }
         return $this->redirect(['view', 'id' => $id]);

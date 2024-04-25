@@ -1,5 +1,7 @@
 <?php
 use yii\helpers\Url;
+use backend\models\ViaHelper;
+
 ?>
 
 <div class="kv-expanded-row">
@@ -101,6 +103,23 @@ use yii\helpers\Url;
                         <tr>
                             <td><?= $model->getAttributeLabel('max_capacity') ?></td>
                             <td><?= Yii::$app->formatter->asText($model->max_capacity) ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table table-bordered table-condensed table-hover small">
+                    <thead><th colspan="2"><?= Yii::t('app', 'Параметры подборки') ?></th></thead>
+                    <tbody>
+                        <tr>
+                            <td><?= $model->getAttributeLabel('param_pool') ?></td>
+                            <td><?= ViaHelper::getIntIcon($model->param_pool) ?></td>
+                        </tr>
+                        <tr>
+                            <td><?= $model->getAttributeLabel('param_place_barbecue') ?></td>
+                            <td><?= ViaHelper::getIntIcon($model->param_place_barbecue) ?></td>
+                        </tr>
+                        <tr>
+                            <td><?= $model->getAttributeLabel('param_open_area') ?></td>
+                            <td><?= ViaHelper::getIntIcon($model->param_open_area) ?></td>
                         </tr>
                     </tbody>
                 </table>

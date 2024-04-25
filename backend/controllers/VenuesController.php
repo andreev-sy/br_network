@@ -59,6 +59,7 @@ class VenuesController extends Controller
     {
         $searchModel = new VenuesSearch();
         $searchModel->is_processed = 1;
+        $searchModel->is_active = 1;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -127,6 +128,10 @@ class VenuesController extends Controller
             'sort' => false,
         ]);
 
+        $dataProviderRooms = new ActiveDataProvider([
+            'query' => Rooms::find()->where(['id'=>$rooms_ids])
+        ]);  
+
         // ini_set('memory_limit', '1024M');
         // $query = Venues::find()->where(['venues.id'=>$id]);
         // $query->joinWith(['site']);
@@ -152,6 +157,7 @@ class VenuesController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
             'dataProviderImg' => $dataProviderImg,
+            'dataProviderRooms' => $dataProviderRooms,
         ]);
     }
 
@@ -194,7 +200,7 @@ class VenuesController extends Controller
             $model = $this->findModel($id);
             if ($model->load($post)) {
                 if(!$model->save())
-                    Yii::$app->session->setFlash('kv-detail-warning', Yii::t('app', 'Не удалсоь сохранить элемент, проверьте правильность заполнения полей'));
+                    Yii::$app->session->setFlash('kv-detail-warning', Yii::t('app', 'Не удалось сохранить элемент, проверьте правильность заполнения полей'));
             }
         }
 

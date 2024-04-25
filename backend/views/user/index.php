@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <div class="box-header">
-        <?php // echo $this->render('_search', ['model' => $searchModel]);  ?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);     ?>
     </div>
     <div class="box-body">
         <?= GridView::widget([
@@ -29,33 +29,46 @@ $this->params['breadcrumbs'][] = $this->title;
                 //['class' => 'yii\grid\SerialColumn'],
         
                 [
-                    'attribute' => 'photo_path',
+                    'attribute' => 'photo',
                     'format' => 'raw',
                     'options' => ['class' => 'img-circle'],
                     'value' => function ($data) {
-                                if (file_exists($data->photo)) {
+                                if (file_exists($data->photo))
                                     return Html::tag('div', Html::img($data->photo_path), ['class' => 'user_avatar']);
-                                }
                                 return null;
                             },
                 ],
+                'fullname',
                 'username',
                 // 'auth_key',
                 // 'password_hash',
                 // 'password_reset_token',
                 'email:email',
-                // 'status',
                 // 'photo:ntext',
                 // 'photo_path:ntext',
                 // 'role',
-                'fullname',
                 'phone',
                 // 'verification_token',
                 // 'created_at',
                 // 'updated_at',
                 'id',
-
-                ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {update} {delete}'],
+                [
+                    'attribute' => 'status',
+                    'value' => function ($data) {
+                                return $data->status_list[$data->status];
+                            },
+                ],
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    'template' => '{role} {update} {delete}',
+                    'buttons' => [
+                        'role' => function ($url, $model, $key) {
+                                    if ($model->status == 10)
+                                        return Html::a('<i class="fa fa-level-up"></i>', ['rbac/assignment/view', 'id' => $model->id]);
+                                    return null;
+                                }
+                    ]
+                ]
             ],
         ]); ?>
     </div>

@@ -76,7 +76,7 @@ class Region extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getAagglomeration()
+    public function getAgglomeration()
     {
         return $this->hasOne(Agglomeration::className(), ['id' => 'agglomeration_id']);
     }

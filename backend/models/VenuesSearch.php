@@ -27,10 +27,10 @@ class VenuesSearch extends Venues
     public function rules()
     {
         return [
-            [['id', 'site_id', 'status_id', 'city_id', 'district_id', 'region_id', 'min_capacity', 'max_capacity', 'manager_user_id', 'vendor_user_id', 'is_processed', 'is_contract_signed', 'is_phoned', 'param_kitchen', 'param_firework', 'param_firecrackers', 'param_parking_dedicated', 'param_alcohol', 'param_own_alcohol', 'param_decor_policy', 'param_dj', 'param_bridal_suite', 'param_can_order_food', 'param_own_menu', 'google_reviews'], 'integer'],
-            [['name', 'address', 'price_day_ranges', 'work_time', 'phone', 'phone2', 'phone_wa', 'param_spec', 'description', 'comment', 'param_type', 'param_location', 'param_kitchen_type', 'param_cuisine', 'param_advanced_payment', 'param_parking', 'param_outdoor_capacity', 'param_extra_services', 'param_payment', 'param_specials', 'param_seating_arrangement', 'param_parking_type', 'param_video', 'latitude', 'longitude', 'google_id', 'google_place_id', 'google_about', 'google_description', 'google_rating', 'google_reviews_link', 'google_location_link', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'site_id', 'status_id', 'city_id', 'district_id', 'region_id', 'min_capacity', 'max_capacity', 'manager_user_id', 'vendor_user_id', 'is_processed', 'is_contract_signed', 'is_phoned', 'param_kitchen', 'param_pool', 'param_open_area', 'param_place_barbecue', 'param_firework', 'param_firecrackers', 'param_parking_dedicated', 'param_alcohol', 'param_own_alcohol', 'param_decor_policy', 'param_dj', 'param_bridal_suite', 'param_can_order_food', 'param_own_menu', 'google_reviews'], 'integer'],
+            [['name', 'address', 'price_day_ranges', 'work_time', 'phone', 'phone2', 'phone_wa', 'param_spec', 'description', 'comment', 'param_type', 'param_location', 'param_kitchen_type', 'param_cuisine', 'param_advanced_payment', 'param_parking', 'param_outdoor_capacity', 'param_extra_services', 'param_payment', 'param_specials', 'param_seating_arrangement', 'param_parking_type', 'param_video', 'latitude', 'longitude', 'google_id', 'google_place_id', 'google_about', 'google_description', 'google_rating', 'google_reviews_link', 'google_location_link', 'processed_at', 'created_at', 'updated_at'], 'safe'],
             [['price_day', 'price_person', 'price_hour'], 'number'],
-            [['price_search', 'capacity_search', 'param_spec_search', 'is_empty'], 'safe'],
+            [['price_search', 'capacity_search', 'param_spec_search', 'is_empty', 'is_active'], 'safe'],
         ];
     }
 
@@ -61,6 +61,13 @@ class VenuesSearch extends Venues
             // 'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
         ]);
 
+        if(!empty($this->is_active)){
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'sort' => ['defaultOrder' => ['updated_at' => SORT_DESC, 'processed_at' => SORT_DESC]]
+            ]);
+        }
+
         $this->load($params);
 
         if (!$this->validate()) {
@@ -87,6 +94,9 @@ class VenuesSearch extends Venues
             'venues.is_contract_signed' => $this->is_contract_signed,
             'venues.is_phoned' => $this->is_phoned,
             'venues.param_kitchen' => $this->param_kitchen,
+            'venues.param_pool' => $this->param_pool,
+            'venues.param_open_area' => $this->param_open_area,
+            'venues.param_place_barbecue' => $this->param_place_barbecue,
             'venues.param_firework' => $this->param_firework,
             'venues.param_firecrackers' => $this->param_firecrackers,
             'venues.param_parking_dedicated' => $this->param_parking_dedicated,
@@ -137,6 +147,10 @@ class VenuesSearch extends Venues
             ->andFilterWhere(['like', 'venues.google_rating', $this->google_rating])
             ->andFilterWhere(['like', 'venues.google_reviews_link', $this->google_reviews_link])
             ->andFilterWhere(['like', 'venues.google_location_link', $this->google_location_link]);
+
+        if(!empty($this->is_active)){
+            $query->andFilterWhere(['in', 'status_id', [1, 2]]);
+        }
 
         if(!empty($this->price_search['value'])){
             if($this->price_search['type'] === 'range'){

@@ -26,14 +26,15 @@ use backend\models\ViaHelper;
     <div class="row">
         <div class="col-md-2"><?= $form->field($model, 'id') ?></div>
         <div class="col-md-4">
-            <?= $form->field($model, 'venue_id')->widget(Select2::classname(), [
-                'data' => Venues::getMap(),
-                'options' => [
-                    'placeholder' => Yii::t('app', 'Выберите заведение'), 
-                    'value' => $model->venue_id,
-                ],
-                'pluginOptions' => ['tags' => true, 'allowClear' => true],
-            ]) ?>
+            <?//= $form->field($model, 'venue_id')->widget(Select2::classname(), [
+              //  'data' => Venues::getMap(),
+              //  'options' => [
+              //      'placeholder' => Yii::t('app', 'Выберите заведение'), 
+              //      'value' => $model->venue_id,
+              //  ],
+              //  'pluginOptions' => ['tags' => true, 'allowClear' => true],
+              //  ]) ?>
+            <?= $form->field($model, 'venue_id') ?>
         </div>
     </div>
     <div class="row">

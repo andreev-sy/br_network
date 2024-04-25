@@ -226,8 +226,19 @@ class CollectionController extends Controller
         
         $post = Yii::$app->request->post();
 		$model = CollectionVenueVia::findOne($post['id']);
-        $model->active = $post['set'] == 'true' ? 1 : 0;
+        $model->active = ($model->active === 1) ? 0 : 1;
         $model->save();
+
+		return true;
+    }
+
+    public function actionAjaxSetAllVenue()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        $post = Yii::$app->request->post();
+        $active = $post['set'] == 'true' ? 1 : 0;
+        CollectionVenueVia::updateAll(['active' => $active], ['collection_id' => $post['collection_id']]);
 
 		return true;
     }

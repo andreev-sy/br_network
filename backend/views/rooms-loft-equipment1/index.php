@@ -11,9 +11,12 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="rooms-loft-equipment1-index box box-primary">
     <?php Pjax::begin(); ?>
-    <div class="box-header with-border">
-        <?= Html::a(Yii::t('app', 'Добавить элемент'), ['create'], ['class' => 'btn btn-success btn-flat']) ?>
-    </div>
+    <?php if(Yii::$app->user->can('/rooms-loft-equipment1/create')): ?>
+        <div class="box-header with-border">
+            <?= Html::a(Yii::t('app', 'Добавить элемент'), ['create'], ['class' => 'btn btn-success btn-flat']) ?>
+        </div>
+    <?php endif; ?>
+
 
         <div class="box-body">
         <?= GridView::widget([
@@ -25,8 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'id',
                 'text:ntext',
                 'text_ru:ntext',
-
-                ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {update} {delete}'],
+                ['class' => 'yii\grid\ActionColumn', 'template' => Yii::$app->RbacActionTemplate::check()],
             ],
         ]); ?>
     </div>

@@ -42,32 +42,32 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'venue_id',
                     'value' => 'venue.name',
-                    'filter' => Select2::widget([
-                        'model' => $searchModel,
-                        'attribute' => 'venue_id',
-                        'data' => Venues::getMap(),
-                        'options' => ['placeholder' => Yii::t('app', 'Выберите заведение')],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'tags' => true,
-                        ],
-                    ])
+                    // 'filter' => Select2::widget([
+                    //     'model' => $searchModel,
+                    //     'attribute' => 'venue_id',
+                    //     'data' => Venues::getMap(),
+                    //     'options' => ['placeholder' => Yii::t('app', 'Выберите заведение')],
+                    //     'pluginOptions' => [
+                    //         'allowClear' => true,
+                    //         'tags' => true,
+                    //     ],
+                    // ])
                 ],
                 [
                     'attribute' => 'room_id',
                     'value' => 'room.param_name_alt',
-                    'filter' => Select2::widget([
-                        'model' => $searchModel,
-                        'attribute' => 'room_id',
-                        'data' => Rooms::getMap(),
-                        'options' => ['placeholder' => Yii::t('app', 'Выберите зал')],
-                        'pluginOptions' => [
-                            'allowClear' => true,
-                            'tags' => true,
-                        ],
-                    ])
+                    // 'filter' => Select2::widget([
+                    //     'model' => $searchModel,
+                    //     'attribute' => 'room_id',
+                    //     'data' => Rooms::getMap(),
+                    //     'options' => ['placeholder' => Yii::t('app', 'Выберите зал')],
+                    //     'pluginOptions' => [
+                    //         'allowClear' => true,
+                    //         'tags' => true,
+                    //     ],
+                    // ])
                 ],
-                'realpath:ntext',
+                // 'realpath:ntext',
                 'webppath:ntext',
                 'waterpath:ntext',
                 // 'timestamp:datetime',

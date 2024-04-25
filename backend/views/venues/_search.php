@@ -131,6 +131,29 @@ use backend\models\ViaHelper;
     </div>
     <div class="row">
         <div class="col-md-2">
+            <?= $form->field($model, 'param_pool')->dropDownList([
+                '' => '',
+                '0' => Yii::t('app', 'Нет'),
+                '1' => Yii::t('app', 'Да'),
+            ]) ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'param_open_area')->dropDownList([
+                '' => '',
+                '0' => Yii::t('app', 'Нет'),
+                '1' => Yii::t('app', 'Да'),
+            ]) ?>
+        </div>
+        <div class="col-md-2">
+            <?= $form->field($model, 'param_place_barbecue')->dropDownList([
+                '' => '',
+                '0' => Yii::t('app', 'Нет'),
+                '1' => Yii::t('app', 'Да'),
+            ]) ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
             <?= $form->field($model, 'is_processed')->dropDownList([
                 '' => '',
                 '0' => Yii::t('app', 'Нет'),

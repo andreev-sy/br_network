@@ -138,7 +138,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'format' => 'raw',
                     'width' => '0px',
                     'value' => function ($model, $key, $index, $widget) { 
-                        return !empty($model->status) ? Html::tag('span', ViaHelper::getText($model->status), [ 'style' => 'border-radius: 3px; color: #fff; padding: 3px 5px; background-color:'.$model->status->color]) : null;
+                        return !empty($model->status) ? Html::tag('span', ViaHelper::getText($model->status), [ 'style' => 'border-radius: 3px; white-space: nowrap; color: #fff; padding: 3px 5px; background-color:'.$model->status->color]) : null;
                     },
                 ],
                 // 'param_type:ntext',
@@ -147,6 +147,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 // 'param_kitchen_type:ntext',
                 // 'param_cuisine:ntext',
                 // 'param_advanced_payment:ntext',
+                // 'param_pool',
+                // 'param_open_area',
+                // 'param_place_barbecue',
                 // 'param_firework',
                 // 'param_firecrackers',
                 // 'param_parking_dedicated',

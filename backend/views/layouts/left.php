@@ -122,6 +122,15 @@ use yii\helpers\Url;
                     ],
                 ],
             ],
+
+            [
+                'label' => Yii::t('app', 'Kommo '),
+                'url' => '#',
+                'items' => [
+                    ['label' => Yii::t('app', 'Лиды'), 'url' => ['/kommo-leads/index']],
+                    ['label' => Yii::t('app', 'Статистика'), 'url' => ['/kommo-stat/index']],
+                ],
+            ],
         ];
 
         if(Yii::$app->user->can('Полный доступ')){

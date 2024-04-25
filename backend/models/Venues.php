@@ -42,6 +42,9 @@ use yii\helpers\ArrayHelper;
  * @property string|null $param_kitchen_type Кухня
  * @property string|null $param_cuisine Описание кухни
  * @property string|null $param_advanced_payment Размер предоплаты
+ * @property int $param_pool Бассейн
+ * @property int $param_open_area Открытая зона
+ * @property int $param_place_barbecue Место для шашлыка
  * @property int $param_firework Возможность проведения фейерверка
  * @property int $param_firecrackers Разрешены петарды
  * @property int $param_parking_dedicated Наличие выделенной парковки
@@ -70,6 +73,7 @@ use yii\helpers\ArrayHelper;
  * @property int|null $google_reviews Количество гугл отзывов
  * @property string|null $google_reviews_link Ссылка гугл на отзывы
  * @property string|null $google_location_link Ссылка гугл на расположение
+ * @property string|null $processed_at Дата обработки
  * @property string|null $created_at Дата создания
  * @property string|null $updated_at Дата изменения
  *
@@ -100,6 +104,7 @@ class Venues extends \yii\db\ActiveRecord
 {
 
     public $venues_images;
+    public $is_active;
     public $price_search;
     public $capacity_search;
     public $param_spec_search;
@@ -119,11 +124,11 @@ class Venues extends \yii\db\ActiveRecord
     {
         return [
             [['agglomeration_id', 'city_id', 'name', 'status_id'], 'required'],
-            [['site_id', 'status_id', 'agglomeration_id', 'city_id', 'district_id', 'region_id', 'min_capacity', 'max_capacity', 'manager_user_id', 'vendor_user_id', 'is_processed', 'is_contract_signed', 'is_phoned', 'param_kitchen', 'param_firework', 'param_firecrackers', 'param_parking_dedicated', 'param_alcohol', 'param_own_alcohol', 'param_decor_policy', 'param_dj', 'param_bridal_suite', 'param_can_order_food', 'param_own_menu', 'google_reviews'], 'integer'],
+            [['site_id', 'status_id', 'agglomeration_id', 'city_id', 'district_id', 'region_id', 'min_capacity', 'max_capacity', 'manager_user_id', 'vendor_user_id', 'is_processed', 'is_contract_signed', 'is_phoned', 'param_pool', 'param_open_area', 'param_place_barbecue', 'param_firework', 'param_firework', 'param_firecrackers', 'param_parking_dedicated', 'param_alcohol', 'param_own_alcohol', 'param_decor_policy', 'param_dj', 'param_bridal_suite', 'param_can_order_food', 'param_own_menu', 'google_reviews'], 'integer'],
             [['name', 'address', 'price_day_ranges', 'work_time', 'description', 'comment', 'param_cuisine', 'param_advanced_payment', 'param_parking', 'param_outdoor_capacity', 'param_video', 'latitude', 'longitude', 'google_id', 'google_place_id', 'google_about', 'google_description', 'google_reviews_link', 'google_location_link'], 'string'],
             [['param_spec', 'param_type', 'param_location', 'param_kitchen_type', 'param_extra_services', 'param_payment', 'param_specials', 'param_seating_arrangement', 'param_parking_type'], 'safe'],
             [['price_day', 'price_person', 'price_hour'], 'number'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['processed_at', 'created_at', 'updated_at'], 'safe'],
             [['phone', 'phone2', 'phone_wa'], 'string', 'max' => 40],
             [['google_rating'], 'string', 'max' => 5],
             [['agglomeration_id'], 'exist', 'skipOnError' => true, 'targetClass' => Agglomeration::className(), 'targetAttribute' => ['agglomeration_id' => 'id']],
@@ -186,6 +191,9 @@ class Venues extends \yii\db\ActiveRecord
             'param_kitchen_type' => Yii::t('app', 'Кухня'),
             'param_cuisine' => Yii::t('app', 'Описание кухни'),
             'param_advanced_payment' => Yii::t('app', 'Размер предоплаты'),
+            'param_pool' => Yii::t('app', 'Бассейн'),
+            'param_open_area' => Yii::t('app', 'Открытая зона'),
+            'param_place_barbecue' => Yii::t('app', 'Место для шашлыка'),
             'param_firework' => Yii::t('app', 'Возможность проведения фейерверка'),
             'param_firecrackers' => Yii::t('app', 'Разрешены петарды'),
             'param_parking_dedicated' => Yii::t('app', 'Наличие выделенной парковки'),
@@ -214,6 +222,7 @@ class Venues extends \yii\db\ActiveRecord
             'google_reviews' => Yii::t('app', 'Количество гугл отзывов'),
             'google_reviews_link' => Yii::t('app', 'Ссылка гугл на отзывы'),
             'google_location_link' => Yii::t('app', 'Ссылка гугл на расположение'),
+            'processed_at' => Yii::t('app', 'Дата обработки'),
             'created_at' => Yii::t('app', 'Дата создания'),
             'updated_at' => Yii::t('app', 'Дата изменения'),
         ];
@@ -463,6 +472,27 @@ class Venues extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map(self::find()->asArray()->all(), 'id', 'name');
     }
+    public static function getMapForCollection()
+    {
+        $result = [];
+		$venues = self::find()
+                    ->with('district.districtRegionVias')
+                    ->with('district.districtRegionVias.district')
+                    ->with('district.districtRegionVias.region')
+                    ->where(['is_processed'=>1])
+                    ->andWhere(['in', 'status_id', [1, 2]])
+                    ->all();
+
+		foreach ($venues as $venue){
+            if(!empty($venue->district)){
+                foreach($venue->district->districtRegionVias as $via){
+                    $result[$via->region->name][$via->district->name][$venue->id] = $venue->name;
+                }
+            }
+        }
+
+		return $result;
+    }
 
     public function getWorkingTimeText()
     {
@@ -499,7 +529,7 @@ class Venues extends \yii\db\ActiveRecord
         CollectionVenueVia::deleteAll(['venue_id' => $this->id]);
         VenuesVisit::deleteAll(['venue_id' => $this->id]);
         // Rooms::deleteAll(['venue_id' => $this->id]);
-
+ 
         return true;
     }
 
@@ -538,6 +568,10 @@ class Venues extends \yii\db\ActiveRecord
         $this->phone2 = rtrim($this->phone2, '_');
         $this->phone_wa = rtrim($this->phone_wa, '_');
 
+        if ($this->is_processed == 1 && $this->oldAttributes['is_processed'] == 0) {
+            $this->processed_at = date('Y-m-d H:i:s');
+        }
+
         return parent::beforeSave($insert);
     }
  
@@ -555,5 +589,6 @@ class Venues extends \yii\db\ActiveRecord
         ViaHelper::setRelatedLink( $insert, $changedAttributes, $this, 'param_specials',             VenuesSpecialVia::className() );
         ViaHelper::setRelatedLink( $insert, $changedAttributes, $this, 'param_seating_arrangement',  VenuesSeatingArrangementVia::className() );
         ViaHelper::setRelatedLink( $insert, $changedAttributes, $this, 'param_parking_type',         VenuesParkingTypeVia::className() );
+
     }
 }

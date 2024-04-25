@@ -120,9 +120,22 @@ class SiteController extends Controller
      * @return string
      */
     public function actionProfile()
-    {
+    { 
+        $model = User::findOne(Yii::$app->user->id);
+
+        if (!empty(Yii::$app->request->post()) and $model->load(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post('User');
+            if(!empty($post['password'])) $model->setPassword($post['password']);
+            if(!$model->save()) {
+                Yii::$app->session->setFlash('kv-detail-warning', Yii::t('app', 'Не удалсоь сохранить элемент, проверьте правильность заполнения полей'));
+            }else{
+                Yii::$app->session->setFlash('kv-detail-success', Yii::t('app', 'Данные сохранены'));
+                return $this->redirect(['profile']);
+            }
+        }
+
         return $this->render('profile', [
-            'model' => User::findOne(Yii::$app->user->id)
+            'model' => $model,
         ]);
     }
 

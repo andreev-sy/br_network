@@ -76,6 +76,7 @@ tests/_output/*
 
 
 backend/web/*
+token_storage/
 
 nodesource_setup.sh
 dev.sh

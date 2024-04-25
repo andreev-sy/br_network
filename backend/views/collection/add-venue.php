@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Изменение');
         <?php $form = ActiveForm::begin(); ?>
 
         <?= $form->field($model, 'collection_venue_via')->widget(Select2::classname(), [
-            'data' => Venues::getMap(),
+            'data' => Venues::getMapForCollection(),
             //'maintainOrder' => true,
             'options' => ['placeholder' => Yii::t('app', 'Выберите заведение')],
             'pluginOptions' => [

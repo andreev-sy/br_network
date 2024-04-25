@@ -129,7 +129,7 @@ return [
         Yii::$app->language = $preferredLanguage;
 
         Yii::$app->params['ru'] = $preferredLanguage === 'ru-RU' ? true : false;
-        // Yii::$app->params['4u_domain'] = 'https://4u.diazao.com.br/';
-        Yii::$app->params['4u_domain'] = 'http://4u.dev.com.br/';
+        Yii::$app->params['4u_domain'] = 'https://4u.diazao.com.br/';
+        // Yii::$app->params['4u_domain'] = 'http://4u.dev.com.br/';
     }, 
 ];

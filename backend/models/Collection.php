@@ -285,10 +285,11 @@ class Collection extends \yii\db\ActiveRecord
 
         $collection = $this;
 
-        $query = Venues::find();
-        $query->andWhere(['not in', 'status_id', [0, 3]]);
+        $query = Venues::find(); 
+        $query->andWhere(['in', 'status_id', [1, 2]]);
         $query->andWhere(['is_processed' => 1]);
         $query->andWhere(['agglomeration_id' => $collection->agglomeration_id]);
+        $query->andWhere(['city_id' => $collection->city_id]);
         $query->andWhere(['and', ['>', 'min_capacity', 1], ['>', 'max_capacity', 1]]);
 
         if (!empty ($collection->price_person_id)){
@@ -321,12 +322,12 @@ class Collection extends \yii\db\ActiveRecord
         }
 
         // TODO эти свойства переехали из заведения в функ.зона зала
-        // if (!empty ($collection->pool))
-        //     $query->andWhere(['pool' => 1]);
-        // if (!empty ($collection->place_barbecue))
-        //     $query->andWhere(['place_barbecue' => 1]);
-        // if (!empty ($collection->open_area))
-        //     $query->andWhere(['open_area' => 1]);
+        if (!empty ($collection->pool))
+            $query->andWhere(['param_pool' => 1]);
+        if (!empty ($collection->place_barbecue))
+            $query->andWhere(['param_place_barbecue' => 1]);
+        if (!empty ($collection->open_area))
+            $query->andWhere(['param_open_area' => 1]);
 
         $region_ids = ArrayHelper::getColumn($collection->collectionRegionVias, 'region_id');
         $district_ids = ArrayHelper::getColumn($collection->collectionDistrictVias, 'district_id');
@@ -360,7 +361,7 @@ class Collection extends \yii\db\ActiveRecord
         // print_r($venues);
         // die;
 
-        if (!empty ($venues)) {
+        if (!empty($venues)) {
             $sort = 1;
             $collection_venue = ArrayHelper::getColumn($collection->collectionVenueVias, 'venue_id');
             foreach ($venues as $venue) {
@@ -369,13 +370,26 @@ class Collection extends \yii\db\ActiveRecord
                     $collection_via->collection_id = $this->id;
                     $collection_via->venue_id = $venue->id;
                     $collection_via->sort = $sort;
-                    $collection_via->active = 1;
+                    $collection_via->active = 0;
                     $collection_via->save(false);
                     $sort++;
                 }
             }
         }
+        // else{
+        //     $query = Venues::find(); 
+        //     $query->andWhere(['in', 'status_id', [1, 2]]);
+        //     $query->andWhere(['is_processed' => 1]);
+        //     $query->orderBy(['updated_at' => SORT_DESC, 'processed_at' => SORT_DESC]);
+        //     $venue = $query->one();
 
+        //     $collection_via = new CollectionVenueVia();
+        //     $collection_via->collection_id = $this->id;
+        //     $collection_via->venue_id = $venue->id;
+        //     $collection_via->sort = 1;
+        //     $collection_via->active = 0;
+        //     $collection_via->save(false);
+        // }
     }
 
 }

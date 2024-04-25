@@ -85,7 +85,19 @@ class Images extends \yii\db\ActiveRecord
         return $this->hasOne(Venues::className(), ['id' => 'venue_id']);
     }
 
+    public function beforeDelete()
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
 
+        $webp = str_replace($this->subpath, $this->webppath, $this->realpath);
+
+        if(file_exists($this->realpath)) unlink($this->realpath);
+        if(file_exists($webp)) unlink($webp);
+
+        return true;
+    }
 
     
     public static function updateSortIndex($model)

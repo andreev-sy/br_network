@@ -68,4 +68,23 @@ class RoomsZonesVia extends \yii\db\ActiveRecord
     {
         return $this->hasOne(RoomsZones::className(), ['id' => 'rooms_zones_id']);
     }
+
+    // public function beforeDelete()
+    // {
+    //     if (!parent::beforeDelete()) {
+    //         return false;
+    //     }
+
+    //     $room = $this->room;
+    //     $param_zones = explode(',', $room->param_zones);
+
+    //     $index = array_search($this->rooms_zones_id, $param_zones);
+    //     if ($index !== false) unset($param_zones[$index]);
+
+    //     $room->param_zones = implode(',', $param_zones);
+    //     $room->update();
+
+    //     return true;
+    // }
+
 }
